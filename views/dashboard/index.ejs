@@ -1,0 +1,20 @@
+<!-- views/dashboard/index.ejs -->
+<div class="dashboard-header">
+  <h2>Welcome, <%= name %> 👋</h2>
+  <p>Here's your activity summary:</p>
+</div>
+
+<div class="dashboard-stats">
+  <div class="stat">
+    <h3><%= stats.leavesApplied %></h3>
+    <p>Leaves Applied</p>
+  </div>
+  <div class="stat">
+    <h3><%= stats.feedbackSubmitted %></h3>
+    <p>Feedback Submitted</p>
+  </div>
+  <div class="stat">
+    <h3><%= stats.attendanceDays %></h3>
+    <p>Attendance Days</p>
+  </div>
+</div>

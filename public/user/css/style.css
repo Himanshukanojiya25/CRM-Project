@@ -1,0 +1,25 @@
+.main-content {
+  padding: 2rem;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+}
+
+.stats-grid {
+  display: flex;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #6c5ce7, #3535ea);
+  padding: 1.5rem 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+  flex: 1;
+  text-align: center;
+}
+
+.stat-card h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+}

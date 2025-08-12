@@ -1,0 +1,13 @@
+<form action="/admin/performance/add" method="POST">
+  <select name="employeeId" required>
+    <% employees.forEach(emp => { %>
+      <option value="<%= emp._id %>"><%= emp.name %></option>
+    <% }); %>
+  </select>
+
+  <input type="number" name="attendance" min="0" max="100" placeholder="Attendance %">
+  <input type="number" name="tasksCompleted" placeholder="Tasks Completed">
+  <input type="number" name="productivity" min="1" max="5" placeholder="Rating (1-5)">
+
+  <button type="submit">Save</button>
+</form>

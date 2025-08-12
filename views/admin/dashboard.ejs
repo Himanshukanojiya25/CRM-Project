@@ -1,0 +1,51 @@
+<%- include('../layouts/main', { 
+  title: 'Admin Dashboard',
+  body: `
+    <div class="container mt-4">
+      <h2>Welcome, ${user?.name || 'Admin'} 👋</h2>
+      <p>Here’s your activity summary:</p>
+
+      <div class="row">
+        <div class="col-md-3">
+          <div class="card text-center shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">Employees</h5>
+              <p class="card-text">Manage all employees.</p>
+              <a href="/admin/employees" class="btn btn-primary">View</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card text-center shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">Departments</h5>
+              <p class="card-text">Department overview.</p>
+              <a href="/admin/departments" class="btn btn-primary">View</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card text-center shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">Leaves</h5>
+              <p class="card-text">Leave requests & status.</p>
+              <a href="/admin/leaves" class="btn btn-primary">View</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card text-center shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">Feedback</h5>
+              <p class="card-text">Check employee feedback.</p>
+              <a href="/admin/feedbacks" class="btn btn-primary">View</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+}) %>

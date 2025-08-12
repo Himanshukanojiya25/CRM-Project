@@ -1,0 +1,48 @@
+<%- include('../layouts/header') %>
+<%- include('../layouts/sidebar', { user: user }) %>
+
+<div class="main-content">
+    <div class="page-header">
+        <h2>User Dashboard</h2>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="cards">
+        <div class="card">
+            <h3>My Attendance</h3>
+            <p><%= stats.attendance %> %</p>
+        </div>
+        <div class="card">
+            <h3>Leave Balance</h3>
+            <p><%= stats.leaveBalance %> days</p>
+        </div>
+        <div class="card">
+            <h3>Performance Score</h3>
+            <p><%= stats.performanceScore %> %</p>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts">
+        <div class="chart">
+            <h4>My Attendance Trend</h4>
+            <canvas id="attendanceChart"></canvas>
+        </div>
+        <div class="chart">
+            <h4>My Performance Trend</h4>
+            <canvas id="performanceChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Recent Updates -->
+    <div class="recent-updates">
+        <h4>Recent Updates</h4>
+        <ul>
+            <% updates.forEach(update => { %>
+                <li><%= update.text %> - <%= update.date %></li>
+            <% }) %>
+        </ul>
+    </div>
+</div>
+
+<%- include('../layouts/footer') %>
