@@ -12,10 +12,32 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true
+    required: function() {
+      // ✅ Password required only for local signup, not for OAuth
+      return !this.googleId && !this.githubId;
+    }
+  },
+  googleId: {
+    type: String,
+    default: null
+  },
+  githubId: {
+    type: String, 
+    default: null
+  },
+  age: {
+    type: Number
+  },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
+  },
+  department: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Department'
   }
-  // Add more fields if needed
-});
+}, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);
 module.exports = User;

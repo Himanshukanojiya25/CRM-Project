@@ -1,24 +1,21 @@
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose'); // ✅ Needed for ObjectId validation
+const mongoose = require('mongoose');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1d';
 
 // ----------------------------
-// @desc Render Login Page
+// @desc Render Combined Auth Page (Login + Register)
 // ----------------------------
-const getLogin = (req, res) => {
-  res.render('auth/login', { page: 'login' }); // ✅ page passed
+const getAuthPage = (req, res) => {
+  res.render('auth/auth', { 
+    pageTitle: 'CRM - Authentication',
+    layout: false
+  });
 };
 
-// ----------------------------
-// @desc Render Register Page
-// ----------------------------
-const getRegister = (req, res) => {
-  res.render('auth/register', { page: 'register' }); // ✅ page passed
-};
 // ----------------------------
 // @desc Handle Registration
 // ----------------------------
@@ -45,13 +42,12 @@ const register = async (req, res) => {
       role: role || 'user'
     });
 
-    // ✅ Only assign department if valid ObjectId
     if (department && mongoose.Types.ObjectId.isValid(department)) {
       user.department = department;
     }
 
     await user.save();
-    res.redirect('/auth/login');
+    res.redirect('/auth');
   } catch (err) {
     console.error('Register Error:', err);
     res.status(500).send('❌ Server error during registration');
@@ -65,7 +61,8 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email }).populate('department');
+    const user = await User.findOne({ email });
+
     if (!user) return res.send('❌ User not found');
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -90,12 +87,11 @@ const login = async (req, res) => {
 // ----------------------------
 const logout = (req, res) => {
   res.clearCookie('token');
-  res.redirect('/auth/login');
+  res.redirect('/auth');
 };
 
 module.exports = {
-  getLogin,
-  getRegister,
+  getAuthPage,  // ✅ Combined auth page
   register,
   login,
   logout
