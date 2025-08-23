@@ -315,39 +315,120 @@ a {
 }
 
 /* SIGNUP FORM SPECIFIC FIXES */
+/* SIGNUP FORM SPECIFIC FIXES */
 .sign-up-container form {
-    padding: 0 40px; /* Reduced padding for more space */
-    justify-content: flex-start; /* Changed from center to flex-start */
-    overflow-y: auto; /* Allow scrolling if needed */
+    padding: 0 30px; /* Reduced padding */
+    justify-content: flex-start; /* Start from top instead of center */
 }
 
 .sign-up-container .form-content {
     width: 100%;
-    max-width: 400px;
-    padding: 20px 0; /* Added vertical padding */
+    max-width: 380px; /* Slightly smaller max width */
+    padding: 15px 0; /* Reduced padding */
 }
 
 .sign-up-container h1 {
-    font-size: 2rem; /* Slightly smaller font */
-    margin-bottom: 20px; /* Reduced margin */
+    font-size: 1.8rem; /* Smaller font size */
+    margin-bottom: 15px; /* Reduced margin */
 }
 
 .sign-up-container input {
-    padding: 14px 18px; /* Slightly reduced padding */
-    margin: 10px 0; /* Reduced margin */
+    padding: 12px 15px; /* Smaller padding */
+    margin: 8px 0; /* Reduced margin */
+    font-size: 14px; /* Smaller font */
 }
 
 .sign-up-container button {
-    padding: 14px 45px; /* Slightly reduced padding */
-    margin: 15px 0; /* Reduced margin */
+    padding: 12px 40px; /* Smaller padding */
+    margin: 12px 0; /* Reduced margin */
+    font-size: 13px; /* Smaller font */
 }
 
 .sign-up-container a {
-    margin: 12px 0; /* Reduced margin */
+    margin: 10px 0; /* Reduced margin */
+    font-size: 13px; /* Smaller font */
 }
 
 .sign-up-container .social-container {
-    margin: 20px 0; /* Reduced margin */
+    margin: 15px 0; /* Reduced margin */
+}
+
+.sign-up-container .social-container a {
+    height: 42px; /* Smaller size */
+    width: 42px; /* Smaller size */
+    font-size: 1.2rem; /* Smaller icon */
+    margin: 0 5px; /* Reduced margin */
+}
+
+/* RESPONSIVE DESIGN - Signup form specific */
+@media (max-width: 768px) {
+    .sign-up-container {
+        padding: 20px 15px;
+    }
+    
+    .sign-up-container form {
+        padding: 0 25px;
+    }
+    
+    .sign-up-container h1 {
+        font-size: 1.6rem;
+    }
+    
+    .sign-up-container input {
+        padding: 10px 12px;
+    }
+    
+    .sign-up-container button {
+        padding: 10px 30px;
+    }
+    
+    .sign-up-container .social-container a {
+        height: 40px;
+        width: 40px;
+        margin: 0 4px;
+    }
+}
+
+@media (max-width: 480px) {
+    .sign-up-container {
+        padding: 15px 10px;
+    }
+    
+    .sign-up-container form {
+        padding: 0 20px;
+    }
+    
+    .sign-up-container h1 {
+        font-size: 1.5rem;
+        margin-bottom: 12px;
+    }
+    
+    .sign-up-container input {
+        padding: 9px 11px;
+        margin: 7px 0;
+        font-size: 13px;
+    }
+    
+    .sign-up-container button {
+        padding: 9px 25px;
+        margin: 10px 0;
+        font-size: 12px;
+    }
+    
+    .sign-up-container a {
+        font-size: 12px;
+        margin: 8px 0;
+    }
+    
+    .sign-up-container .social-container {
+        margin: 12px 0;
+    }
+    
+    .sign-up-container .social-container a {
+        height: 38px;
+        width: 38px;
+        font-size: 1.1rem;
+    }
 }
 
 /* RESPONSIVE DESIGN - Signup form specific */
