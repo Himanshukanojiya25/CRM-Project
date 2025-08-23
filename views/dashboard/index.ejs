@@ -1,6 +1,7 @@
-<!-- views/dashboard/index.ejs -->
+<% layout = 'layouts/user-base' %>
+
 <div class="dashboard-header">
-  <h2>Welcome, <%= name %> 👋</h2>
+  <h2>Welcome, <%= user.name %> 👋</h2>  <!-- ✅ user.name use karo -->
   <p>Here's your activity summary:</p>
 </div>
 
@@ -18,3 +19,10 @@
     <p>Attendance Days</p>
   </div>
 </div>
+
+<!-- Fallback agar data na aaye -->
+<% if (!user || !stats) { %>
+  <script>
+    console.error('Dashboard data missing:', { user: '<%= user %>', stats: '<%= stats %>' });
+  </script>
+<% } %>

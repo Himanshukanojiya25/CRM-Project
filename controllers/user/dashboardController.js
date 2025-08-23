@@ -1,11 +1,24 @@
 const User = require('../../models/User');
+const Attendance = require('../../models/Attendance');
 
 const getDashboard = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id); // adjust if using JWT or session
+    console.log('📊 Dashboard Request - User:', req.user);
+    console.log('📊 Dashboard Request - Session:', req.session);
+    
+    if (!req.user) {
+      console.log('❌ No user in request');
+      return res.redirect('/auth/login');
+    }
 
-    if (!user) return res.status(404).send("User not found");
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      console.log('❌ User not found in database');
+      return res.redirect('/auth/login');
+    }
 
+    console.log('✅ User found:', user.name);
+    
     const stats = {
       leavesApplied: 3,
       feedbackSubmitted: 2,
@@ -13,12 +26,13 @@ const getDashboard = async (req, res) => {
     };
 
     res.render('user/dashboard', {
-      title: 'Dashboard',
-      name: user.name,
-      stats
+      pageTitle: 'Dashboard - CRM',
+      layout: 'layouts/user-base',
+      user: user,
+      stats: stats
     });
   } catch (err) {
-    console.error('Error loading dashboard:', err);
+    console.error('❌ Dashboard error:', err);
     res.status(500).send('Server Error');
   }
 };

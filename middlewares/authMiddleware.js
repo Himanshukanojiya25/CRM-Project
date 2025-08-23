@@ -1,40 +1,63 @@
-// const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 
 const isAuthenticated = (req, res, next) => {
-  // 🔹 TEMPORARY BYPASS FOR TESTING
-  req.user = { id: 'dummyId', role: 'admin', name: 'Test Admin' };
-  return next();
+  // ✅ Check if already authenticated via session
+  if (req.isAuthenticated()) {
+    console.log('✅ Authenticated via session:', req.user._id);
+    return next();
+  }
 
-  /*
-  if (req.user) return next();
-
-  const token = req.cookies?.token || req.headers.authorization?.split(' ')[1];
+  // ✅ Check JWT token
+  const token = req.cookies?.token || 
+                (req.headers.authorization && req.headers.authorization.startsWith('Bearer ') 
+                  ? req.headers.authorization.substring(7) 
+                  : null);
 
   if (!token) {
-    return res.status(401).send('Access Denied: No Token Provided');
+    console.log('❌ No authentication token found');
+    return res.status(401).json({
+      success: false,
+      message: 'Access Denied: Please login first'
+    });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // ✅ Attach user to request
     req.user = {
       id: decoded.id,
-      role: decoded.role, // Make sure role is included in the token
+      role: decoded.role,
+      name: decoded.name,
+      email: decoded.email
     };
+    
+    console.log('✅ Authenticated via JWT:', req.user.id);
     next();
   } catch (err) {
-    return res.status(401).send('Invalid Token');
+    console.log('❌ Invalid token:', err.message);
+    return res.status(401).json({
+      success: false,
+      message: 'Invalid or expired token'
+    });
   }
-  */
 };
 
 const roleMiddleware = (allowedRoles) => {
   return (req, res, next) => {
-    const userRole = req.user?.role;
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required"
+      });
+    }
 
-    if (!userRole || !allowedRoles.includes(userRole)) {
+    const userRole = req.user.role;
+
+    if (!allowedRoles.includes(userRole)) {
       return res.status(403).json({
         success: false,
-        message: "Forbidden: You do not have access to this resource.",
+        message: "Forbidden: Insufficient permissions"
       });
     }
 
@@ -44,5 +67,5 @@ const roleMiddleware = (allowedRoles) => {
 
 module.exports = {
   isAuthenticated,
-  roleMiddleware,
+  roleMiddleware
 };

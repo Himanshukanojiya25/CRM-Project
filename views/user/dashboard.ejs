@@ -1,48 +1,118 @@
-<%- include('../layouts/header') %>
-<%- include('../layouts/sidebar', { user: user }) %>
+<% layout = 'layouts/user-base' %>
 
-<div class="main-content">
-    <div class="page-header">
-        <h2>User Dashboard</h2>
+<!-- ✅ FALLBACK CONDITION ADD KARO -->
+<% if (typeof user === 'undefined' || typeof stats === 'undefined') { %>
+  <div class="container-fluid">
+    <div class="alert alert-warning mt-4">
+      <h4>⚠️ Data Loading...</h4>
+      <p>Please wait while we load your dashboard data.</p>
+      <button onclick="window.location.reload()" class="btn btn-primary">Refresh</button>
     </div>
-
-    <!-- Summary Cards -->
-    <div class="cards">
-        <div class="card">
-            <h3>My Attendance</h3>
-            <p><%= stats.attendance %> %</p>
-        </div>
-        <div class="card">
-            <h3>Leave Balance</h3>
-            <p><%= stats.leaveBalance %> days</p>
-        </div>
-        <div class="card">
-            <h3>Performance Score</h3>
-            <p><%= stats.performanceScore %> %</p>
-        </div>
-    </div>
-
-    <!-- Charts Section -->
-    <div class="charts">
-        <div class="chart">
-            <h4>My Attendance Trend</h4>
-            <canvas id="attendanceChart"></canvas>
-        </div>
-        <div class="chart">
-            <h4>My Performance Trend</h4>
-            <canvas id="performanceChart"></canvas>
+  </div>
+<% } else { %>
+  <!-- ✅ ORIGINAL CONTENT -->
+  <div class="container-fluid">
+    
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-4 text-gradient">Welcome, <%= user.name %>! 👋</h1>
+            <p class="lead">Here's your activity summary</p>
         </div>
     </div>
 
-    <!-- Recent Updates -->
-    <div class="recent-updates">
-        <h4>Recent Updates</h4>
-        <ul>
-            <% updates.forEach(update => { %>
-                <li><%= update.text %> - <%= update.date %></li>
-            <% }) %>
-        </ul>
-    </div>
-</div>
+    <!-- User Stats -->
+    <div class="row">
+        <!-- Attendance Card -->
+        <div class="col-md-3 mb-4">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-calendar-check fa-3x text-primary mb-3"></i>
+                    <h3><%= stats.attendanceDays %>/30</h3>
+                    <p class="text-muted">Attendance Days</p>
+                </div>
+            </div>
+        </div>
 
-<%- include('../layouts/footer') %>
+        <!-- Leaves Card -->
+        <div class="col-md-3 mb-4">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-plane-departure fa-3x text-warning mb-3"></i>
+                    <h3><%= stats.leavesApplied %></h3>
+                    <p class="text-muted">Leaves Applied</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feedback Card -->
+        <div class="col-md-3 mb-4">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-comments fa-3x text-info mb-3"></i>
+                    <h3><%= stats.feedbackSubmitted %></h3>
+                    <p class="text-muted">Feedback Submitted</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Card -->
+        <div class="col-md-3 mb-4">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-user fa-3x text-success mb-3"></i>
+                    <h3><%= user.role %></h3>
+                    <p class="text-muted">Your Role</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="mb-4">Quick Actions</h3>
+            <div class="d-flex gap-3">
+                <a href="/user/attendance" class="btn btn-primary">
+                    <i class="fas fa-calendar-check me-2"></i>Mark Attendance
+                </a>
+                <a href="/user/leaves" class="btn btn-warning">
+                    <i class="fas fa-plane-departure me-2"></i>Apply Leave
+                </a>
+                <a href="/user/feedback" class="btn btn-info">
+                    <i class="fas fa-comments me-2"></i>Give Feedback
+                </a>
+                <a href="/user/profile" class="btn btn-success">
+                    <i class="fas fa-user me-2"></i>View Profile
+                </a>
+            </div>
+        </div>
+    </div>
+
+  </div>
+
+  <!-- Add some CSS -->
+  <style>
+  .text-gradient {
+      background: linear-gradient(45deg, #007bff, #6610f2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+  }
+
+  .stat-card {
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+  }
+
+  .stat-card:hover {
+      transform: translateY(-5px);
+  }
+
+  .stat-card i {
+      opacity: 0.8;
+  }
+  </style>
+<% } %>

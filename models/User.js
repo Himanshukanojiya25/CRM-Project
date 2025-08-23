@@ -13,9 +13,30 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: function() {
-      // ✅ Password required only for local signup, not for OAuth
       return !this.googleId && !this.githubId;
     }
+  },
+  phone: {
+    type: String,
+    default: ''
+  },
+  role: {
+    type: String,
+    enum: ['user', 'admin', 'hr', 'manager', 'developer'],
+    default: 'user'
+  },
+  status: {
+    type: String,
+    enum: ['Active', 'On Leave', 'Resigned'],
+    default: 'Active'
+  },
+  joiningDate: {
+    type: Date,
+    default: Date.now
+  },
+  department: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Department'
   },
   googleId: {
     type: String,
@@ -24,20 +45,7 @@ const userSchema = new mongoose.Schema({
   githubId: {
     type: String, 
     default: null
-  },
-  age: {
-    type: Number
-  },
-  role: {
-    type: String,
-    enum: ['user', 'admin'],
-    default: 'user'
-  },
-  department: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Department'
   }
 }, { timestamps: true });
 
-const User = mongoose.model('User', userSchema);
-module.exports = User;
+module.exports = mongoose.model('User', userSchema);

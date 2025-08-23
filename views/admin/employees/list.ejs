@@ -1,4 +1,4 @@
-<% layout('layouts/admin-base') %>
+<% layout = 'layouts/admin-base' %>
 
 <div class="main-content">
   <div class="header">
@@ -12,45 +12,48 @@
 
   <!-- Employee Cards View -->
   <div class="users-grid">
-    <% // Loop your employee data dynamically later %>
-    <div class="user-card">
-      <div class="user-header">
-        <div class="user-info">
-          <h3>John Doe</h3>
-          <p>Developer</p>
+    <% if (users && users.length > 0) { %>
+      <% users.forEach(user => { %>
+      <div class="user-card">
+        <div class="user-header">
+          <div class="user-info">
+            <h3><%= user.name %></h3>
+            <p><%= user.role || 'Employee' %></p>
+          </div>
+        </div>
+        <div class="user-details">
+          <div class="detail-row">
+            <span class="detail-label">Email:</span>
+            <span class="detail-value"><%= user.email %></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Phone:</span>
+            <span class="detail-value"><%= user.phone || 'N/A' %></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Department:</span>
+            <span class="detail-value"><%= user.department ? user.department.name : 'Not assigned' %></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Status:</span>
+            <span class="detail-value" style="color: var(--success);">Active</span>
+          </div>
+        </div>
+        <div class="user-actions">
+          <a href="/admin/employees/<%= user._id %>" class="action-btn edit-btn">
+            <i class="fas fa-edit"></i> View
+          </a>
+          <button class="action-btn delete-btn" onclick="deleteEmployee('<%= user._id %>')">
+            <i class="fas fa-trash"></i> Delete
+          </button>
         </div>
       </div>
-      <div class="user-details">
-        <div class="detail-row">
-          <span class="detail-label">Email:</span>
-          <span class="detail-value">john@example.com</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Phone:</span>
-          <span class="detail-value">9876543210</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Department:</span>
-          <span class="detail-value">IT</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Status:</span>
-          <span class="detail-value" style="color: var(--success);">Active</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Joining Date:</span>
-          <span class="detail-value">2023-01-10</span>
-        </div>
+      <% }) %>
+    <% } else { %>
+      <div class="no-data">
+        <p>No employees found</p>
       </div>
-      <div class="user-actions">
-        <button class="action-btn edit-btn">
-          <i class="fas fa-edit"></i> Edit
-        </button>
-        <button class="action-btn delete-btn">
-          <i class="fas fa-trash"></i> Delete
-        </button>
-      </div>
-    </div>
+    <% } %>
   </div>
 </div>
 
@@ -63,46 +66,64 @@
     </div>
     <form id="userForm">
       <div class="form-group">
-        <label for="fullName">Full Name</label>
+        <label for="fullName">Full Name *</label>
         <input type="text" id="fullName" class="form-control" required>
       </div>
+      
       <div class="form-group">
-        <label for="email">Email</label>
+        <label for="email">Email *</label>
         <input type="email" id="email" class="form-control" required>
       </div>
+      
       <div class="form-group">
-        <label for="phone">Phone Number</label>
+        <label for="phone">Phone Number *</label>
         <input type="tel" id="phone" class="form-control" required>
       </div>
+      
+      <!-- ✅ PASSWORD FIELD -->
       <div class="form-group">
-        <label for="department">Department</label>
-        <input type="text" id="department" class="form-control" required>
+        <label for="password">Password *</label>
+        <input type="password" id="password" class="form-control" required 
+               minlength="6" placeholder="Minimum 6 characters">
       </div>
+      
       <div class="form-group">
-        <label for="role">Role</label>
+        <label for="department">Department *</label>
+        <input type="text" id="department" class="form-control" required 
+               placeholder="e.g., IT, HR, Marketing">
+      </div>
+      
+      <div class="form-group">
+        <label for="role">Role *</label>
         <select id="role" class="form-control" required>
           <option value="">Select Role</option>
-          <option value="Developer">Developer</option>
-          <option value="HR">HR</option>
-          <option value="Manager">Manager</option>
+          <option value="developer">Developer</option>
+          <option value="hr">HR</option>
+          <option value="manager">Manager</option>
+          <option value="admin">Admin</option>
+          <option value="user">User</option>
         </select>
       </div>
+      
       <div class="form-group">
-        <label for="status">Status</label>
+        <label for="status">Status *</label>
         <select id="status" class="form-control" required>
           <option value="Active">Active</option>
           <option value="On Leave">On Leave</option>
           <option value="Resigned">Resigned</option>
         </select>
       </div>
+      
       <div class="form-group">
-        <label for="joiningDate">Joining Date</label>
+        <label for="joiningDate">Joining Date *</label>
         <input type="date" id="joiningDate" class="form-control" required>
       </div>
+      
       <div class="form-group">
         <label for="profilePic">Profile Picture (optional)</label>
-        <input type="file" id="profilePic" class="form-control">
+        <input type="file" id="profilePic" class="form-control" accept="image/*">
       </div>
+      
       <div class="modal-footer">
         <button type="button" class="btn btn-danger" id="cancelBtn">Cancel</button>
         <button type="submit" class="btn btn-primary">Save Employee</button>

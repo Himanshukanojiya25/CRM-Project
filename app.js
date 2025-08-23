@@ -1,5 +1,5 @@
 const express = require('express');
-const session = require('express-session'); // ✅ Naya import
+const session = require('express-session');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const path = require('path');
@@ -16,9 +16,28 @@ dotenv.config();
 
 const app = express();
 
-// ✅ Security Middleware
-app.use(helmet());
-app.use(cors({ origin: 'http://localhost:8080', credentials: true })); // ✅ Port 8080 kar diya
+// ✅ FIXED: Security Middleware with CSP configuration
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://kit.fontawesome.com", "https://cdnjs.cloudflare.com"],
+      scriptSrcAttr: ["'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com", "https://kit.fontawesome.com", "https://cdnjs.cloudflare.com"],
+      fontSrc: ["'self'", "https://cdn.jsdelivr.net", "https://fonts.gstatic.com", "https://kit.fontawesome.com", "https://cdnjs.cloudflare.com"],
+      imgSrc: ["'self'", "data:", "https:", "http:", "https://cdnjs.cloudflare.com"],
+      connectSrc: ["'self'"],
+      frameSrc: ["'self'", "https://accounts.google.com", "https://github.com"],
+      objectSrc: ["'none'"]
+    }
+  }
+}));
+
+// ✅ CORS Configuration
+app.use(cors({ 
+  origin: 'http://localhost:8080', 
+  credentials: true 
+}));
 
 // ✅ Rate Limiting (Login protection)
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
@@ -27,20 +46,24 @@ app.use(limiter);
 // ✅ Logging
 app.use(morgan('combined'));
 
-// ✅ Body Parsing
+// ✅ Body Parsing (PEHLE YEH AAYEGA)
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 
-// ✅ Session Middleware (Body parsing ke baad)
+// ✅ Session Middleware (BODY PARSING KE BAAD)
 app.use(session({
-  secret: process.env.JWT_SECRET || 'your_secret_key', // Session encryption key
+  secret: process.env.JWT_SECRET || 'your_secret_key',
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false } // HTTPS nahi hai toh false rakho
+  cookie: { 
+    secure: false,
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000
+  }
 }));
 
-// ✅ Passport Initialization (app define ke baad)
+// ✅ Passport Initialization (SESSION KE BAAD)
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -54,7 +77,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(expressLayouts);
-app.set('layout', 'layouts/user-base'); // Default layout
+app.set('layout', 'layouts/user-base');
 
 // ✅ Route Imports
 const userAttendanceRoutes = require('./routes/user/attendanceRoutes');
@@ -68,6 +91,8 @@ const adminLeaveRoutes = require('./routes/admin/leavesRoutes');
 const authRoutes = require('./routes/authRoutes');
 const testRoutes = require('./routes/testRoutes');
 const employeeRoutes = require('./routes/admin/employeeRoutes');
+// ❌ TEMPORARY: Performance routes comment out karo
+// const adminPerformanceRoutes = require('./routes/admin/performanceRoutes');
 
 // ✅ Mount Routes
 app.use('/user/attendance', userAttendanceRoutes);
@@ -81,16 +106,44 @@ app.use('/user/dashboard', userDashboardRoutes);
 app.use('/auth', authRoutes);
 app.use('/test', testRoutes);
 app.use('/admin/employees', employeeRoutes);
+// ❌ TEMPORARY: Performance routes comment out karo
+// app.use('/admin/performance', adminPerformanceRoutes);
 
 // ✅ Base route
 app.get('/', (req, res) => res.send('CRM Backend Running'));
 
-// ✅ Dashboard route with layout override example
+// ✅ Dashboard routes
 app.get("/dashboard", (req, res) => {
-  res.render("dashboard/index", { title: "Dashboard", layout: 'layouts/user-base' });
+  res.render("dashboard/index", { 
+    pageTitle: "Dashboard - CRM",  // ✅ pageTitle add karo
+    title: "Dashboard", 
+    layout: 'layouts/user-base',
+    user: req.user || { name: 'Guest' },
+    stats: {
+      leavesApplied: 0,
+      feedbackSubmitted: 0, 
+      attendanceDays: 0
+    }
+  });
 });
 
-// ✅ Test Email Route (Temporary - remove later)
+// ✅ Admin Dashboard Route
+app.get('/admin/dashboard', (req, res) => {
+  res.render('admin/dashboard', { 
+    pageTitle: 'Admin Dashboard',
+    layout: 'layouts/admin-base'
+  });
+});
+
+// ✅ User Dashboard Route
+app.get('/user/dashboard', (req, res) => {
+  res.render('user/dashboard', { 
+    pageTitle: 'User Dashboard',
+    layout: 'layouts/user-base'
+  });
+});
+
+// ✅ Test Email Route
 app.get('/test-email', async (req, res) => {
   try {
     let transporter = nodemailer.createTransport({
@@ -117,6 +170,16 @@ app.get('/test-email', async (req, res) => {
   }
 });
 
+// ✅ Test delete route (for debugging)
+app.delete('/test-delete/:id', async (req, res) => {
+  try {
+    console.log('🧪 Test delete for ID:', req.params.id);
+    res.json({ message: 'Test successful', id: req.params.id });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ✅ Error Handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -128,8 +191,8 @@ mongoose.connect(process.env.DB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-  .then(() => console.log('✅ MongoDB Connected'))
-  .catch(err => console.error('❌ MongoDB Connection Error:', err));
+.then(() => console.log('✅ MongoDB Connected'))
+.catch(err => console.error('❌ MongoDB Connection Error:', err));
 
 // ✅ Start Server
 const PORT = process.env.PORT || 8080;

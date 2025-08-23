@@ -1,0 +1,55 @@
+<% layout = 'layouts/user-base' %>
+
+<div class="attendance-container">
+    <!-- Check-In Card -->
+    <div class="attendance-card checkin-card">
+        <div class="pulse-animation"></div>
+        <i class="fas fa-fingerprint fa-3x"></i>
+        <h3>Check-In</h3>
+        <p>Start your productive day</p>
+        <button id="checkInBtn" class="glow-btn">
+            <i class="fas fa-sign-in-alt"></i> Check In
+        </button>
+    </div>
+
+    <!-- Check-Out Card -->
+    <div class="attendance-card checkout-card">
+        <div class="pulse-animation"></div>
+        <i class="fas fa-sign-out-alt fa-3x"></i>
+        <h3>Check-Out</h3>
+        <p>End your day</p>
+        <button id="checkOutBtn" class="glow-btn">
+            <i class="fas fa-sign-out-alt"></i> Check Out
+        </button>
+    </div>
+</div>
+
+<!-- Current Status -->
+<div class="status-container">
+    <h3>Today's Status: <span id="current-status" class="status-badge status-absent">ABSENT</span></h3>
+</div>
+
+<!-- Attendance Records -->
+<div class="records-container">
+    <h3>Your Attendance History</h3>
+    <table class="records-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Check-In</th>
+                <th>Check-Out</th>
+                <th>Hours</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="records-body">
+            <!-- JavaScript se load hoga -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Include CSS -->
+<link rel="stylesheet" href="/css/attendance.css">
+
+<!-- Include JavaScript -->
+<script src="/js/attendance.js"></script>

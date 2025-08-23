@@ -61,3 +61,4 @@ function switchToSignUp() {
 function switchToSignIn() {
   document.getElementById('container').classList.remove('right-panel-active');
 }
+

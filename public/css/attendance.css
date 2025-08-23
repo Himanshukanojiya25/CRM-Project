@@ -1,0 +1,252 @@
+/* Attendance Page Animations */
+.attendance-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.attendance-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    animation: slideUp 0.5s ease;
+}
+
+.attendance-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 45px rgba(0,0,0,0.2);
+}
+
+.checkin-card {
+    background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+}
+
+.checkout-card {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+}
+
+.pulse-animation {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+    100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+}
+
+.glow-btn {
+    background: rgba(255,255,255,0.2);
+    border: 2px solid white;
+    color: white;
+    padding: 12px 30px;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.glow-btn:hover {
+    background: white;
+    color: #333;
+    box-shadow: 0 0 20px rgba(255,255,255,0.5);
+    transform: scale(1.05);
+}
+
+.glow-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Status Indicators */
+.status-badge {
+    padding: 8px 16px;
+    border-radius: 25px;
+    font-weight: bold;
+    animation: fadeIn 0.5s ease;
+    display: inline-block;
+    min-width: 100px;
+    text-align: center;
+}
+
+.status-present { background: #4CAF50; color: white; }
+.status-late { background: #FF9800; color: white; }
+.status-absent { background: #F44336; color: white; }
+.status-half-day { background: #2196F3; color: white; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Records Table */
+.records-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 2rem;
+    animation: slideUp 0.5s ease;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.records-table th,
+.records-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.records-table th {
+    background: linear-gradient(135deg, #2d2dff, #000000);
+    color: white;
+    font-weight: 600;
+}
+
+.records-table tr {
+    transition: all 0.3s ease;
+}
+
+.records-table tr:hover {
+    background: rgba(0,0,0,0.03);
+    transform: scale(1.01);
+}
+
+.records-table tr:last-child td {
+    border-bottom: none;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .attendance-container {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 1rem;
+    }
+    
+    .attendance-card {
+        padding: 1.5rem;
+    }
+    
+    .glow-btn {
+        padding: 10px 20px;
+        font-size: 1rem;
+    }
+    
+    .records-table {
+        font-size: 0.9rem;
+    }
+    
+    .records-table th,
+    .records-table td {
+        padding: 8px 10px;
+    }
+}
+
+/* Status Container */
+.status-container {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 15px;
+    margin: 2rem auto;
+    max-width: 1200px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    text-align: center;
+    animation: fadeIn 0.6s ease;
+}
+
+.status-container h3 {
+    color: #2d2dff;
+    margin-bottom: 1rem;
+    font-weight: bold;
+}
+
+/* Records Container */
+.records-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 15px;
+    margin: 2rem auto;
+    max-width: 1200px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    animation: slideUp 0.7s ease;
+}
+
+.records-container h3 {
+    color: #2d2dff;
+    margin-bottom: 1.5rem;
+    font-weight: bold;
+}
+
+/* Loading Animation */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #2d2dff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Notification Toast */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    z-index: 10000;
+    animation: slideInRight 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.notification.success {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+}
+
+.notification.error {
+    background: linear-gradient(135deg, #F44336, #d32f2f);
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
