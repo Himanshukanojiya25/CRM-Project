@@ -6,50 +6,158 @@
 <div class="dashboard-grid">
     <div class="stat-card purple">
         <i class="fas fa-users"></i>
-        <div>
-            <h3>Total Employees</h3>
-            <p><%= totalEmployees %></p>
+        <div class="stat-card-content">
+            <h3 style="color: white;">Total Employees</h3>
+            <p style="color: white;"><%= totalEmployees %></p>
         </div>
     </div>
     <div class="stat-card blue">
         <i class="fas fa-building"></i>
-        <div>
-            <h3>Departments</h3>
-            <p><%= totalDepartments %></p>
+        <div class="stat-card-content">
+            <h3 style="color: white;">Departments</h3>
+            <p style="color: white;"><%= totalDepartments %></p>
         </div>
     </div>
     <div class="stat-card green">
         <i class="fas fa-user-check"></i>
-        <div>
-            <h3>Active Today</h3>
-            <p><%= todayAttendance %></p>
+        <div class="stat-card-content">
+            <h3 style="color: white;">Active Today</h3>
+            <p style="color: white;"><%= todayAttendance %></p>
         </div>
     </div>
     <div class="stat-card orange">
         <i class="fas fa-plane-departure"></i>
-        <div>
-            <h3>On Leave Today</h3>
-            <p><%= todayLeaves %></p>
+        <div class="stat-card-content">
+            <h3 style="color: white;">On Leave Today</h3>
+            <p style="color: white;"><%= todayLeaves %></p>
         </div>
     </div>
 </div>
 
 <div class="chart-section">
-    <h2>Performance Overview</h2>
-    <div class="chart-box">
-        <canvas id="performanceChart" width="100%" height="300"></canvas>
+    <h2 style="color: white; text-align: center; margin-bottom: 20px; font-size: 1.5rem; font-weight: bold;">Performance Overview</h2>
+    <div class="chart-container">
+        <div class="chart-box">
+            <canvas id="performanceChart"></canvas>
+        </div>
     </div>
 </div>
 
-<div class="recent-activity">
-    <h2>Recent Feedback</h2>
-    <ul>
+<div class="recent-activity" style="
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 25px;
+    margin: 25px 0;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+">
+    <h2 style="
+        color: #FFFFFF; 
+        text-align: center; 
+        margin-bottom: 25px; 
+        font-size: 1.6rem; 
+        font-weight: 700;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        letter-spacing: 0.5px;
+    ">📝 Recent Feedback</h2>
+    
+    <ul style="list-style: none; padding: 0; margin: 0;">
         <% if (recentFeedbacks.length > 0) { %>
             <% recentFeedbacks.forEach(feedback => { %>
-                <li><strong><%= feedback.user.name %></strong> - <%= feedback.message.substring(0, 50) %>...</li>
+                <li style="
+                    color: #FFFFFF;
+                    padding: 18px 20px;
+                    margin: 15px 0;
+                    background: rgba(255,255,255,0.12);
+                    border-radius: 16px;
+                    transition: all 0.3s ease;
+                    backdrop-filter: blur(12px);
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+                ">
+                    <strong style="color: #FEF08A; font-weight: 600; font-size: 1.1rem;">
+                        <% if (feedback.user && feedback.user.name) { %>
+                            👤 <%= feedback.user.name %>
+                        <% } else { %>
+                            👤 Unknown User
+                        <% } %>
+                    </strong> 
+                    <br>
+                    <span style="opacity: 0.9; font-size: 0.95rem; line-height: 1.5; display: inline-block; margin-top: 8px;">
+                        <% if (feedback.message) { %>
+                            💬 <%= feedback.message.substring(0, 60) %>...
+                        <% } else { %>
+                            💬 No message
+                        <% } %>
+                    </span>
+                </li>
             <% }) %>
         <% } else { %>
-            <li>No recent feedback.</li>
+            <li style="
+                color: #FFFFFF;
+                padding: 25px;
+                text-align: center;
+                background: rgba(255,255,255,0.1);
+                border-radius: 16px;
+                font-style: italic;
+                opacity: 0.8;
+                font-size: 1.1rem;
+            ">
+                📭 No feedback received yet
+            </li>
         <% } %>
     </ul>
 </div>
+
+<!-- ✅ Include your custom CSS -->
+<link rel="stylesheet" href="/css/charts.css">
+<link rel="stylesheet" href="/css/animations.css">
+
+<!-- ✅ Include your custom JS -->
+<script src="/js/charts/performanceChart.js"></script>
+<script src="/js/animations/gsapAnimations.js"></script>
+
+<!-- ✅ Temporary fallback if files not found -->
+<style>
+/* Fallback styles if CSS files don't load */
+.stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 15px;
+}
+
+.stat-card i {
+    font-size: 2.5rem;
+    opacity: 0.9;
+}
+
+.stat-card-content h3 {
+    margin: 0;
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+.stat-card-content p {
+    margin: 5px 0 0 0;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.chart-container {
+    background: linear-gradient(135deg, #1F2937 0%, #374151 100%);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0;
+}
+</style>
+
+<script>
+// Force dark theme for chart
+Chart.defaults.color = '#FFFFFF';
+Chart.defaults.font.family = 'Arial, sans-serif';
+Chart.defaults.font.weight = 'bold';
+</script>

@@ -2,7 +2,7 @@ const User = require('../../models/User');
 const Department = require('../../models/Department');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
-const { sendWelcomeEmail } = require('../../utils/emailSender'); // ✅ ADD THIS LINE
+const { sendWelcomeEmail } = require('../../utils/emailSender');
 
 exports.getEmployeePage = async (req, res) => {
   try {
@@ -16,6 +16,31 @@ exports.getEmployeePage = async (req, res) => {
   } catch (error) {
     console.error('Employee page error:', error);
     res.status(500).send('Error loading employees page');
+  }
+};
+
+// ✅ Employee Profile Function
+exports.getEmployeeProfile = async (req, res) => {
+  try {
+    console.log('🟢 Fetching profile for ID:', req.params.id);
+    
+    const employee = await User.findById(req.params.id)
+      .populate('department', 'name')
+      .select('-password');
+
+    if (!employee) {
+      return res.status(404).send('Employee not found');
+    }
+
+    res.render('admin/employees/profile', {
+      pageTitle: `${employee.name} - Profile`,
+      layout: 'layouts/admin-base',
+      employee: employee
+    });
+
+  } catch (error) {
+    console.error('❌ Profile error:', error);
+    res.status(500).send('Error loading profile');
   }
 };
 
@@ -44,7 +69,6 @@ exports.createEmployee = async (req, res) => {
 
     await newEmployee.save();
 
-    // ✅ ADD THIS CODE - Welcome email send karega
     try {
       await sendWelcomeEmail(email, name, password);
       console.log('✅ Welcome email sent to:', email);

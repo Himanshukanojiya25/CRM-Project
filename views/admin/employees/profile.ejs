@@ -1,0 +1,158 @@
+<% layout = 'layouts/admin-base' %>
+
+<div class="container-fluid">
+  <div class="header">
+    <h1>Employee Profile</h1>
+    <a href="/admin/employees" class="btn btn-secondary">
+      <i class="fas fa-arrow-left"></i> Back to Employees
+    </a>
+  </div>
+
+  <div class="profile-card">
+    <div class="profile-header">
+      <div class="profile-avatar">
+        <i class="fas fa-user-circle fa-5x text-primary"></i>
+      </div>
+      <div class="profile-info">
+        <h2><%= employee.name %></h2>
+        <p class="text-muted"><%= employee.role %></p>
+      </div>
+    </div>
+
+    <div class="profile-details">
+      <div class="detail-section">
+        <h4>📧 Contact Information</h4>
+        <div class="detail-row">
+          <label>Email:</label>
+          <span><%= employee.email %></span>
+        </div>
+        <div class="detail-row">
+          <label>Phone:</label>
+          <span><%= employee.phone || 'N/A' %></span>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h4>🏢 Work Information</h4>
+        <div class="detail-row">
+          <label>Department:</label>
+          <span><%= employee.department ? employee.department.name : 'Not assigned' %></span>
+        </div>
+        <div class="detail-row">
+          <label>Role:</label>
+          <span class="badge bg-info"><%= employee.role %></span>
+        </div>
+        <div class="detail-row">
+          <label>Status:</label>
+          <span class="badge bg-success">Active</span>
+        </div>
+        <div class="detail-row">
+          <label>Join Date:</label>
+          <span><%= employee.joiningDate ? employee.joiningDate.toLocaleDateString() : 'Not set' %></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.profile-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+  margin-top: 30px;
+  border: 1px solid #e2e8f0;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  margin-bottom: 40px;
+  padding-bottom: 25px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.profile-avatar i {
+  opacity: 0.8;
+}
+
+.profile-info h2 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 2.2rem;
+  font-weight: 700;
+}
+
+.profile-info p {
+  margin: 5px 0 0 0;
+  color: #6b7280;
+  font-size: 1.1rem;
+}
+
+.detail-section {
+  margin-bottom: 35px;
+}
+
+.detail-section h4 {
+  color: #667eea;
+  margin-bottom: 20px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  border-left: 4px solid #667eea;
+  padding-left: 15px;
+}
+
+.detail-row {
+  display: flex;
+  margin-bottom: 15px;
+  align-items: center;
+}
+
+.detail-row label {
+  font-weight: 600;
+  color: #374151;
+  min-width: 150px;
+  font-size: 1rem;
+}
+
+.detail-row span {
+  color: #4b5563;
+  font-size: 1rem;
+}
+
+.badge {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.header h1 {
+  color: #1f2937;
+  margin: 0;
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+</style>

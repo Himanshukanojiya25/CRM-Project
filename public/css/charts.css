@@ -1,0 +1,33 @@
+/* charts.css - Light Theme */
+.chart-container {
+    position: relative;
+    height: 400px;
+    width: 100%;
+    background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); /* ✅ Light background */
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border: 1px solid #E5E7EB;
+}
+
+.chart-box {
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+
+canvas {
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.9); /* ✅ Light background */
+    padding: 15px;
+    border: 1px solid #F1F5F9;
+}
+
+.chart-section h2 {
+    color: #1F2937; /* ✅ Dark text */
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    font-weight: bold;
+}

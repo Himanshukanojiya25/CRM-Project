@@ -1,0 +1,67 @@
+/* animations.css - Smooth Animations */
+.stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+}
+
+.stat-card i {
+    font-size: 2.5rem;
+    opacity: 0.9;
+}
+
+.stat-card-content h3 {
+    margin: 0;
+    font-size: 1rem;
+    opacity: 0.9;
+    font-weight: 500;
+}
+
+.stat-card-content p {
+    margin: 5px 0 0 0;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+/* Card colors */
+.stat-card.purple {
+    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+}
+
+.stat-card.blue {
+    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+}
+
+.stat-card.green {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+}
+
+.stat-card.orange {
+    background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+}
+
+/* Floating animation */
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+}
+
+.stat-card {
+    animation: float 3s ease-in-out infinite;
+}
+
+.stat-card:nth-child(1) { animation-delay: 0s; }
+.stat-card:nth-child(2) { animation-delay: 0.5s; }
+.stat-card:nth-child(3) { animation-delay: 1s; }
+.stat-card:nth-child(4) { animation-delay: 1.5s; }
