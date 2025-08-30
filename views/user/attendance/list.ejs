@@ -1,6 +1,9 @@
 <% layout = 'layouts/user-base' %>
 
 <div class="attendance-container">
+     <button class="sidebar-toggle" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
     <!-- Check-In Card -->
     <div class="attendance-card checkin-card">
         <div class="pulse-animation"></div>
@@ -46,6 +49,8 @@
             <!-- JavaScript se load hoga -->
         </tbody>
     </table>
+    <!-- Sidebar Overlay -->
+<div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 </div>
 
 <!-- Include CSS -->
@@ -53,3 +58,4 @@
 
 <!-- Include JavaScript -->
 <script src="/js/attendance.js"></script>
+<script src="/js/sidebar.js"></script>

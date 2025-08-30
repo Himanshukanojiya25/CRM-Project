@@ -1,13 +1,13 @@
 const jwt = require('jsonwebtoken');
 
 const isAuthenticated = (req, res, next) => {
-  // ✅ Check if already authenticated via session
-  if (req.isAuthenticated()) {
-    console.log('✅ Authenticated via session:', req.user._id);
+  // ✅ Pehle session check (jo pehle kaam kar raha tha)
+  if (req.isAuthenticated && req.isAuthenticated()) {
+    console.log('✅ Authenticated via session:', req.user.id);
     return next();
   }
 
-  // ✅ Check JWT token
+  // ✅ Phir JWT check (backup ke liye)
   const token = req.cookies?.token || 
                 (req.headers.authorization && req.headers.authorization.startsWith('Bearer ') 
                   ? req.headers.authorization.substring(7) 
@@ -43,6 +43,7 @@ const isAuthenticated = (req, res, next) => {
   }
 };
 
+// Role middleware same rahega
 const roleMiddleware = (allowedRoles) => {
   return (req, res, next) => {
     if (!req.user) {

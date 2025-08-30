@@ -1,37 +1,46 @@
 const Leave = require('../../models/Leave');
-const User = require('../../models/User');
+const Employee = require('../../models/Employee'); // Make sure to use the correct model
 
-exports.getAllLeaves = async (req, res) => {
-  try {
-    const leaves = await Leave.find()
-      .populate('user', 'name email department')
-      .sort({ createdAt: -1 });
-
-    res.status(200).json({ success: true, leaves });
-  } catch (error) {
-    console.error('Admin Get Leaves Error:', error);
-    res.status(500).json({ success: false, message: 'Server Error', error });
-  }
+// Function to fetch all pending leave requests and render the admin view
+exports.getPendingLeaves = async (req, res) => {
+    try {
+        const pendingLeaves = await Leave.find({ status: 'pending' }).populate('employeeId');
+        res.render('admin/leaves/list', {
+            leaves: pendingLeaves,
+            pageTitle: 'Pending Leave Requests'
+        });
+    } catch (error) {
+        console.error('Error fetching pending leaves:', error);
+        res.status(500).send('Server Error');
+    }
 };
 
-exports.updateLeaveStatus = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { status } = req.body;
-
-    if (!['approved', 'rejected'].includes(status)) {
-      return res.status(400).json({ success: false, message: 'Invalid status' });
+// Function to approve a leave request (Now redirects instead of returning JSON)
+exports.approveLeave = async (req, res) => {
+    try {
+        const leaveId = req.params.id;
+        const leave = await Leave.findByIdAndUpdate(leaveId, { status: 'approved' }, { new: true });
+        if (!leave) {
+            return res.status(404).send('Leave request not found.');
+        }
+        res.redirect('/admin/leaves'); // Redirect back to the list of leaves
+    } catch (error) {
+        console.error('Error approving leave:', error);
+        res.status(500).send('Server Error');
     }
+};
 
-    const leave = await Leave.findByIdAndUpdate(id, { status }, { new: true });
-
-    if (!leave) {
-      return res.status(404).json({ success: false, message: 'Leave not found' });
+// Function to reject a leave request (Now redirects instead of returning JSON)
+exports.rejectLeave = async (req, res) => {
+    try {
+        const leaveId = req.params.id;
+        const leave = await Leave.findByIdAndUpdate(leaveId, { status: 'rejected' }, { new: true });
+        if (!leave) {
+            return res.status(404).send('Leave request not found.');
+        }
+        res.redirect('/admin/leaves'); // Redirect back to the list of leaves
+    } catch (error) {
+        console.error('Error rejecting leave:', error);
+        res.status(500).send('Server Error');
     }
-
-    res.status(200).json({ success: true, message: 'Leave status updated', leave });
-  } catch (error) {
-    console.error('Update Leave Error:', error);
-    res.status(500).json({ success: false, message: 'Server Error', error });
-  }
 };

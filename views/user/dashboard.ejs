@@ -1,12 +1,15 @@
 <% layout = 'layouts/user-base' %>
 
 <div class="container-fluid">
+   <button class="sidebar-toggle" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
   
   <!-- Header -->
   <div class="row mb-4">
     <div class="col-12">
       <h1>User Dashboard</h1>
-      <p class="lead">Welcome to your dashboard</p>
+      <p class="lead">Welcome, <%= typeof user !== 'undefined' ? user.name : 'User' %> 👋</p>
     </div>
   </div>
 
@@ -16,7 +19,7 @@
       <div class="card">
         <div class="card-body text-center">
           <i class="fas fa-calendar-check fa-2x text-primary mb-2"></i>
-          <h3>15/30</h3>
+          <h3><%= typeof stats !== 'undefined' ? stats.attendanceDays : '0' %></h3>
           <p class="text-muted">Attendance Days</p>
         </div>
       </div>
@@ -26,7 +29,7 @@
       <div class="card">
         <div class="card-body text-center">
           <i class="fas fa-plane-departure fa-2x text-warning mb-2"></i>
-          <h3>3</h3>
+          <h3><%= typeof stats !== 'undefined' ? stats.leavesApplied : '0' %></h3>
           <p class="text-muted">Leaves Applied</p>
         </div>
       </div>
@@ -36,7 +39,7 @@
       <div class="card">
         <div class="card-body text-center">
           <i class="fas fa-comments fa-2x text-info mb-2"></i>
-          <h3>5</h3>
+          <h3><%= typeof stats !== 'undefined' ? stats.feedbackSubmitted : '0' %></h3>
           <p class="text-muted">Feedback Submitted</p>
         </div>
       </div>
@@ -46,7 +49,7 @@
       <div class="card">
         <div class="card-body text-center">
           <i class="fas fa-user-check fa-2x text-success mb-2"></i>
-          <h3>Present</h3>
+          <h3><%= typeof stats !== 'undefined' ? stats.todayAttendance : 'Present' %></h3>
           <p class="text-muted">Today's Status</p>
         </div>
       </div>
@@ -74,6 +77,8 @@
       </div>
     </div>
   </div>
+  <!-- Sidebar Overlay -->
+<div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 </div>
 
@@ -93,3 +98,6 @@
   border-radius: 8px;
 }
 </style>
+
+<!-- ✅ ONLY sidebar.js include karo, inline JavaScript nahi -->
+<script src="/js/sidebar.js"></script>

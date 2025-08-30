@@ -14,20 +14,20 @@ const getAttendancePage = async (req, res) => {
   }
 };
 
-// ✅ Check-In
+// ✅ Check-In (FIXED)
 const checkIn = async (req, res) => {
   try {
     console.log('Request User:', req.user); // Debug log
     
-    // ✅ Check if user is authenticated
-    if (!req.user || !req.user._id) {
+    // ✅ FIXED: Consistent user ID check
+    if (!req.user || !req.user.id) {
       return res.status(401).json({ 
         success: false,
         message: 'User not authenticated. Please login again.' 
       });
     }
 
-    const userId = req.user._id;
+    const userId = req.user.id; // ✅ CHANGED: req.user._id -> req.user.id
     const today = moment().startOf('day');
     const now = new Date();
 
@@ -81,18 +81,18 @@ const checkIn = async (req, res) => {
   }
 };
 
-// ✅ Check-Out
+// ✅ Check-Out (FIXED)
 const checkOut = async (req, res) => {
   try {
-    // ✅ Check if user is authenticated
-    if (!req.user || !req.user._id) {
+    // ✅ FIXED: Consistent user ID check
+    if (!req.user || !req.user.id) {
       return res.status(401).json({ 
         success: false,
         message: 'User not authenticated. Please login again.' 
       });
     }
 
-    const userId = req.user._id;
+    const userId = req.user.id; // ✅ CHANGED: req.user._id -> req.user.id
     const today = moment().startOf('day');
     const now = new Date();
 
@@ -141,18 +141,18 @@ const checkOut = async (req, res) => {
   }
 };
 
-// ✅ User's Attendance Records with Pagination
+// ✅ User's Attendance Records with Pagination (FIXED)
 const myRecords = async (req, res) => {
   try {
-    // ✅ Check if user is authenticated
-    if (!req.user || !req.user._id) {
+    // ✅ FIXED: Consistent user ID check
+    if (!req.user || !req.user.id) {
       return res.status(401).json({ 
         success: false,
         message: 'User not authenticated. Please login again.' 
       });
     }
 
-    const userId = req.user._id;
+    const userId = req.user.id; // ✅ CHANGED: req.user._id -> req.user.id
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 30;
     const skip = (page - 1) * limit;
@@ -185,18 +185,18 @@ const myRecords = async (req, res) => {
   }
 };
 
-// ✅ Today's Status
+// ✅ Today's Status (FIXED)
 const todayStatus = async (req, res) => {
   try {
-    // ✅ Check if user is authenticated
-    if (!req.user || !req.user._id) {
+    // ✅ FIXED: Consistent user ID check
+    if (!req.user || !req.user.id) {
       return res.status(401).json({ 
         success: false,
         message: 'User not authenticated. Please login again.' 
       });
     }
 
-    const userId = req.user._id;
+    const userId = req.user.id; // ✅ CHANGED: req.user._id -> req.user.id
     const today = moment().startOf('day');
 
     const attendance = await Attendance.findOne({

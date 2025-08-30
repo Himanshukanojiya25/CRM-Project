@@ -1,36 +1,38 @@
-const Attendance = require('../../models/Attendance'); // correct relative path
-const moment = require('moment');
+const { checkIn } = require('../../services/admin/attendance'); // ✅ Service import
 
 const checkIn = async (req, res) => {
   try {
-    const userId = req.user._id;
-    const today = moment().startOf('day');
+    // ✅ Get user ID from authenticated request
+    const userId = req.user.id; // ✅ CHANGED: req.user._id -> req.user.id
+    
+    // ✅ Get client IP address and device type
+    const ipAddr = req.ip || req.connection.remoteAddress;
+    const deviceType = req.headers['user-agent'];
 
-    const existingAttendance = await Attendance.findOne({
-      user: userId,
-      date: {
-        $gte: today.toDate(),
-        $lte: moment(today).endOf('day').toDate(),
-      },
+    // ✅ Call the service function with proper parameters
+    const result = await checkIn(userId, ipAddr, deviceType); // ✅ ADDED: await and result capture
+    
+    // ✅ Send success response with data from service
+    res.status(200).json({ 
+      success: true, // ✅ ADDED: success flag
+      message: 'Checked in successfully', 
+      data: result.data // ✅ CHANGED: attendance -> result.data
     });
-
-    if (existingAttendance && existingAttendance.checkIn) {
-      return res.status(400).json({ message: 'Already checked in today' });
-    }
-
-    const attendance = existingAttendance || new Attendance({
-      user: userId,
-      date: today.toDate(),
-    });
-
-    attendance.checkIn = new Date();
-    attendance.ipAddress = req.ip;
-    attendance.deviceType = req.headers['user-agent'];
-
-    await attendance.save();
-    res.status(200).json({ message: 'Checked in successfully', data: attendance });
   } catch (error) {
-    res.status(500).json({ message: 'Check-in failed', error });
+    // ✅ Handle specific error cases
+    if (error.message === 'Already checked in today') {
+      return res.status(400).json({ 
+        success: false, // ✅ ADDED: success flag
+        message: error.message 
+      });
+    }
+    
+    // ✅ Handle generic errors
+    res.status(500).json({ 
+      success: false, // ✅ ADDED: success flag
+      message: 'Check-in failed', 
+      error: error.message // ✅ CHANGED: full error -> error.message
+    });
   }
 };
 

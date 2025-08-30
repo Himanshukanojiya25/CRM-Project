@@ -24,4 +24,11 @@ router.get('/my-records', isAuthenticated, myRecords);
 // ✅ Route: Today's Status (API)
 router.get('/today-status', isAuthenticated, todayStatus);
 
+// routes/user/attendanceRoutes.js mein
+router.post('/check-in', isAuthenticated, (req, res, next) => {
+  console.log('CHECK-IN ROUTE - User:', req.user);
+  console.log('CHECK-IN ROUTE - Session:', req.session);
+  next();
+}, checkIn);
+
 module.exports = router;

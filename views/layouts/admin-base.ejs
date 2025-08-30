@@ -11,6 +11,7 @@
 </head>
 <body class="light-mode">
     <div class="admin-container">
+     
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="sidebar-header">
@@ -54,6 +55,11 @@
 
         <!-- Main Content -->
         <div class="main-content">
+            <!-- ✅ Page Header with Title -->
+            <div class="header">
+                <h1><%= pageTitle || 'Admin Dashboard' %></h1>
+            </div>
+            
             <%- body %>
         </div>
     </div>
@@ -61,6 +67,9 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
+    <!-- ✅ Sidebar JavaScript -->
+    <script src="/js/sidebar.js"></script>
+
     <!-- ✅ Safe JavaScript loading -->
     <script>
     // Load dashboard.js safely

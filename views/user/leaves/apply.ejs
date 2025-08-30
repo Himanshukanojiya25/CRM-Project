@@ -1,0 +1,64 @@
+<div class="container-fluid">
+    <h2>Leave Application Form</h2>
+    <hr>
+    
+    <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
+        <div class="alert alert-danger"><%= errorMessage %></div>
+    <% } %>
+    
+    <% if (typeof successMessage !== 'undefined' && successMessage) { %>
+        <div class="alert alert-success"><%= successMessage %></div>
+    <% } %>
+
+    <form action="/user/leaves/apply" method="POST">
+        <div class="mb-3">
+            <label for="leaveType" class="form-label">Leave Type</label>
+            <select class="form-select" id="leaveType" name="leaveType" required>
+                <option value="full-day">Full Day</option>
+                <option value="half-day">Half Day</option>
+            </select>
+        </div>
+        
+        <div class="mb-3">
+            <label for="startDate" class="form-label">From Date</label>
+            <input type="date" class="form-control" id="startDate" name="startDate" required>
+        </div>
+        
+        <div class="mb-3" id="endDateContainer">
+            <label for="endDate" class="form-label">To Date</label>
+            <input type="date" class="form-control" id="endDate" name="endDate">
+        </div>
+
+        <div class="mb-3">
+            <label for="reason" class="form-label">Reason</label>
+            <textarea class="form-control" id="reason" name="reason" rows="3" required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit Application</button>
+        <a href="/user/leaves" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+
+<script>
+    const leaveTypeSelect = document.getElementById('leaveType');
+    const endDateContainer = document.getElementById('endDateContainer');
+    const endDateInput = document.getElementById('endDate');
+    const startDateInput = document.getElementById('startDate');
+  
+    leaveTypeSelect.addEventListener('change', (event) => {
+        if (event.target.value === 'half-day') {
+            endDateContainer.style.display = 'none';
+            endDateInput.removeAttribute('required');
+        } else {
+            endDateContainer.style.display = 'block';
+            endDateInput.setAttribute('required', 'required');
+        }
+    });
+
+    startDateInput.addEventListener('change', (event) => {
+        endDateInput.min = event.target.value;
+    });
+
+    // Run on page load
+    leaveTypeSelect.dispatchEvent(new Event('change'));
+</script>

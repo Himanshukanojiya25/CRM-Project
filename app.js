@@ -12,11 +12,14 @@ const morgan = require('morgan');
 const nodemailer = require('nodemailer');
 const passport = require('passport');
 
+// ✅ NEW: Swagger import
+const swaggerDocs = require('./config/swagger');  // <<-- ADD THIS LINE
+
 dotenv.config();
 
 const app = express();
 
-// ✅ FIXED: Security Middleware with CSP configuration
+// ✅ Security Middleware with CSP configuration
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -46,12 +49,12 @@ app.use(limiter);
 // ✅ Logging
 app.use(morgan('combined'));
 
-// ✅ Body Parsing (PEHLE YEH AAYEGA)
+// ✅ Body Parsing
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 
-// ✅ Session Middleware (BODY PARSING KE BAAD)
+// ✅ Session Middleware
 app.use(session({
   secret: process.env.JWT_SECRET || 'your_secret_key',
   resave: false,
@@ -63,7 +66,7 @@ app.use(session({
   }
 }));
 
-// ✅ Passport Initialization (SESSION KE BAAD)
+// ✅ Passport Initialization
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -91,7 +94,8 @@ const adminLeaveRoutes = require('./routes/admin/leavesRoutes');
 const authRoutes = require('./routes/authRoutes');
 const testRoutes = require('./routes/testRoutes');
 const employeeRoutes = require('./routes/admin/employeeRoutes');
-// ❌ TEMPORARY: Performance routes comment out karo
+
+// ❌ TEMPORARY: Performance routes comment out
 // const adminPerformanceRoutes = require('./routes/admin/performanceRoutes');
 
 // ✅ Mount Routes
@@ -106,7 +110,7 @@ app.use('/user/dashboard', userDashboardRoutes);
 app.use('/auth', authRoutes);
 app.use('/test', testRoutes);
 app.use('/admin/employees', employeeRoutes);
-// ❌ TEMPORARY: Performance routes comment out karo
+// ❌ TEMPORARY: Performance routes comment out
 // app.use('/admin/performance', adminPerformanceRoutes);
 
 // ✅ Base route
@@ -114,17 +118,17 @@ app.get('/', (req, res) => res.send('CRM Backend Running'));
 
 // ✅ Dashboard routes
 app.get("/dashboard", (req, res) => {
-  res.render("dashboard/index", { 
-    pageTitle: "Dashboard - CRM",  // ✅ pageTitle add karo
-    title: "Dashboard", 
-    layout: 'layouts/user-base',
-    user: req.user || { name: 'Guest' },
-    stats: {
-      leavesApplied: 0,
-      feedbackSubmitted: 0, 
-      attendanceDays: 0
-    }
-  });
+  // Check if user is authenticated
+  if (!req.user) {
+    return res.redirect('/auth/login');
+  }
+  
+  // Redirect based on user role
+  if (req.user.role === 'admin') {
+    res.redirect('/admin/dashboard');
+  } else {
+    res.redirect('/user/dashboard');
+  }
 });
 
 // ✅ Admin Dashboard Route
@@ -180,7 +184,7 @@ app.delete('/test-delete/:id', async (req, res) => {
   }
 });
 
-// ✅ Error Handler
+// ✅ Error Handler (Swagger se pehle bhi chalega)
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: err.message });
@@ -194,6 +198,10 @@ mongoose.connect(process.env.DB_URI, {
 .then(() => console.log('✅ MongoDB Connected'))
 .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
-// ✅ Start Server
+// ✅ Start Server (sirf ek baar)
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`Swagger Docs available at http://localhost:${PORT}/api-docs`);
+  swaggerDocs(app); // <<-- ✅ NOW called correctly after server start
+});

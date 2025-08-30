@@ -38,3 +38,34 @@ router.post('/register', authController.register);
 router.get('/logout', authController.logout);
 
 module.exports = router;
+
+/**
+ * @swagger
+ * /api/auth/register:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - password
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Himanshu Kanojiya
+ *               email:
+ *                 type: string
+ *                 example: himanshu@example.com
+ *               password:
+ *                 type: string
+ *                 example: your_password_here
+ *     responses:
+ *       201:
+ *         description: User registered successfully
+ */
