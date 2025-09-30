@@ -16,11 +16,14 @@ router.get('/google',
 router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/auth' }),
   (req, res) => {
-    res.redirect('/dashboard');
+    // ✅ Session properly set karne ke liye
+    req.session.save(() => {
+      res.redirect('/dashboard');
+    });
   }
 );
 
-// ✅ GitHub Auth Routes (ADD KARO YAHAN)
+// ✅ GitHub Auth Routes
 router.get('/github',
   passport.authenticate('github', { scope: ['user:email'] })
 );
@@ -28,7 +31,10 @@ router.get('/github',
 router.get('/github/callback',
   passport.authenticate('github', { failureRedirect: '/auth' }),
   (req, res) => {
-    res.redirect('/dashboard');
+    // ✅ Session properly set karne ke liye
+    req.session.save(() => {
+      res.redirect('/dashboard');
+    });
   }
 );
 

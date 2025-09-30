@@ -1,0 +1,36 @@
+<%- include('../../layouts/admin-base.ejs') %>
+
+<div class="container mt-4">
+  <h2>Leave Request Details</h2>
+  <div class="card">
+    <div class="card-body">
+      <p><strong>Employee:</strong> <%= leave.employeeId.name %></p>
+      <p><strong>Email:</strong> <%= leave.employeeId.email %></p>
+      <p><strong>Start Date:</strong> <%= new Date(leave.startDate).toLocaleDateString() %></p>
+      <p><strong>End Date:</strong> <%= new Date(leave.endDate).toLocaleDateString() %></p>
+      <p><strong>Reason:</strong> <%= leave.reason %></p>
+      <p><strong>Status:</strong> <%= leave.status %></p>
+
+      <!-- ❌ Flash Messages removed -->
+
+      <form action="/api/admin/leaves/approve/<%= leave._id %>" method="POST">
+        <div class="mb-3">
+          <label for="adminComment" class="form-label">Admin Comment (Optional)</label>
+          <textarea name="adminComment" id="adminComment" class="form-control"><%= leave.adminComment || '' %></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Approve</button>
+      </form>
+
+      <form action="/api/admin/leaves/reject/<%= leave._id %>" method="POST" class="mt-2">
+        <div class="mb-3">
+          <label for="adminComment" class="form-label">Admin Comment (Optional)</label>
+          <textarea name="adminComment" id="adminComment" class="form-control"><%= leave.adminComment || '' %></textarea>
+        </div>
+        <button type="submit" class="btn btn-danger">Reject</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<%- include('../../partials/footer.ejs') %>

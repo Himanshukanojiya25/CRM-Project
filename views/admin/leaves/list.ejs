@@ -1,0 +1,204 @@
+<% layout = 'layouts/admin-base' %>
+
+<div class="container-fluid px-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center py-4">
+        <div>
+            <h1 class="h3 mb-2 text-gray-800"><%= pageTitle %></h1>
+            <p class="mb-4 text-muted">Review and manage pending leave requests from employees</p>
+        </div>
+        <div class="badge bg-primary text-white px-3 py-2 rounded-pill">
+            <i class="fas fa-clock me-2"></i>
+            <%= leaves.length %> Pending Requests
+        </div>
+    </div>
+
+    <!-- ❌ Flash Messages removed -->
+
+    <!-- Leaves Table Card -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 border-0">
+            <h5 class="mb-0 text-primary">
+                <i class="fas fa-list-check me-2"></i>
+                Leave Requests
+            </h5>
+        </div>
+        
+        <div class="card-body p-0">
+            <% if (leaves.length > 0) { %>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col" class="ps-4">Employee</th>
+                                <th scope="col">Leave Details</th>
+                                <th scope="col">Duration</th>
+                                <th scope="col">Reason</th>
+                                <th scope="col" class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% leaves.forEach(leave => { %>
+                                <tr class="border-bottom">
+                                    <!-- Employee Column -->
+                                    <!-- Employee Column -->
+<td class="ps-4">
+    <div class="d-flex align-items-center">
+        <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+            <i class="fas fa-user"></i>
+        </div>
+        <div>
+            <h6 class="mb-1 text-dark">
+                <%= leave.user ? leave.user.name : 'N/A' %>
+                <% if (leave.user && leave.user.employeeId) { %>
+                    <br><small class="text-muted">ID: <%= leave.user.employeeId %></small>
+                <% } %>
+            </h6>
+            <small class="text-muted">
+                <%= leave.user ? leave.user.email : 'User deleted' %>
+                <% if (leave.user && leave.user.department) { %>
+                    <br><small class="text-info"><%= leave.user.department %></small>
+                <% } %>
+            </small>
+        </div>
+    </div>
+</td>
+
+                                    <!-- Leave Details Column -->
+                                    <td>
+                                        <span class="badge bg-<%= leave.leaveType === 'full-day' ? 'primary' : 'warning' %> text-white">
+                                            <%= leave.leaveType === 'full-day' ? 'Full Day' : 'Half Day' %>
+                                        </span>
+                                        <div class="text-muted small mt-1">
+                                            Applied: <%= leave.createdAt.toLocaleDateString() %>
+                                        </div>
+                                    </td>
+
+                                    <!-- Duration Column -->
+                                    <td>
+                                        <div class="text-dark fw-semibold">
+                                            <%= leave.startDate.toLocaleDateString() %>
+                                            <% if (leave.leaveType === 'full-day') { %>
+                                                - <%= leave.endDate.toLocaleDateString() %>
+                                            <% } %>
+                                        </div>
+                                        <div class="text-muted small">
+                                            <%= leave.days %> day(s)
+                                        </div>
+                                    </td>
+
+                                    <!-- Reason Column -->
+                                    <td>
+                                        <p class="mb-0 text-dark" style="max-width: 250px;">
+                                            <%= leave.reason.length > 100 ? leave.reason.substring(0, 100) + '...' : leave.reason %>
+                                        </p>
+                                    </td>
+
+                                    <!-- Actions Column -->
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <form action="/admin/leaves/approve/<%= leave._id %>" method="POST">
+                                                <button type="submit" class="btn btn-success btn-sm px-3 py-2">
+                                                    <i class="fas fa-check me-1"></i>Approve
+                                                </button>
+                                            </form>
+                                            <form action="/admin/leaves/reject/<%= leave._id %>" method="POST">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm px-3 py-2">
+                                                    <i class="fas fa-times me-1"></i>Reject
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } else { %>
+                <!-- Empty State -->
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-inbox fa-3x text-muted"></i>
+                    </div>
+                    <h5 class="text-muted mb-3">No pending requests</h5>
+                    <p class="text-muted">All leave requests have been processed</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Statistics Card -->
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fas fa-clock fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-0"><%= leaves.length %></h5>
+                            <p class="card-text mb-0">Pending Requests</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-0">0</h5>
+                            <p class="card-text mb-0">Approved Today</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-0"><%= leaves.length %></h5>
+                            <p class="card-text mb-0">Total Employees</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+.avatar-sm {
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
+}
+.card {
+    border-radius: 12px;
+    border: 1px solid #e3e6f0;
+}
+.table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+}
+.badge {
+    font-size: 0.75rem;
+}
+</style>

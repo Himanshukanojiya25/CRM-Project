@@ -11,9 +11,11 @@ const rateLimit = require('express-rate-limit');
 const morgan = require('morgan');
 const nodemailer = require('nodemailer');
 const passport = require('passport');
+const flash = require('connect-flash');
+const MongoStore = require('connect-mongo');
 
 // ✅ NEW: Swagger import
-const swaggerDocs = require('./config/swagger');  // <<-- ADD THIS LINE
+const swaggerDocs = require('./config/swagger');
 
 dotenv.config();
 
@@ -54,11 +56,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 
-// ✅ Session Middleware
+// ✅ Session Middleware (FIXED - MongoStore added)
 app.use(session({
   secret: process.env.JWT_SECRET || 'your_secret_key',
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.DB_URI,
+    collectionName: 'sessions'
+  }),
   cookie: { 
     secure: false,
     httpOnly: true,
@@ -70,6 +76,16 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+// ✅ Flash Middleware
+app.use(flash());
+
+// ✅ Global flash variables (har view me available)
+app.use((req, res, next) => {
+  res.locals.success = req.flash('success');
+  res.locals.error = req.flash('error');
+  next();
+});
+
 // ✅ Passport Config
 require('./config/passport');
 
@@ -79,8 +95,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ✅ EJS Setup
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+app.set('view cache', false);
 app.use(expressLayouts);
 app.set('layout', 'layouts/user-base');
+
+// ✅ Default page title middleware
+app.use((req, res, next) => {
+  if (!res.locals.pageTitle) {
+    res.locals.pageTitle = "CRM System";
+  }
+  next();
+});
 
 // ✅ Route Imports
 const userAttendanceRoutes = require('./routes/user/attendanceRoutes');
@@ -94,9 +119,7 @@ const adminLeaveRoutes = require('./routes/admin/leavesRoutes');
 const authRoutes = require('./routes/authRoutes');
 const testRoutes = require('./routes/testRoutes');
 const employeeRoutes = require('./routes/admin/employeeRoutes');
-
-// ❌ TEMPORARY: Performance routes comment out
-// const adminPerformanceRoutes = require('./routes/admin/performanceRoutes');
+const profileRoutes = require('./routes/user/profileRoutes');
 
 // ✅ Mount Routes
 app.use('/user/attendance', userAttendanceRoutes);
@@ -110,20 +133,16 @@ app.use('/user/dashboard', userDashboardRoutes);
 app.use('/auth', authRoutes);
 app.use('/test', testRoutes);
 app.use('/admin/employees', employeeRoutes);
-// ❌ TEMPORARY: Performance routes comment out
-// app.use('/admin/performance', adminPerformanceRoutes);
+app.use('/user/profile', profileRoutes);
 
 // ✅ Base route
 app.get('/', (req, res) => res.send('CRM Backend Running'));
 
 // ✅ Dashboard routes
 app.get("/dashboard", (req, res) => {
-  // Check if user is authenticated
   if (!req.user) {
     return res.redirect('/auth/login');
   }
-  
-  // Redirect based on user role
   if (req.user.role === 'admin') {
     res.redirect('/admin/dashboard');
   } else {
@@ -174,17 +193,7 @@ app.get('/test-email', async (req, res) => {
   }
 });
 
-// ✅ Test delete route (for debugging)
-app.delete('/test-delete/:id', async (req, res) => {
-  try {
-    console.log('🧪 Test delete for ID:', req.params.id);
-    res.json({ message: 'Test successful', id: req.params.id });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// ✅ Error Handler (Swagger se pehle bhi chalega)
+// ✅ Error Handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: err.message });
@@ -198,10 +207,10 @@ mongoose.connect(process.env.DB_URI, {
 .then(() => console.log('✅ MongoDB Connected'))
 .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
-// ✅ Start Server (sirf ek baar)
+// ✅ Start Server
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`Swagger Docs available at http://localhost:${PORT}/api-docs`);
-  swaggerDocs(app); // <<-- ✅ NOW called correctly after server start
+  swaggerDocs(app);
 });

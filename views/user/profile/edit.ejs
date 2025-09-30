@@ -1,0 +1,324 @@
+<% layout = 'layouts/user-base' %>
+
+<style>
+    /* Custom Styles for Edit Profile Page */
+    :root {
+        --primary-color: #6a11cb;
+        --secondary-color: #2575fc;
+        --card-bg: #fff;
+        --input-border: #e9ecef;
+        --input-focus-border: var(--primary-color);
+        --btn-primary-bg: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    }
+    .form-card {
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 1px solid var(--input-border);
+        padding: 12px 15px;
+        transition: all 0.3s ease;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: var(--input-focus-border);
+        box-shadow: 0 0 0 0.25rem rgba(106, 17, 203, 0.25);
+    }
+    .profile-photo-upload-card, .cover-photo-upload-card, .document-upload-card {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease;
+    }
+    .btn-primary {
+        background: var(--btn-primary-bg);
+        border: none;
+        padding: 12px 25px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+    .form-section-title {
+        color: var(--primary-color);
+        font-weight: bold;
+        border-left: 4px solid var(--primary-color);
+        padding-left: 1rem;
+        margin-bottom: 2rem;
+    }
+    .form-group-title {
+        color: var(--text-dark);
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+</style>
+
+<div class="container-fluid px-4 py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-2 text-gray-800">Edit Profile</h1>
+            <p class="mb-0 text-muted">Update your professional and personal details</p>
+        </div>
+        <div>
+            <a href="/user/profile" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Profile
+            </a>
+        </div>
+    </div>
+
+    <% if (success && success.length > 0) { %>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <%= success %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <% } %>
+    <% if (error && error.length > 0) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <%= error %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <% } %>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card form-card mb-4">
+                <div class="card-body p-4">
+                    <form action="/user/profile/update" method="POST">
+                        <h4 class="form-section-title">Personal Details</h4>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="name" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="name" name="name" value="<%= user.name %>" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="phone" class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" value="<%= user.phone %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="personalEmail" class="form-label">Personal Email</label>
+                                <input type="email" class="form-control" id="personalEmail" name="personalEmail" value="<%= user.personalEmail %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="dob" class="form-label">Date of Birth</label>
+                                <input type="date" class="form-control" id="dob" name="dob" value="<%= user.dob ? new Date(user.dob).toISOString().slice(0, 10) : '' %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="gender" class="form-label">Gender</label>
+                                <select class="form-select" id="gender" name="gender">
+                                    <option value="" disabled selected>Select Gender</option>
+                                    <option value="Male" <%= user.gender === 'Male' ? 'selected' : '' %>>Male</option>
+                                    <option value="Female" <%= user.gender === 'Female' ? 'selected' : '' %>>Female</option>
+                                    <option value="Other" <%= user.gender === 'Other' ? 'selected' : '' %>>Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="bloodGroup" class="form-label">Blood Group</label>
+                                <select class="form-select" id="bloodGroup" name="bloodGroup">
+                                    <option value="" disabled selected>Select Blood Group</option>
+                                    <option value="A+" <%= user.bloodGroup === 'A+' ? 'selected' : '' %>>A+</option>
+                                    <option value="A-" <%= user.bloodGroup === 'A-' ? 'selected' : '' %>>A-</option>
+                                    <option value="B+" <%= user.bloodGroup === 'B+' ? 'selected' : '' %>>B+</option>
+                                    <option value="B-" <%= user.bloodGroup === 'B-' ? 'selected' : '' %>>B-</option>
+                                    <option value="AB+" <%= user.bloodGroup === 'AB+' ? 'selected' : '' %>>AB+</option>
+                                    <option value="AB-" <%= user.bloodGroup === 'AB-' ? 'selected' : '' %>>AB-</option>
+                                    <option value="O+" <%= user.bloodGroup === 'O+' ? 'selected' : '' %>>O+</option>
+                                    <option value="O-" <%= user.bloodGroup === 'O-' ? 'selected' : '' %>>O-</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label for="currentAddress" class="form-label">Current Address</label>
+                                <input type="text" class="form-control" id="currentAddress" name="currentAddress" value="<%= user.currentAddress %>">
+                            </div>
+                            <div class="col-12">
+                                <label for="permanentAddress" class="form-label">Permanent Address</label>
+                                <input type="text" class="form-control" id="permanentAddress" name="permanentAddress" value="<%= user.permanentAddress %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="emergencyContactName" class="form-label">Emergency Contact Name</label>
+                                <input type="text" class="form-control" id="emergencyContactName" name="emergencyContactName" value="<%= user.emergencyContactName %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="emergencyContactNumber" class="form-label">Emergency Contact Number</label>
+                                <input type="tel" class="form-control" id="emergencyContactNumber" name="emergencyContactNumber" value="<%= user.emergencyContactNumber %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="linkedinProfile" class="form-label">LinkedIn Profile URL</label>
+                                <input type="url" class="form-control" id="linkedinProfile" name="linkedinProfile" value="<%= user.linkedinProfile %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="twitterProfile" class="form-label">Twitter Profile URL</label>
+                                <input type="url" class="form-control" id="twitterProfile" name="twitterProfile" value="<%= user.twitterProfile %>">
+                            </div>
+                        </div>
+
+                        <h4 class="form-section-title">Professional Details</h4>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="employeeId" class="form-label">Employee ID</label>
+                                <input type="text" class="form-control" id="employeeId" name="employeeId" value="<%= user.employeeId %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="designation" class="form-label">Designation</label>
+                                <input type="text" class="form-control" id="designation" name="designation" value="<%= user.designation %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="employeeType" class="form-label">Employee Type</label>
+                                <select class="form-select" id="employeeType" name="employeeType">
+                                    <option value="" disabled selected>Select Employee Type</option>
+                                    <option value="Full-time" <%= user.employeeType === 'Full-time' ? 'selected' : '' %>>Full-time</option>
+                                    <option value="Part-time" <%= user.employeeType === 'Part-time' ? 'selected' : '' %>>Part-time</option>
+                                    <option value="Contract" <%= user.employeeType === 'Contract' ? 'selected' : '' %>>Contract</option>
+                                    <option value="Intern" <%= user.employeeType === 'Intern' ? 'selected' : '' %>>Intern</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="workLocation" class="form-label">Work Location</label>
+                                <select class="form-select" id="workLocation" name="workLocation">
+                                    <option value="" disabled selected>Select Work Location</option>
+                                    <option value="Office" <%= user.workLocation === 'Office' ? 'selected' : '' %>>Office</option>
+                                    <option value="Remote" <%= user.workLocation === 'Remote' ? 'selected' : '' %>>Remote</option>
+                                    <option value="Hybrid" <%= user.workLocation === 'Hybrid' ? 'selected' : '' %>>Hybrid</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="shiftTimings" class="form-label">Shift Timings</label>
+                                <input type="text" class="form-control" id="shiftTimings" name="shiftTimings" value="<%= user.shiftTimings %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="employeeStatus" class="form-label">Employee Status</label>
+                                <select class="form-select" id="employeeStatus" name="employeeStatus">
+                                    <option value="" disabled selected>Select Status</option>
+                                    <option value="Probation" <%= user.employeeStatus === 'Probation' ? 'selected' : '' %>>Probation</option>
+                                    <option value="Confirmed" <%= user.employeeStatus === 'Confirmed' ? 'selected' : '' %>>Confirmed</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12">
+                                <label for="team" class="form-label">Team</label>
+                                <input type="text" class="form-control" id="team" name="team" value="<%= user.team %>">
+                            </div>
+                        </div>
+
+                        <h4 class="form-section-title">Bank Details</h4>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="bankName" class="form-label">Bank Name</label>
+                                <input type="text" class="form-control" id="bankName" name="bankName" value="<%= user.bankName %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="accountNumber" class="form-label">Account Number</label>
+                                <input type="text" class="form-control" id="accountNumber" name="accountNumber" value="<%= user.accountNumber %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="ifscCode" class="form-label">IFSC Code</label>
+                                <input type="text" class="form-control" id="ifscCode" name="ifscCode" value="<%= user.ifscCode %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="branchName" class="form-label">Branch Name</label>
+                                <input type="text" class="form-control" id="branchName" name="branchName" value="<%= user.branchName %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="accountType" class="form-label">Account Type</label>
+                                <select class="form-select" id="accountType" name="accountType">
+                                    <option value="" disabled selected>Select Account Type</option>
+                                    <option value="Savings" <%= user.accountType === 'Savings' ? 'selected' : '' %>>Savings</option>
+                                    <option value="Current" <%= user.accountType === 'Current' ? 'selected' : '' %>>Current</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <h4 class="form-section-title">Education & Experience</h4>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="qualification" class="form-label">Highest Qualification</label>
+                                <input type="text" class="form-control" id="qualification" name="qualification" value="<%= user.qualification %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="university" class="form-label">University / Institute</label>
+                                <input type="text" class="form-control" id="university" name="university" value="<%= user.university %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="yearOfPassing" class="form-label">Year of Passing</label>
+                                <input type="number" class="form-control" id="yearOfPassing" name="yearOfPassing" value="<%= user.yearOfPassing || '' %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="percentage" class="form-label">Percentage / GPA</label>
+                                <input type="text" class="form-control" id="percentage" name="percentage" value="<%= user.percentage %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="previousCompany" class="form-label">Previous Company</label>
+                                <input type="text" class="form-control" id="previousCompany" name="previousCompany" value="<%= user.previousCompany %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="previousDesignation" class="form-label">Previous Designation</label>
+                                <input type="text" class="form-control" id="previousDesignation" name="previousDesignation" value="<%= user.previousDesignation %>">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="experienceYears" class="form-label">Experience (in Years)</label>
+                                <input type="number" class="form-control" id="experienceYears" name="experienceYears" value="<%= user.experienceYears || '' %>">
+                            </div>
+                            <div class="col-md-12">
+                                <label for="skills" class="form-label">Skills (comma separated)</label>
+                                <input type="text" class="form-control" id="skills" name="skills" value="<%= user.skills.join(', ') %>">
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary mt-3">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card profile-photo-upload-card mb-4">
+                <div class="card-body">
+                    <h5 class="form-group-title"><i class="fas fa-camera me-2 text-primary"></i>Profile Photo</h5>
+                    <form action="/user/profile/upload-profile-photo" method="POST" enctype="multipart/form-data">
+                        <input type="file" name="profilePhoto" id="profilePhoto" class="form-control mb-2">
+                        <button type="submit" class="btn btn-sm btn-outline-primary">Upload</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card cover-photo-upload-card mb-4">
+                <div class="card-body">
+                    <h5 class="form-group-title"><i class="fas fa-image me-2 text-info"></i>Cover Photo</h5>
+                    <form action="/user/profile/upload-cover-photo" method="POST" enctype="multipart/form-data">
+                        <input type="file" name="coverPhoto" id="coverPhoto" class="form-control mb-2">
+                        <button type="submit" class="btn btn-sm btn-outline-info">Upload</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card document-upload-card mb-4">
+                <div class="card-body">
+                    <h5 class="form-group-title"><i class="fas fa-file-upload me-2 text-success"></i>Upload Documents</h5>
+                    <form action="/user/profile/upload-document" method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="document" class="form-label">Choose Document</label>
+                            <input type="file" name="document" id="document" class="form-control mb-2" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="documentType" class="form-label">Document Type</label>
+                            <select class="form-select" name="documentType" id="documentType" required>
+                                <option value="" disabled selected>Select Document Type</option>
+                                <option value="aadharDocument">Aadhar Card</option>
+                                <option value="panDocument">PAN Card</option>
+                                <option value="resumeDocument">Resume</option>
+                                <option value="offerLetterDocument">Offer Letter</option>
+                                <option value="experienceLetterDocument">Experience Letter</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-sm btn-outline-success">Upload Document</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

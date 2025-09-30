@@ -131,14 +131,19 @@ passport.use(new GitHubStrategy({
   }
 }));
 
-// ✅ Serialize/Deserialize User
+// ✅ Serialize/Deserialize User (CRITICAL FIX)
 passport.serializeUser((user, done) => {
+  console.log('🔐 Serializing user:', user.id);
   done(null, user.id);
 });
 
 passport.deserializeUser(async (id, done) => {
   try {
+    console.log('🔓 Deserializing user:', id);
     const user = await User.findById(id);
+    if (!user) {
+      return done(new Error('User not found'));
+    }
     done(null, user);
   } catch (error) {
     done(error, null);
