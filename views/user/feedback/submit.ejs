@@ -1,0 +1,1181 @@
+<%# views/user/feedback/submit.ejs - SUPER ATTRACTIVE FEEDBACK FORM %>
+<% layout = 'layouts/user-base' %>
+
+<!-- Include CSS -->
+<link rel="stylesheet" href="/users/css/feedback.css">
+
+<div class="feedback-container">
+  <!-- Header Section - ENHANCED: Added Drafts Button -->
+  <div class="feedback-header">
+    <div class="header-content">
+      <div class="header-icon">
+        <i class="fas fa-comment-dots"></i>
+      </div>
+      <div class="header-text">
+        <h1 class="display-5 fw-bold text-gradient">Share Your Feedback</h1>
+        <p class="lead text-muted">We value your opinion! Help us improve with your suggestions, bug reports, or feature requests.</p>
+      </div>
+      <div class="header-actions">
+        <!-- Drafts Button -->
+        <button type="button" class="btn btn-warning btn-lg me-2" id="viewDraftsBtn">
+          <i class="fas fa-save me-2"></i>View Drafts (<span id="draftsCount">0</span>)
+        </button>
+        <!-- History Button -->
+        <a href="/user/feedback/history" class="btn btn-outline-light btn-lg me-2">
+          <i class="fas fa-history me-2"></i>View History
+        </a>
+        <a href="/user/feedback" class="btn btn-primary btn-lg">
+          <i class="fas fa-plus me-2"></i>New Feedback
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-8">
+      <!-- Quick Stats Bar -->
+      <div class="quick-stats-bar mb-4">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="stat-item">
+              <i class="fas fa-clock text-warning"></i>
+              <div>
+                <span class="stat-number">24h</span>
+                <span class="stat-label">Avg Response</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="stat-item">
+              <i class="fas fa-check-circle text-success"></i>
+              <div>
+                <span class="stat-number">95%</span>
+                <span class="stat-label">Resolved</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="stat-item">
+              <i class="fas fa-comments text-info"></i>
+              <div>
+                <span class="stat-number">100+</span>
+                <span class="stat-label">Feedbacks</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Auto-Save Indicator -->
+      <div class="auto-save-indicator alert alert-info d-none" id="autoSaveIndicator">
+        <i class="fas fa-save me-2"></i>
+        <span id="autoSaveText">Auto-saving...</span>
+        <span class="float-end" id="lastSaved"></span>
+      </div>
+
+      <!-- Template Quick Insert -->
+      <div class="template-section mb-4">
+        <h4 class="section-title">
+          <i class="fas fa-magic me-2"></i>Quick Templates
+        </h4>
+        <div class="template-buttons">
+          <button type="button" class="btn btn-outline-primary btn-sm template-btn" data-template="bug">
+            <i class="fas fa-bug me-1"></i>Bug Report
+          </button>
+          <button type="button" class="btn btn-outline-success btn-sm template-btn" data-template="feature">
+            <i class="fas fa-lightbulb me-1"></i>Feature Request
+          </button>
+          <button type="button" class="btn btn-outline-warning btn-sm template-btn" data-template="complaint">
+            <i class="fas fa-exclamation-triangle me-1"></i>Complaint
+          </button>
+          <button type="button" class="btn btn-outline-info btn-sm template-btn" data-template="suggestion">
+            <i class="fas fa-hand-point-up me-1"></i>Suggestion
+          </button>
+        </div>
+      </div>
+
+      <!-- Feedback Form -->
+      <div class="card feedback-form-card shadow-lg border-0">
+        <div class="card-body p-5">
+          <form id="feedbackForm" action="/user/feedback" method="POST" enctype="multipart/form-data" novalidate>
+            
+            <!-- Feedback Type Selection -->
+            <div class="form-section mb-5">
+              <h4 class="section-title">
+                <i class="fas fa-tags me-2"></i>Feedback Type
+              </h4>
+              <div class="category-grid">
+                <div class="category-option">
+                  <input type="radio" name="category" value="general" id="cat-general" class="category-input" checked>
+                  <label for="cat-general" class="category-label">
+                    <i class="fas fa-comment"></i>
+                    <span>General</span>
+                    <small>Share your thoughts</small>
+                  </label>
+                </div>
+                <div class="category-option">
+                  <input type="radio" name="category" value="bug" id="cat-bug" class="category-input">
+                  <label for="cat-bug" class="category-label">
+                    <i class="fas fa-bug"></i>
+                    <span>Bug Report</span>
+                    <small>Something's not working</small>
+                  </label>
+                </div>
+                <div class="category-option">
+                  <input type="radio" name="category" value="feature" id="cat-feature" class="category-input">
+                  <label for="cat-feature" class="category-label">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>Feature Request</span>
+                    <small>Suggest new features</small>
+                  </label>
+                </div>
+                <div class="category-option">
+                  <input type="radio" name="category" value="complaint" id="cat-complaint" class="category-input">
+                  <label for="cat-complaint" class="category-label">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Complaint</span>
+                    <small>Report an issue</small>
+                  </label>
+                </div>
+                <div class="category-option">
+                  <input type="radio" name="category" value="appreciation" id="cat-appreciation" class="category-input">
+                  <label for="cat-appreciation" class="category-label">
+                    <i class="fas fa-heart"></i>
+                    <span>Appreciation</span>
+                    <small>Share positive feedback</small>
+                  </label>
+                </div>
+                <div class="category-option">
+                  <input type="radio" name="category" value="suggestion" id="cat-suggestion" class="category-input">
+                  <label for="cat-suggestion" class="category-label">
+                    <i class="fas fa-hand-point-up"></i>
+                    <span>Suggestion</span>
+                    <small>Ideas for improvement</small>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Priority & Rating -->
+            <div class="row g-4 mb-4">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                  <i class="fas fa-flag me-2"></i>Priority Level
+                </label>
+                <select name="priority" class="form-select form-select-lg" id="prioritySelect">
+                  <option value="low">🟢 Low - Minor issue</option>
+                  <option value="medium" selected>🟡 Medium - Standard priority</option>
+                  <option value="high">🟠 High - Important issue</option>
+                  <option value="urgent">🔴 Urgent - Critical problem</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                  <i class="fas fa-star me-2"></i>Overall Rating (Optional)
+                </label>
+                <div class="rating-stars">
+                  <input type="radio" name="rating" value="5" id="star5">
+                  <label for="star5">★</label>
+                  <input type="radio" name="rating" value="4" id="star4">
+                  <label for="star4">★</label>
+                  <input type="radio" name="rating" value="3" id="star3">
+                  <label for="star3">★</label>
+                  <input type="radio" name="rating" value="2" id="star2">
+                  <label for="star2">★</label>
+                  <input type="radio" name="rating" value="1" id="star1">
+                  <label for="star1">★</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Title & Message -->
+            <div class="form-section mb-4">
+              <h4 class="section-title">
+                <i class="fas fa-edit me-2"></i>Feedback Details
+              </h4>
+              
+              <div class="mb-4">
+                <label for="title" class="form-label fw-semibold">
+                  <i class="fas fa-heading me-2"></i>Brief Title *
+                </label>
+                <input type="text" 
+                       class="form-control form-control-lg" 
+                       id="title" 
+                       name="title" 
+                       placeholder="e.g., Login page loading slowly"
+                       required
+                       maxlength="200">
+                <div class="form-text">Summarize your feedback in one line</div>
+              </div>
+
+              <div class="mb-4">
+                <label for="message" class="form-label fw-semibold">
+                  <i class="fas fa-align-left me-2"></i>Detailed Description *
+                </label>
+                <textarea class="form-control" 
+                          id="message" 
+                          name="message" 
+                          rows="6" 
+                          placeholder="Please provide detailed information about your feedback, issue, or suggestion..."
+                          required
+                          maxlength="2000"></textarea>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                  <div class="form-text">Be as detailed as possible</div>
+                  <div class="character-count">
+                    <span id="charCount">0</span>/2000 characters
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Page URL -->
+            <div class="mb-4">
+              <label for="pageUrl" class="form-label fw-semibold">
+                <i class="fas fa-link me-2"></i>Page URL (Optional)
+              </label>
+              <input type="url" 
+                     class="form-control" 
+                     id="pageUrl" 
+                     name="pageUrl" 
+                     placeholder="https://example.com/page">
+              <div class="form-text">Which page were you on when you encountered this?</div>
+            </div>
+
+            <!-- File Uploads -->
+            <div class="form-section mb-4">
+              <h4 class="section-title">
+                <i class="fas fa-paperclip me-2"></i>Attachments
+              </h4>
+              
+              <!-- Screenshots -->
+              <div class="mb-4">
+                <label class="form-label fw-semibold">
+                  <i class="fas fa-camera me-2"></i>Screenshots (Max 2 files)
+                </label>
+                <div class="file-upload-area" id="screenshotUpload" onclick="document.getElementById('screenshots').click()">
+                  <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                  <h5>Click here to upload screenshots</h5>
+                  <p class="text-muted">PNG, JPG, GIF up to 10MB each</p>
+                  <input type="file" 
+                         name="screenshots" 
+                         id="screenshots" 
+                         multiple 
+                         accept="image/*"
+                         class="file-input"
+                         onchange="handleFileSelect(this, 'screenshotPreview')">
+                  <div class="file-preview mt-3" id="screenshotPreview"></div>
+                </div>
+              </div>
+
+              <!-- Attachments -->
+              <div class="mb-4">
+                <label class="form-label fw-semibold">
+                  <i class="fas fa-file me-2"></i>Additional Files (Max 3 files)
+                </label>
+                <div class="file-upload-area" id="attachmentUpload" onclick="document.getElementById('attachments').click()">
+                  <i class="fas fa-file-upload fa-3x text-muted mb-3"></i>
+                  <h5>Click here to upload files</h5>
+                  <p class="text-muted">PDF, DOC, TXT, ZIP up to 10MB each</p>
+                  <input type="file" 
+                         name="attachments" 
+                         id="attachments" 
+                         multiple 
+                         accept=".pdf,.doc,.docx,.txt,.zip,.rar,image/*"
+                         class="file-input"
+                         onchange="handleFileSelect(this, 'attachmentPreview')">
+                  <div class="file-preview mt-3" id="attachmentPreview"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Privacy Options -->
+            <div class="form-section mb-4">
+              <h4 class="section-title">
+                <i class="fas fa-shield-alt me-2"></i>Privacy Settings
+              </h4>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" name="isAnonymous" id="isAnonymous">
+                    <label class="form-check-label" for="isAnonymous">
+                      <i class="fas fa-user-secret me-2"></i>Submit Anonymously
+                    </label>
+                  </div>
+                  <div class="form-text">Your name will not be visible to admins</div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" name="isPublic" id="isPublic">
+                    <label class="form-check-label" for="isPublic">
+                      <i class="fas fa-globe me-2"></i>Make Public
+                    </label>
+                  </div>
+                  <div class="form-text">Other users can see this feedback</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions mt-5 pt-4 border-top">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <button type="button" class="btn btn-outline-secondary btn-lg w-100" id="saveDraftBtn">
+                    <i class="fas fa-save me-2"></i>Save Draft
+                  </button>
+                </div>
+                <div class="col-md-4">
+                  <button type="button" class="btn btn-outline-info btn-lg w-100" id="previewBtn">
+                    <i class="fas fa-eye me-2"></i>Preview
+                  </button>
+                </div>
+                <div class="col-md-4">
+                  <button type="submit" class="btn btn-primary btn-lg w-100 submit-btn" id="submitBtn">
+                    <i class="fas fa-paper-plane me-2"></i>Submit Feedback
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Quick Tips -->
+      <div class="card quick-tips-card mt-4 border-0">
+        <div class="card-body">
+          <h5 class="card-title">
+            <i class="fas fa-lightbulb me-2 text-warning"></i>Tips for Great Feedback
+          </h5>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="tip-item">
+                <i class="fas fa-check-circle text-success"></i>
+                <span>Be specific and detailed</span>
+              </div>
+              <div class="tip-item">
+                <i class="fas fa-check-circle text-success"></i>
+                <span>Include steps to reproduce bugs</span>
+              </div>
+              <div class="tip-item">
+                <i class="fas fa-check-circle text-success"></i>
+                <span>Use templates for common issues</span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="tip-item">
+                <i class="fas fa-check-circle text-success"></i>
+                <span>Add screenshots for visual issues</span>
+              </div>
+              <div class="tip-item">
+                <i class="fas fa-check-circle text-success"></i>
+                <span>Suggest solutions if possible</span>
+              </div>
+              <div class="tip-item">
+                <i class="fas fa-check-circle text-success"></i>
+                <span>Save drafts to continue later</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+// Character counter for message
+document.getElementById('message').addEventListener('input', function() {
+  const charCount = this.value.length;
+  document.getElementById('charCount').textContent = charCount;
+});
+
+// File upload handling - ORIGINAL WORKING CODE
+function handleFileSelect(input, previewId) {
+  const files = input.files;
+  const preview = document.getElementById(previewId);
+  preview.innerHTML = '';
+  
+  if (files.length > 0) {
+    const fileList = document.createElement('div');
+    fileList.className = 'file-list';
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const fileItem = document.createElement('div');
+      fileItem.className = 'file-preview-item';
+      
+      // File icon based on type
+      let icon = 'fa-file';
+      if (file.type.startsWith('image/')) {
+        icon = 'fa-file-image';
+      } else if (file.type.includes('pdf')) {
+        icon = 'fa-file-pdf';
+      } else if (file.type.includes('word') || file.type.includes('document')) {
+        icon = 'fa-file-word';
+      } else if (file.type.includes('zip') || file.type.includes('rar')) {
+        icon = 'fa-file-archive';
+      }
+      
+      fileItem.innerHTML = `
+        <i class="fas ${icon} text-primary"></i>
+        <div class="file-info">
+          <div class="file-name">${file.name}</div>
+          <div class="file-size">${formatFileSize(file.size)}</div>
+        </div>
+        <button type="button" class="btn-remove-file" onclick="removeFile(${i}, '${input.id}', '${previewId}')">
+          <i class="fas fa-times"></i>
+        </button>
+      `;
+      
+      fileList.appendChild(fileItem);
+    }
+    
+    preview.appendChild(fileList);
+    
+    // Update upload area text
+    const uploadArea = input.parentElement;
+    uploadArea.querySelector('h5').textContent = `${files.length} file(s) selected`;
+    uploadArea.classList.add('has-files');
+  }
+}
+
+// Remove file from input
+function removeFile(index, inputId, previewId) {
+  const input = document.getElementById(inputId);
+  const files = Array.from(input.files);
+  files.splice(index, 1);
+  
+  // Create new FileList
+  const dt = new DataTransfer();
+  files.forEach(file => dt.items.add(file));
+  input.files = dt.files;
+  
+  // Update preview
+  handleFileSelect(input, previewId);
+}
+
+// Format file size
+function formatFileSize(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Drag and drop functionality
+document.querySelectorAll('.file-upload-area').forEach(area => {
+  area.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    this.classList.add('dragover');
+  });
+  
+  area.addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    this.classList.remove('dragover');
+  });
+  
+  area.addEventListener('drop', function(e) {
+    e.preventDefault();
+    this.classList.remove('dragover');
+    const input = this.querySelector('.file-input');
+    input.files = e.dataTransfer.files;
+    handleFileSelect(input, this.querySelector('.file-preview').id);
+  });
+});
+
+// Form validation
+document.getElementById('feedbackForm').addEventListener('submit', function(e) {
+  const title = document.getElementById('title').value.trim();
+  const message = document.getElementById('message').value.trim();
+  
+  if (!title) {
+    e.preventDefault();
+    alert('Please enter a feedback title');
+    document.getElementById('title').focus();
+    return;
+  }
+  
+  if (!message) {
+    e.preventDefault();
+    alert('Please enter a feedback message');
+    document.getElementById('message').focus();
+    return;
+  }
+  
+  // Show loading state
+  const submitBtn = document.getElementById('submitBtn');
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+  submitBtn.disabled = true;
+});
+
+// Save draft functionality - WORKING VERSION
+document.getElementById('saveDraftBtn').addEventListener('click', function() {
+  const draftData = {
+    title: document.getElementById('title').value,
+    message: document.getElementById('message').value,
+    category: document.querySelector('input[name="category"]:checked').value,
+    priority: document.getElementById('prioritySelect').value,
+    rating: document.querySelector('input[name="rating"]:checked')?.value || null,
+    pageUrl: document.getElementById('pageUrl').value,
+    isAnonymous: document.getElementById('isAnonymous').checked,
+    isPublic: document.getElementById('isPublic').checked,
+    savedAt: new Date().toISOString()
+  };
+  
+  // Save to localStorage
+  localStorage.setItem('feedbackDraft', JSON.stringify(draftData));
+  
+  // Show success message
+  const originalText = this.innerHTML;
+  this.innerHTML = '<i class="fas fa-check me-2"></i>Draft Saved!';
+  this.classList.remove('btn-outline-secondary');
+  this.classList.add('btn-success');
+  
+  setTimeout(() => {
+    this.innerHTML = originalText;
+    this.classList.remove('btn-success');
+    this.classList.add('btn-outline-secondary');
+  }, 2000);
+  
+  updateDraftsCount();
+  console.log('Draft saved:', draftData);
+});
+
+// Load draft on page load
+document.addEventListener('DOMContentLoaded', function() {
+  const savedDraft = localStorage.getItem('feedbackDraft');
+  if (savedDraft) {
+    const draft = JSON.parse(savedDraft);
+    
+    // Populate form fields
+    document.getElementById('title').value = draft.title || '';
+    document.getElementById('message').value = draft.message || '';
+    document.getElementById('pageUrl').value = draft.pageUrl || '';
+    
+    // Set category
+    if (draft.category) {
+      document.querySelector(`input[name="category"][value="${draft.category}"]`).checked = true;
+    }
+    
+    // Set priority
+    if (draft.priority) {
+      document.getElementById('prioritySelect').value = draft.priority;
+    }
+    
+    // Set rating
+    if (draft.rating) {
+      document.querySelector(`input[name="rating"][value="${draft.rating}"]`).checked = true;
+    }
+    
+    // Set checkboxes
+    document.getElementById('isAnonymous').checked = draft.isAnonymous || false;
+    document.getElementById('isPublic').checked = draft.isPublic || false;
+    
+    // Update character count
+    document.getElementById('charCount').textContent = draft.message?.length || 0;
+    
+    console.log('Draft loaded:', draft);
+  }
+
+  // Initialize new features
+  initTemplates();
+  initPreview();
+  initDraftsManagement();
+  initAutoSave();
+  updateDraftsCount();
+});
+
+// Clear draft when form is submitted
+document.getElementById('feedbackForm').addEventListener('submit', function() {
+  localStorage.removeItem('feedbackDraft');
+  updateDraftsCount();
+});
+
+// NEW FEATURES - SIMPLE AND WORKING
+
+// 1. Quick Templates
+function initTemplates() {
+  document.querySelectorAll('.template-btn').forEach(button => {
+    button.addEventListener('click', function() {
+      const templateType = this.dataset.template;
+      applyTemplate(templateType);
+    });
+  });
+}
+
+function applyTemplate(templateType) {
+  const templates = {
+    bug: {
+      title: "Bug Report: [Brief Description]",
+      message: "🐛 Bug Report\n\nDescription: [Detailed description of the bug]\n\nSteps to Reproduce:\n1. Go to [page/feature]\n2. Click on [element]\n3. Observe the error\n\nExpected Behavior: [What should happen]\nActual Behavior: [What actually happens]\n\nEnvironment:\n- Browser: [Browser and version]\n- Device: [Device type]"
+    },
+    feature: {
+      title: "Feature Request: [Feature Name]", 
+      message: "💡 Feature Request\n\nFeature Description: [Detailed description]\n\nProblem it Solves: [What problem will this solve?]\n\nProposed Solution: [How should it work?]\n\nBenefits:\n- [Benefit 1]\n- [Benefit 2]\n- [Benefit 3]"
+    },
+    complaint: {
+      title: "Complaint: [Issue Summary]",
+      message: "⚠️ Complaint\n\nIssue: [Clear description]\n\nImpact: [How this affects me]\n\nTimeline: [When did this start?]\n\nExpected Resolution: [What would resolve this?]"
+    },
+    suggestion: {
+      title: "Suggestion: [Improvement Idea]", 
+      message: "👆 Suggestion\n\nCurrent Situation: [Describe current process]\n\nSuggested Improvement: [Your suggestion]\n\nReasoning: [Why this would be beneficial]\n\nImplementation Ideas: [How this could be implemented]"
+    }
+  };
+
+  const template = templates[templateType];
+  if (template) {
+    document.getElementById('title').value = template.title;
+    document.getElementById('message').value = template.message;
+    
+    // Set appropriate category
+    document.querySelector(`input[name="category"][value="${templateType}"]`).checked = true;
+    
+    // Update character count
+    document.getElementById('charCount').textContent = template.message.length;
+    
+    // Show success message
+    showNotification(`${templateType.replace(/_/g, ' ')} template applied!`, 'success');
+  }
+}
+
+// 2. Preview Functionality
+function initPreview() {
+  document.getElementById('previewBtn').addEventListener('click', function() {
+    const title = document.getElementById('title').value;
+    const message = document.getElementById('message').value;
+    
+    if (!title && !message) {
+      showNotification('Please add some content to preview.', 'warning');
+      return;
+    }
+
+    const previewContent = `
+      <h2>${title || 'No Title'}</h2>
+      <hr>
+      <div style="white-space: pre-line;">${message || 'No content'}</div>
+      <hr>
+      <p><small>This is a preview of your feedback.</small></p>
+    `;
+    
+    const previewWindow = window.open('', '_blank');
+    previewWindow.document.write(`
+      <html>
+        <head>
+          <title>Feedback Preview</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+            h2 { color: #333; }
+            hr { border: 1px solid #eee; }
+          </style>
+        </head>
+        <body>
+          <h1>📝 Feedback Preview</h1>
+          ${previewContent}
+        </body>
+      </html>
+    `);
+    previewWindow.document.close();
+  });
+}
+
+// 3. Drafts Management
+function initDraftsManagement() {
+  document.getElementById('viewDraftsBtn').addEventListener('click', function() {
+    const savedDraft = localStorage.getItem('feedbackDraft');
+    
+    if (!savedDraft) {
+      showNotification('No drafts saved yet.', 'info');
+      return;
+    }
+    
+    const draft = JSON.parse(savedDraft);
+    const shouldLoad = confirm(`Load draft: "${draft.title || 'Untitled'}"?\n\nCreated: ${new Date(draft.savedAt).toLocaleString()}\n\nClick OK to load this draft.`);
+    
+    if (shouldLoad) {
+      document.getElementById('title').value = draft.title || '';
+      document.getElementById('message').value = draft.message || '';
+      document.getElementById('pageUrl').value = draft.pageUrl || '';
+      
+      if (draft.category) {
+        document.querySelector(`input[name="category"][value="${draft.category}"]`).checked = true;
+      }
+      
+      document.getElementById('prioritySelect').value = draft.priority || 'medium';
+      document.getElementById('isAnonymous').checked = draft.isAnonymous || false;
+      document.getElementById('isPublic').checked = draft.isPublic || false;
+      
+      document.getElementById('charCount').textContent = draft.message?.length || 0;
+      
+      showNotification('Draft loaded successfully!', 'success');
+    }
+  });
+}
+
+function updateDraftsCount() {
+  const draftsCount = document.getElementById('draftsCount');
+  const savedDraft = localStorage.getItem('feedbackDraft');
+  
+  if (draftsCount) {
+    draftsCount.textContent = savedDraft ? '1' : '0';
+  }
+}
+
+// 4. Auto-Save System
+function initAutoSave() {
+  let autoSaveTimeout;
+  
+  // Auto-save on input (with debounce)
+  const autoSaveFields = ['title', 'message', 'pageUrl', 'prioritySelect', 'isAnonymous', 'isPublic'];
+  
+  autoSaveFields.forEach(field => {
+    const element = document.getElementById(field);
+    if (element) {
+      element.addEventListener('input', triggerAutoSave);
+      element.addEventListener('change', triggerAutoSave);
+    }
+  });
+  
+  // Category and rating changes
+  document.querySelectorAll('input[name="category"], input[name="rating"]').forEach(radio => {
+    radio.addEventListener('change', triggerAutoSave);
+  });
+}
+
+function triggerAutoSave() {
+  clearTimeout(window.autoSaveTimeout);
+  window.autoSaveTimeout = setTimeout(() => {
+    const title = document.getElementById('title').value;
+    const message = document.getElementById('message').value;
+    
+    // Only auto-save if there's content
+    if (title || message) {
+      const draftData = {
+        title: title,
+        message: message,
+        category: document.querySelector('input[name="category"]:checked').value,
+        priority: document.getElementById('prioritySelect').value,
+        rating: document.querySelector('input[name="rating"]:checked')?.value || null,
+        pageUrl: document.getElementById('pageUrl').value,
+        isAnonymous: document.getElementById('isAnonymous').checked,
+        isPublic: document.getElementById('isPublic').checked,
+        savedAt: new Date().toISOString(),
+        autoSaved: true
+      };
+      
+      localStorage.setItem('feedbackDraft', JSON.stringify(draftData));
+      showAutoSaveIndicator();
+      updateDraftsCount();
+    }
+  }, 2000); // 2 second debounce
+}
+
+function showAutoSaveIndicator() {
+  const indicator = document.getElementById('autoSaveIndicator');
+  const text = document.getElementById('autoSaveText');
+  const lastSaved = document.getElementById('lastSaved');
+  
+  if (indicator) {
+    indicator.classList.remove('d-none');
+    text.textContent = 'Auto-saved';
+    lastSaved.textContent = new Date().toLocaleTimeString();
+    
+    setTimeout(() => {
+      indicator.classList.add('d-none');
+    }, 3000);
+  }
+}
+
+// 5. Notification System
+function showNotification(message, type = 'info') {
+  // Simple alert for now - you can replace with toast notifications
+  const icons = {
+    success: '✅',
+    error: '❌',
+    warning: '⚠️',
+    info: 'ℹ️'
+  };
+  
+  alert(`${icons[type] || ''} ${message}`);
+}
+</script>
+
+<style>
+/* Additional styles for new features */
+.template-section {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 15px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.template-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.template-btn {
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  transition: all 0.3s ease;
+}
+
+.template-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.auto-save-indicator {
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  border: none;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .header-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  
+  .header-actions .btn {
+    width: 100%;
+    margin: 0.25rem 0;
+  }
+  
+  .template-buttons {
+    justify-content: center;
+  }
+  
+  .form-actions .btn {
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Keep all your original styles below */
+.text-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.feedback-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  padding: 3rem 2rem;
+  margin-bottom: 3rem;
+  color: white;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.header-icon {
+  font-size: 4rem;
+  opacity: 0.9;
+}
+
+.header-text {
+  flex: 1;
+}
+
+.header-text h1 {
+  color: white !important;
+  -webkit-text-fill-color: white !important;
+}
+
+.header-actions .btn {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  backdrop-filter: blur(10px);
+}
+
+.header-actions .btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.quick-stats-bar {
+  background: white;
+  border-radius: 15px;
+  padding: 1.5rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stat-item i {
+  font-size: 2rem;
+  opacity: 0.8;
+}
+
+.stat-number {
+  font-size: 1.5rem;
+  font-weight: bold;
+  display: block;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #6c757d;
+  display: block;
+}
+
+.feedback-form-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 20px;
+}
+
+.section-title {
+  color: #2c3e50;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.category-option {
+  position: relative;
+}
+
+.category-input {
+  position: absolute;
+  opacity: 0;
+}
+
+.category-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 1rem;
+  border: 2px solid #e9ecef;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  background: white;
+}
+
+.category-label i {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: #6c757d;
+}
+
+.category-label span {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.category-label small {
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+.category-input:checked + .category-label {
+  border-color: #667eea;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.category-input:checked + .category-label i,
+.category-input:checked + .category-label small {
+  color: white;
+}
+
+.rating-stars {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  gap: 0.25rem;
+}
+
+.rating-stars input {
+  display: none;
+}
+
+.rating-stars label {
+  font-size: 2rem;
+  color: #ddd;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.rating-stars label:hover,
+.rating-stars label:hover ~ label,
+.rating-stars input:checked ~ label {
+  color: #ffc107;
+}
+
+.file-upload-area {
+  border: 2px dashed #dee2e6;
+  border-radius: 15px;
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+  cursor: pointer;
+  position: relative;
+}
+
+.file-upload-area:hover,
+.file-upload-area.dragover {
+  border-color: #667eea;
+  background: #f0f4ff;
+  transform: translateY(-2px);
+}
+
+.file-upload-area.has-files {
+  border-color: #28a745;
+  background: #f8fff9;
+}
+
+.file-input {
+  display: none;
+}
+
+.file-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.file-list {
+  width: 100%;
+}
+
+.file-preview-item {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  width: 100%;
+  margin-bottom: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.file-preview-item:hover {
+  border-color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+.file-info {
+  flex: 1;
+}
+
+.file-name {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.file-size {
+  color: #6c757d;
+  font-size: 0.75rem;
+}
+
+.btn-remove-file {
+  background: none;
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.btn-remove-file:hover {
+  background: #dc3545;
+  color: white;
+}
+
+.tip-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.quick-tips-card {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+}
+
+.character-count {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.submit-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .feedback-header {
+    padding: 2rem 1rem;
+  }
+  
+  .category-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .feedback-form-card .card-body {
+    padding: 2rem !important;
+  }
+  
+  .file-upload-area {
+    padding: 1.5rem 1rem;
+  }
+}
+</style>

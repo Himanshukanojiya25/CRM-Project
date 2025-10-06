@@ -1,0 +1,122 @@
+<!-- Recent Activity Section -->
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-history me-2"></i>Recent Activity
+        </h5>
+    </div>
+    <div class="card-body">
+        <% if (recentActivity && (recentActivity.attendance.length > 0 || recentActivity.leaves.length > 0 || recentActivity.feedback.length > 0)) { %>
+            <div class="activity-timeline">
+                
+                <!-- Attendance Activity -->
+                <% recentActivity.attendance.forEach(attendance => { %>
+                    <div class="activity-item d-flex align-items-start mb-3">
+                        <div class="activity-icon me-3">
+                            <i class="fas fa-calendar-check text-success"></i>
+                        </div>
+                        <div class="activity-content flex-grow-1">
+                            <h6 class="mb-1">Attendance Marked</h6>
+                            <p class="text-muted mb-1">
+                                <%= new Date(attendance.date).toLocaleDateString() %> - 
+                                <span class="badge bg-<%= attendance.status === 'present' ? 'success' : 'warning' %>">
+                                    <%= attendance.status %>
+                                </span>
+                            </p>
+                            <small class="text-muted">
+                                <% if (attendance.checkIn) { %>
+                                    Check-in: <%= new Date(attendance.checkIn).toLocaleTimeString() %>
+                                <% } %>
+                            </small>
+                        </div>
+                    </div>
+                <% }); %>
+
+                <!-- Leaves Activity -->
+                <% recentActivity.leaves.forEach(leave => { %>
+                    <div class="activity-item d-flex align-items-start mb-3">
+                        <div class="activity-icon me-3">
+                            <i class="fas fa-plane-departure text-warning"></i>
+                        </div>
+                        <div class="activity-content flex-grow-1">
+                            <h6 class="mb-1">Leave Application</h6>
+                            <p class="text-muted mb-1">
+                                <%= new Date(leave.startDate).toLocaleDateString() %> 
+                                <% if (leave.endDate) { %>
+                                    - <%= new Date(leave.endDate).toLocaleDateString() %>
+                                <% } %>
+                            </p>
+                            <p class="mb-1"><%= leave.reason %></p>
+                            <span class="badge bg-<%= 
+                                leave.status === 'approved' ? 'success' : 
+                                leave.status === 'rejected' ? 'danger' : 'warning' 
+                            %>">
+                                <%= leave.status %>
+                            </span>
+                        </div>
+                    </div>
+                <% }); %>
+
+                <!-- Feedback Activity -->
+                <% recentActivity.feedback.forEach(feedback => { %>
+                    <div class="activity-item d-flex align-items-start mb-3">
+                        <div class="activity-icon me-3">
+                            <i class="fas fa-comments text-info"></i>
+                        </div>
+                        <div class="activity-content flex-grow-1">
+                            <h6 class="mb-1">Feedback Submitted</h6>
+                            <p class="text-muted mb-1"><%= feedback.title %></p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-secondary"><%= feedback.category %></span>
+                                <span class="badge bg-<%= 
+                                    feedback.status === 'resolved' ? 'success' : 
+                                    feedback.status === 'rejected' ? 'danger' : 'warning' 
+                                %>">
+                                    <%= feedback.status %>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+
+            </div>
+        <% } else { %>
+            <div class="text-center text-muted py-4">
+                <i class="fas fa-inbox fa-3x mb-3"></i>
+                <p>No recent activity found</p>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<style>
+.activity-timeline {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.activity-item {
+    border-left: 3px solid #e9ecef;
+    padding-left: 15px;
+    margin-left: 10px;
+}
+
+.activity-item:last-child {
+    margin-bottom: 0 !important;
+}
+
+.activity-icon {
+    width: 30px;
+    text-align: center;
+    margin-top: 2px;
+}
+
+.activity-content h6 {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.activity-content p {
+    font-size: 0.85rem;
+}
+</style>

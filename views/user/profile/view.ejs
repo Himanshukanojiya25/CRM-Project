@@ -1,641 +1,553 @@
+<%# views/user/profile/view.ejs - CLEAN VERSION (NO JS/CSS) %>
 <% layout = 'layouts/user-base' %>
 
-<div class="profile-page container-fluid p-0">
-  <!-- ===== Cover / Header ===== -->
-  <header class="profile-hero">
-    <% if (user.coverPhoto && user.coverPhoto !== '/images/default-cover.jpg') { %>
-      <img src="<%= user.coverPhoto %>" alt="Cover Photo" class="cover-img" onerror="this.classList.add('hide')" />
-    <% } %>
-    <div class="cover-gradient"></div>
+<!-- Include CSS from users folder -->
+<link rel="stylesheet" href="/users/css/profile.css">
 
-    <div class="hero-actions">
-      <a href="/user/profile/edit" class="btn btn-light btn-sm rounded-pill shadow-soft action-pill">
-        <i class="fas fa-pen me-2"></i>Edit Profile
-      </a>
-      <button type="button" class="btn btn-sm btn-outline-light rounded-pill shadow-soft action-pill" id="themeToggle" aria-label="Toggle theme">
-        <i class="fas fa-moon me-2"></i><span>Dark</span>
-      </button>
-    </div>
+<div class="profile-container container py-4 py-lg-5">
+  <div class="row g-4">
 
-    <!-- Avatar + Basic Info -->
-    <div class="hero-footer container px-4">
-      <div class="row g-4 align-items-end">
-        <div class="col-md-4 text-center text-md-start">
-          <div class="avatar-wrap">
-            <div class="avatar-ring">
-              <img
-                src="<%= user.profilePhoto %>"
-                alt="<%= user.name %> profile photo"
-                class="avatar-img"
-                onerror="this.src='/images/default-avatar.png'"
-              />
-              <span class="status-dot" title="Active"></span>
+    <!-- Left Sidebar - User Card -->
+    <div class="col-lg-4">
+      <div class="card user-card sticky-top" style="top: 20px;">
+        <div class="card-body text-center">
+          <!-- Profile Picture - CLEAN VERSION -->
+          <div class="avatar-wrapper">
+            <img 
+              src="<%= user.profilePhoto %>" 
+              alt="<%= user.name %>" 
+              class="avatar-img"
+              id="profileImage"
+            >
+            <span class="status-dot <%= user.status === 'Active' ? 'bg-success' : 'bg-warning' %>" 
+                  title="<%= user.status || 'Active' %>"></span>
+          </div>
+
+          <h4 class="card-title mt-3 mb-1"><%= user.name %></h4>
+          <p class="text-muted mb-2"><%= user.designation %></p>
+          <p class="text-muted small mb-3">
+            <i class="fas fa-building me-1"></i>
+            <% if (user.department && user.department.name) { %>
+              <%= user.department.name %>
+            <% } else { %>
+              No Department
+            <% } %>
+          </p>
+
+          <!-- Action Buttons -->
+          <div class="d-flex justify-content-center align-items-center gap-2 mt-3">
+            <a href="/user/profile/edit" class="btn btn-primary btn-sm px-3">
+              <i class="fas fa-edit me-1"></i> Edit Profile
+            </a>
+            <button class="btn btn-outline-secondary btn-sm px-3" id="shareProfileBtn">
+              <i class="fas fa-share-alt me-1"></i> Share
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm icon-btn" id="themeToggle" title="Toggle Theme">
+              <i class="fas fa-moon"></i>
+            </button>
+          </div>
+
+          <!-- Profile Completion -->
+          <% if (user.profileCompletion !== undefined) { %>
+          <div class="mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <small class="text-muted">Profile Completion</small>
+              <small class="text-muted"><%= user.profileCompletion %>%</small>
+            </div>
+            <div class="progress" style="height: 6px;">
+              <div class="progress-bar" role="progressbar" 
+                   style="width: <%= user.profileCompletion %>%;" 
+                   aria-valuenow="<%= user.profileCompletion %>" 
+                   aria-valuemin="0" aria-valuemax="100"></div>
             </div>
           </div>
-          <div class="mt-3 mt-md-2">
-            <h1 class="display-name"><%= user.name %></h1>
-            <p class="designation m-0">
-              <%= user.designation || 'Employee' %>
-              <span class="sep">•</span>
-              <i class="fas fa-building me-1"></i>
-              <%= (user.department && (user.department.name || user.department)) || 'No Department' %>
-            </p>
-          </div>
+          <% } %>
         </div>
 
-        <!-- Quick Glass Stats -->
-        <div class="col-md-8">
-          <div class="row g-3 stats-row">
-            <div class="col-6 col-lg-3">
-              <div class="stat glass-card">
-                <span class="stat-value"><%= user.leavesRemaining ?? 12 %></span>
-                <span class="stat-label">Leaves Left</span>
+        <!-- Contact Information -->
+        <div class="card-footer">
+          <div class="info-list">
+            <div class="info-item">
+              <i class="fas fa-envelope info-icon"></i>
+              <div>
+                <small class="text-muted">Work Email</small>
+                <span><%= user.email %></span>
+              </div>
+              <button class="btn btn-sm btn-outline-secondary copy-btn ms-auto" data-copy="<%= user.email %>">
+                <i class="far fa-copy"></i>
+              </button>
+            </div>
+
+            <% if (user.phone) { %>
+            <div class="info-item">
+              <i class="fas fa-phone info-icon"></i>
+              <div>
+                <small class="text-muted">Work Phone</small>
+                <span><%= user.phone %></span>
+              </div>
+              <button class="btn btn-sm btn-outline-secondary copy-btn ms-auto" data-copy="<%= user.phone %>">
+                <i class="far fa-copy"></i>
+              </button>
+            </div>
+            <% } %>
+
+            <% if (user.personalEmail) { %>
+            <div class="info-item">
+              <i class="fas fa-envelope-open info-icon"></i>
+              <div>
+                <small class="text-muted">Personal Email</small>
+                <span><%= user.personalEmail %></span>
+              </div>
+              <button class="btn btn-sm btn-outline-secondary copy-btn ms-auto" data-copy="<%= user.personalEmail %>">
+                <i class="far fa-copy"></i>
+              </button>
+            </div>
+            <% } %>
+
+            <% if (user.emergencyContactName) { %>
+            <div class="info-item">
+              <i class="fas fa-phone-alt info-icon"></i>
+              <div>
+                <small class="text-muted">Emergency Contact</small>
+                <span><%= user.emergencyContactName %></span>
+                <% if (user.emergencyContactNumber) { %>
+                <small class="text-muted d-block"><%= user.emergencyContactNumber %></small>
+                <% } %>
               </div>
             </div>
-            <div class="col-6 col-lg-3">
-              <div class="stat glass-card">
-                <span class="stat-value">
-                  <%= (user.attendancePercentage ?? 100) %><span class="unit">%</span>
-                </span>
-                <span class="stat-label">Attendance</span>
+            <% } %>
+
+            <div class="info-item">
+              <i class="fas fa-id-card info-icon"></i>
+              <div>
+                <small class="text-muted">Employee ID</small>
+                <span><%= user.employeeId %></span>
               </div>
-            </div>
-            <div class="col-6 col-lg-3">
-              <div class="stat glass-card">
-                <span class="stat-value"><%= user.leavesTaken ?? 0 %></span>
-                <span class="stat-label">Leaves Taken</span>
-              </div>
-            </div>
-            <div class="col-6 col-lg-3">
-              <div class="stat glass-card">
-                <span class="stat-value"><%= user.performanceRating || 'N/A' %></span>
-                <span class="stat-label">Performance</span>
-              </div>
+              <% if (user.employeeId && user.employeeId !== 'Not assigned') { %>
+              <button class="btn btn-sm btn-outline-secondary copy-btn ms-auto" data-copy="<%= user.employeeId %>">
+                <i class="far fa-copy"></i>
+              </button>
+              <% } %>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </header>
 
-  <!-- ===== Main Content ===== -->
-  <main class="container px-4 pb-5">
-    <div class="row g-4 mt-2">
-      <!-- ===== Left Column ===== -->
-      <div class="col-lg-4">
-        <!-- Personal Info -->
-        <section class="card neo-card">
-          <div class="card-header d-flex align-items-center gap-2">
-            <span class="icon-pill bg-primary-soft"><i class="fas fa-user text-primary"></i></span>
-            <h5 class="m-0">Personal Information</h5>
+    <!-- Main Content Area -->
+    <div class="col-lg-8">
+      <!-- Quick Stats -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-3 col-6">
+          <div class="card summary-card">
+            <div class="card-body">
+              <h5 class="value"><%= user.leavesRemaining %></h5>
+              <p class="label">Leaves Left</p>
+            </div>
           </div>
-          <div class="card-body">
-            <div class="info">
-              <div class="info-row">
-                <i class="fas fa-envelope info-ico text-primary"></i>
-                <div>
-                  <small class="text-muted d-block">Email</small>
-                  <span><%= user.email %></span>
-                </div>
-                <button class="ico-btn" data-copy="<%= user.email %>" title="Copy email"><i class="far fa-copy"></i></button>
-              </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="card summary-card">
+            <div class="card-body">
+              <h5 class="value"><%= user.attendancePercentage %>%</h5>
+              <p class="label">Attendance</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="card summary-card">
+            <div class="card-body">
+              <h5 class="value"><%= user.totalExperience %></h5>
+              <p class="label">Experience</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="card summary-card">
+            <div class="card-body">
+              <h5 class="value">
+                <% if (user.performanceRating && user.performanceRating > 0) { %>
+                  <%= user.performanceRating %>/5
+                <% } else { %>
+                  N/A
+                <% } %>
+              </h5>
+              <p class="label">Performance</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-              <% if (user.personalEmail) { %>
-              <div class="info-row">
-                <i class="fas fa-envelope-open info-ico text-primary"></i>
-                <div>
-                  <small class="text-muted d-block">Personal Email</small>
-                  <span><%= user.personalEmail %></span>
-                </div>
-                <button class="ico-btn" data-copy="<%= user.personalEmail %>" title="Copy"><i class="far fa-copy"></i></button>
-              </div>
-              <% } %>
+      <!-- Detailed Information Tabs -->
+      <div class="card">
+        <div class="card-header">
+          <ul class="nav nav-tabs card-header-tabs" id="profileTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#professional" type="button">
+                <i class="fas fa-briefcase me-1"></i> Professional
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#personal" type="button">
+                <i class="fas fa-user me-1"></i> Personal
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#education" type="button">
+                <i class="fas fa-graduation-cap me-1"></i> Education
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#account" type="button">
+                <i class="fas fa-file-invoice me-1"></i> Account & IDs
+              </button>
+            </li>
+          </ul>
+        </div>
 
-              <% if (user.phone) { %>
-              <div class="info-row">
-                <i class="fas fa-phone info-ico text-primary"></i>
-                <div>
-                  <small class="text-muted d-block">Phone</small>
-                  <span><%= user.phone %></span>
-                </div>
-                <a class="ico-btn" href="tel:<%= user.phone %>" title="Call"><i class="fas fa-phone-volume"></i></a>
+        <div class="card-body tab-content p-4" id="profileTabsContent">
+          <!-- Professional Tab -->
+          <div class="tab-pane fade show active" id="professional" role="tabpanel">
+            <h5 class="mb-4"><i class="fas fa-briefcase me-2"></i>Professional Information</h5>
+            <div class="row g-4">
+              <div class="col-md-6">
+                <small class="text-muted">Employee ID</small>
+                <p><%= user.employeeId %></p>
               </div>
-              <% } %>
+              <div class="col-md-6">
+                <small class="text-muted">Date of Joining</small>
+                <p>
+                  <% if (user.joiningDate) { %>
+                    <%= new Date(user.joiningDate).toLocaleDateString() %>
+                  <% } else { %>
+                    —
+                  <% } %>
+                </p>
+              </div>
+              <div class="col-md-6">
+                <small class="text-muted">Designation</small>
+                <p><%= user.designation %></p>
+              </div>
+              <div class="col-md-6">
+                <small class="text-muted">Department</small>
+                <p>
+                  <% if (user.department && user.department.name) { %>
+                    <%= user.department.name %>
+                  <% } else { %>
+                    No Department
+                  <% } %>
+                </p>
+              </div>
+              <div class="col-md-6">
+                <small class="text-muted">Reporting Manager</small>
+                <p>
+                  <% if (user.reportingManager && user.reportingManager.name) { %>
+                    <%= user.reportingManager.name %>
+                  <% } else { %>
+                    N/A
+                  <% } %>
+                </p>
+              </div>
+              <div class="col-md-6">
+                <small class="text-muted">Employee Type</small>
+                <p><%= user.employeeType %></p>
+              </div>
+              <div class="col-md-6">
+                <small class="text-muted">Work Location</small>
+                <p><%= user.workLocation %></p>
+              </div>
+              <div class="col-md-6">
+                <small class="text-muted">Employee Status</small>
+                <p><%= user.employeeStatus %></p>
+              </div>
+              <div class="col-md-6">
+                <small class="text-muted">Shift Timings</small>
+                <p><%= user.shiftTimings %></p>
+              </div>
+              <div class="col-md-6">
+                <small class="text-muted">Team</small>
+                <p><%= user.team %></p>
+              </div>
+            </div>
 
+            <!-- Skills Section -->
+            <% if (user.skills && user.skills.length > 0) { %>
+            <div class="mt-5">
+              <h6 class="mb-3">Skills</h6>
+              <div class="d-flex flex-wrap gap-2">
+                <% user.skills.forEach(skill => { %>
+                  <span class="badge bg-primary py-2 px-3"><%= skill %></span>
+                <% }) %>
+              </div>
+            </div>
+            <% } %>
+          </div>
+
+          <!-- Personal Tab -->
+          <div class="tab-pane fade" id="personal" role="tabpanel">
+            <h5 class="mb-4"><i class="fas fa-user me-2"></i>Personal Details</h5>
+            <div class="row g-4">
               <% if (user.dob) { %>
-              <div class="info-row">
-                <i class="fas fa-birthday-cake info-ico text-primary"></i>
-                <div>
-                  <small class="text-muted d-block">Date of Birth</small>
-                  <span><%= new Date(user.dob).toLocaleDateString() %></span>
-                </div>
+              <div class="col-md-6">
+                <small class="text-muted">Date of Birth</small>
+                <p>
+                  <%= new Date(user.dob).toLocaleDateString() %>
+                  <% if (user.age) { %> (<%= user.age %> years)<% } %>
+                </p>
               </div>
               <% } %>
-
+              
               <% if (user.gender) { %>
-              <div class="info-row">
-                <i class="fas fa-venus-mars info-ico text-primary"></i>
-                <div>
-                  <small class="text-muted d-block">Gender</small>
-                  <span><%= user.gender %></span>
-                </div>
+              <div class="col-md-6">
+                <small class="text-muted">Gender</small>
+                <p><%= user.gender %></p>
               </div>
               <% } %>
 
               <% if (user.bloodGroup) { %>
-              <div class="info-row">
-                <i class="fas fa-tint info-ico text-danger"></i>
-                <div>
-                  <small class="text-muted d-block">Blood Group</small>
-                  <span><%= user.bloodGroup %></span>
-                </div>
-              </div>
-              <% } %>
-            </div>
-          </div>
-        </section>
-
-        <!-- Government IDs -->
-        <% if (user.aadharNumber || user.panNumber || user.passportNumber) { %>
-        <section class="card neo-card">
-          <div class="card-header d-flex align-items-center gap-2">
-            <span class="icon-pill bg-success-soft"><i class="fas fa-id-card text-success"></i></span>
-            <h5 class="m-0">Government IDs</h5>
-          </div>
-          <div class="card-body">
-            <div class="info">
-              <% if (user.aadharNumber) { %>
-              <div class="info-row">
-                <i class="fas fa-id-card info-ico text-success"></i>
-                <div>
-                  <small class="text-muted d-block">Aadhar Number</small>
-                  <span class="mono"><%= user.aadharNumber %></span>
-                </div>
-                <button class="ico-btn" data-copy="<%= user.aadharNumber %>" title="Copy"><i class="far fa-copy"></i></button>
+              <div class="col-md-6">
+                <small class="text-muted">Blood Group</small>
+                <p><%= user.bloodGroup %></p>
               </div>
               <% } %>
 
-              <% if (user.panNumber) { %>
-              <div class="info-row">
-                <i class="fas fa-credit-card info-ico text-success"></i>
-                <div>
-                  <small class="text-muted d-block">PAN Number</small>
-                  <span class="mono"><%= user.panNumber %></span>
-                </div>
-                <button class="ico-btn" data-copy="<%= user.panNumber %>" title="Copy"><i class="far fa-copy"></i></button>
+              <% if (user.personalEmail) { %>
+              <div class="col-md-6">
+                <small class="text-muted">Personal Email</small>
+                <p><%= user.personalEmail %></p>
               </div>
               <% } %>
 
-              <% if (user.passportNumber) { %>
-              <div class="info-row">
-                <i class="fas fa-passport info-ico text-success"></i>
-                <div>
-                  <small class="text-muted d-block">Passport Number</small>
-                  <span class="mono"><%= user.passportNumber %></span>
-                </div>
-                <button class="ico-btn" data-copy="<%= user.passportNumber %>" title="Copy"><i class="far fa-copy"></i></button>
-              </div>
-              <% } %>
-            </div>
-          </div>
-        </section>
-        <% } %>
-
-        <!-- Emergency Contact -->
-        <% if (user.emergencyContactName || user.emergencyContactNumber) { %>
-        <section class="card neo-card">
-          <div class="card-header d-flex align-items-center gap-2">
-            <span class="icon-pill bg-danger-soft"><i class="fas fa-ambulance text-danger"></i></span>
-            <h5 class="m-0">Emergency Contact</h5>
-          </div>
-          <div class="card-body">
-            <div class="info">
-              <% if (user.emergencyContactName) { %>
-              <div class="info-row">
-                <i class="fas fa-user-shield info-ico text-danger"></i>
-                <div>
-                  <small class="text-muted d-block">Contact Name</small>
-                  <span><%= user.emergencyContactName %></span>
-                </div>
-              </div>
-              <% } %>
-
-              <% if (user.emergencyContactNumber) { %>
-              <div class="info-row">
-                <i class="fas fa-phone-alt info-ico text-danger"></i>
-                <div>
-                  <small class="text-muted d-block">Contact Number</small>
-                  <span><%= user.emergencyContactNumber %></span>
-                </div>
-                <a class="ico-btn" href="tel:<%= user.emergencyContactNumber %>" title="Call"><i class="fas fa-phone"></i></a>
-              </div>
-              <% } %>
-            </div>
-          </div>
-        </section>
-        <% } %>
-      </div>
-
-      <!-- ===== Right Column ===== -->
-      <div class="col-lg-8">
-        <!-- Professional Info -->
-        <section class="card neo-card">
-          <div class="card-header d-flex align-items-center gap-2">
-            <span class="icon-pill bg-success-soft"><i class="fas fa-briefcase text-success"></i></span>
-            <h5 class="m-0">Professional Information</h5>
-          </div>
-          <div class="card-body">
-            <div class="row g-3">
-              <div class="col-md-6">
-                <div class="info-row flat">
-                  <i class="fas fa-id-badge info-ico text-success"></i>
-                  <div>
-                    <small class="text-muted d-block">Employee ID</small>
-                    <span><%= user.employeeId || 'Not assigned' %></span>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="info-row flat">
-                  <i class="fas fa-calendar-check info-ico text-success"></i>
-                  <div>
-                    <small class="text-muted d-block">Date of Joining</small>
-                    <span><%= user.joiningDate ? new Date(user.joiningDate).toLocaleDateString() : '—' %></span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-md-6">
-                <div class="info-row flat">
-                  <i class="fas fa-user-tie info-ico text-success"></i>
-                  <div>
-                    <small class="text-muted d-block">Employee Type</small>
-                    <span><%= user.employeeType || 'Full-time' %></span>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="info-row flat">
-                  <i class="fas fa-location-dot info-ico text-success"></i>
-                  <div>
-                    <small class="text-muted d-block">Work Location</small>
-                    <span><%= user.workLocation || 'Office' %></span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-md-6">
-                <div class="info-row flat">
-                  <i class="fas fa-clock info-ico text-success"></i>
-                  <div>
-                    <small class="text-muted d-block">Shift Timings</small>
-                    <span><%= user.shiftTimings || '9:30 AM - 6:30 PM' %></span>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="info-row flat">
-                  <i class="fas fa-chart-line info-ico text-success"></i>
-                  <div>
-                    <small class="text-muted d-block">Employee Status</small>
-                    <span><%= user.employeeStatus || 'Probation' %></span>
-                  </div>
-                </div>
-              </div>
-
-              <% if (user.reportingManager) { %>
-              <div class="col-md-6">
-                <div class="info-row flat">
-                  <i class="fas fa-user-shield info-ico text-success"></i>
-                  <div>
-                    <small class="text-muted d-block">Reporting Manager</small>
-                    <span><%= user.reportingManager.name %></span>
-                  </div>
-                </div>
-              </div>
-              <% } %>
-
-              <% if (user.team) { %>
-              <div class="col-md-6">
-                <div class="info-row flat">
-                  <i class="fas fa-users info-ico text-success"></i>
-                  <div>
-                    <small class="text-muted d-block">Team</small>
-                    <span><%= user.team %></span>
-                  </div>
-                </div>
-              </div>
-              <% } %>
-            </div>
-          </div>
-        </section>
-
-        <!-- Bank Details -->
-        <% if (user.bankName || user.accountNumber || user.ifscCode || user.branchName) { %>
-        <section class="card neo-card">
-          <div class="card-header d-flex align-items-center gap-2">
-            <span class="icon-pill bg-info-soft"><i class="fas fa-university text-info"></i></span>
-            <h5 class="m-0">Bank Details</h5>
-          </div>
-          <div class="card-body">
-            <div class="row g-3">
-              <% if (user.bankName) { %>
-              <div class="col-md-6">
-                <div class="info-row flat">
-                  <i class="fas fa-building info-ico text-info"></i>
-                  <div>
-                    <small class="text-muted d-block">Bank Name</small>
-                    <span><%= user.bankName %></span>
-                  </div>
-                </div>
-              </div>
-              <% } %>
-
-              <% if (user.accountNumber) { %>
-              <div class="col-md-6">
-                <div class="info-row flat">
-                  <i class="fas fa-credit-card info-ico text-info"></i>
-                  <div>
-                    <small class="text-muted d-block">Account Number</small>
-                    <span class="mono"><%= user.accountNumber %></span>
-                  </div>
-                  <button class="ico-btn" data-copy="<%= user.accountNumber %>" title="Copy"><i class="far fa-copy"></i></button>
-                </div>
-              </div>
-              <% } %>
-
-              <% if (user.ifscCode) { %>
-              <div class="col-md-6">
-                <div class="info-row flat">
-                  <i class="fas fa-code info-ico text-info"></i>
-                  <div>
-                    <small class="text-muted d-block">IFSC Code</small>
-                    <span class="mono"><%= user.ifscCode %></span>
-                  </div>
-                  <button class="ico-btn" data-copy="<%= user.ifscCode %>" title="Copy"><i class="far fa-copy"></i></button>
-                </div>
-              </div>
-              <% } %>
-
-              <% if (user.branchName) { %>
-              <div class="col-md-6">
-                <div class="info-row flat">
-                  <i class="fas fa-map-marker-alt info-ico text-info"></i>
-                  <div>
-                    <small class="text-muted d-block">Branch Name</small>
-                    <span><%= user.branchName %></span>
-                  </div>
-                </div>
-              </div>
-              <% } %>
-            </div>
-          </div>
-        </section>
-        <% } %>
-
-        <!-- Addresses -->
-        <% if (user.currentAddress || user.permanentAddress) { %>
-        <section class="card neo-card">
-          <div class="card-header d-flex align-items-center gap-2">
-            <span class="icon-pill bg-warning-soft"><i class="fas fa-home text-warning"></i></span>
-            <h5 class="m-0">Address Information</h5>
-          </div>
-          <div class="card-body">
-            <div class="row g-3">
               <% if (user.currentAddress) { %>
               <div class="col-12">
-                <div class="info-row flat">
-                  <i class="fas fa-map-marker-alt info-ico text-warning"></i>
-                  <div>
-                    <small class="text-muted d-block">Current Address</small>
-                    <span><%= user.currentAddress %></span>
-                  </div>
-                </div>
+                <small class="text-muted">Current Address</small>
+                <p><%= user.currentAddress %></p>
               </div>
               <% } %>
 
               <% if (user.permanentAddress) { %>
               <div class="col-12">
-                <div class="info-row flat">
-                  <i class="fas fa-map-pin info-ico text-warning"></i>
-                  <div>
-                    <small class="text-muted d-block">Permanent Address</small>
-                    <span><%= user.permanentAddress %></span>
-                  </div>
-                </div>
+                <small class="text-muted">Permanent Address</small>
+                <p><%= user.permanentAddress %></p>
               </div>
               <% } %>
             </div>
           </div>
-        </section>
-        <% } %>
+
+          <!-- Education Tab -->
+          <div class="tab-pane fade" id="education" role="tabpanel">
+            <h5 class="mb-4"><i class="fas fa-graduation-cap me-2"></i>Education Details</h5>
+            
+            <% if (user.qualification || user.university) { %>
+            <div class="row g-4">
+              <% if (user.qualification) { %>
+              <div class="col-md-6">
+                <small class="text-muted">Highest Qualification</small>
+                <p><%= user.qualification %></p>
+              </div>
+              <% } %>
+
+              <% if (user.university) { %>
+              <div class="col-md-6">
+                <small class="text-muted">University</small>
+                <p><%= user.university %></p>
+              </div>
+              <% } %>
+
+              <% if (user.yearOfPassing) { %>
+              <div class="col-md-6">
+                <small class="text-muted">Year of Passing</small>
+                <p><%= user.yearOfPassing %></p>
+              </div>
+              <% } %>
+
+              <% if (user.percentage) { %>
+              <div class="col-md-6">
+                <small class="text-muted">Percentage/CGPA</small>
+                <p><%= user.percentage %></p>
+              </div>
+              <% } %>
+            </div>
+            <% } else { %>
+            <div class="text-center py-4">
+              <i class="fas fa-graduation-cap fa-2x text-muted mb-3"></i>
+              <p class="text-muted">No education details added</p>
+              <a href="/user/profile/edit" class="btn btn-primary btn-sm">Add Education</a>
+            </div>
+            <% } %>
+
+            <!-- Experience Section -->
+            <% if (user.previousCompany || user.experienceYears > 0) { %>
+            <div class="mt-5">
+              <h6 class="mb-3">Work Experience</h6>
+              <div class="row g-4">
+                <% if (user.previousCompany) { %>
+                <div class="col-md-6">
+                  <small class="text-muted">Previous Company</small>
+                  <p><%= user.previousCompany %></p>
+                </div>
+                <% } %>
+
+                <% if (user.previousDesignation) { %>
+                <div class="col-md-6">
+                  <small class="text-muted">Previous Designation</small>
+                  <p><%= user.previousDesignation %></p>
+                </div>
+                <% } %>
+
+                <% if (user.experienceYears > 0) { %>
+                <div class="col-md-6">
+                  <small class="text-muted">Total Experience</small>
+                  <p><%= user.experienceYears %> years</p>
+                </div>
+                <% } %>
+              </div>
+            </div>
+            <% } %>
+          </div>
+
+          <!-- Account & IDs Tab -->
+          <div class="tab-pane fade" id="account" role="tabpanel">
+            <h5 class="mb-4"><i class="fas fa-file-invoice me-2"></i>Account & Government IDs</h5>
+            
+            <!-- Bank Details -->
+            <% if (user.bankName || user.accountNumber) { %>
+            <div class="mb-5">
+              <h6 class="mb-3">Bank Account Details</h6>
+              <div class="row g-3">
+                <% if (user.accountNumber) { %>
+                <div class="col-md-6 info-with-copy">
+                  <div>
+                    <small class="text-muted">Account Number</small>
+                    <p><%= user.accountNumber %></p>
+                  </div>
+                  <button class="btn btn-sm btn-outline-secondary copy-btn" data-copy="<%= user.accountNumber %>">
+                    <i class="far fa-copy"></i>
+                  </button>
+                </div>
+                <% } %>
+
+                <% if (user.ifscCode) { %>
+                <div class="col-md-6 info-with-copy">
+                  <div>
+                    <small class="text-muted">IFSC Code</small>
+                    <p><%= user.ifscCode %></p>
+                  </div>
+                  <button class="btn btn-sm btn-outline-secondary copy-btn" data-copy="<%= user.ifscCode %>">
+                    <i class="far fa-copy"></i>
+                  </button>
+                </div>
+                <% } %>
+
+                <% if (user.bankName) { %>
+                <div class="col-md-6">
+                  <small class="text-muted">Bank Name</small>
+                  <p><%= user.bankName %></p>
+                </div>
+                <% } %>
+
+                <% if (user.accountType) { %>
+                <div class="col-md-6">
+                  <small class="text-muted">Account Type</small>
+                  <p><%= user.accountType %></p>
+                </div>
+                <% } %>
+
+                <% if (user.branchName) { %>
+                <div class="col-md-6">
+                  <small class="text-muted">Branch Name</small>
+                  <p><%= user.branchName %></p>
+                </div>
+                <% } %>
+              </div>
+            </div>
+            <% } %>
+
+            <!-- Government IDs -->
+            <div class="row g-4">
+              <% if (user.panNumber) { %>
+              <div class="col-md-6 info-with-copy">
+                <div>
+                  <small class="text-muted">PAN Number</small>
+                  <p><%= user.panNumber %></p>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary copy-btn" data-copy="<%= user.panNumber %>">
+                  <i class="far fa-copy"></i>
+                </button>
+              </div>
+              <% } %>
+
+              <% if (user.aadharNumber) { %>
+              <div class="col-md-6 info-with-copy">
+                <div>
+                  <small class="text-muted">Aadhar Number</small>
+                  <p><%= user.aadharNumber %></p>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary copy-btn" data-copy="<%= user.aadharNumber %>">
+                  <i class="far fa-copy"></i>
+                </button>
+              </div>
+              <% } %>
+
+              <% if (user.passportNumber) { %>
+              <div class="col-md-6 info-with-copy">
+                <div>
+                  <small class="text-muted">Passport Number</small>
+                  <p><%= user.passportNumber %></p>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary copy-btn" data-copy="<%= user.passportNumber %>">
+                  <i class="far fa-copy"></i>
+                </button>
+              </div>
+              <% } %>
+
+              <% if (user.drivingLicense) { %>
+              <div class="col-md-6 info-with-copy">
+                <div>
+                  <small class="text-muted">Driving License</small>
+                  <p><%= user.drivingLicense %></p>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary copy-btn" data-copy="<%= user.drivingLicense %>">
+                  <i class="far fa-copy"></i>
+                </button>
+              </div>
+              <% } %>
+
+              <% if (user.uanNumber) { %>
+              <div class="col-md-6">
+                <small class="text-muted">UAN Number</small>
+                <p><%= user.uanNumber %></p>
+              </div>
+              <% } %>
+
+              <% if (user.pfNumber) { %>
+              <div class="col-md-6">
+                <small class="text-muted">PF Number</small>
+                <p><%= user.pfNumber %></p>
+              </div>
+              <% } %>
+
+              <% if (user.esicNumber) { %>
+              <div class="col-md-6">
+                <small class="text-muted">ESIC Number</small>
+                <p><%= user.esicNumber %></p>
+              </div>
+              <% } %>
+            </div>
+
+            <% if (!user.bankName && !user.panNumber && !user.aadharNumber) { %>
+            <div class="text-center py-4">
+              <i class="fas fa-file-invoice fa-2x text-muted mb-3"></i>
+              <p class="text-muted">No account details added</p>
+              <a href="/user/profile/edit" class="btn btn-primary btn-sm">Add Account Details</a>
+            </div>
+            <% } %>
+          </div>
+        </div>
       </div>
     </div>
-  </main>
+  </div>
 </div>
 
-<!-- ===== Styles ===== -->
-<style>
-:root {
-  --primary: #5b7cfa;
-  --primary-2: #6228e6;
-  --bg: #0f1220;
-  --surface: #131731;
-  --text: #0f172a;            /* light text */
-  --muted: #6b7280;
-
-  --success: #22c55e;
-  --info: #0ea5e9;
-  --warn: #f59e0b;
-  --danger: #ef4444;
-
-  --glass: rgba(255,255,255,0.14);
-  --glass-border: rgba(255,255,255,0.25);
-  --card: #ffffff;
-  --card-2: #f8fafc;
-}
-
-/* Dark mode variables */
-:root.dark {
-  --card: #141827;
-  --card-2: #0f1220;
-  --text: #e5e7eb;           /* dark text */
-  --muted: #94a3b8;
-  --glass: rgba(255,255,255,0.08);
-  --glass-border: rgba(255,255,255,0.18);
-}
-
-/* ===== Hero / Cover ===== */
-.profile-hero {
-  position: relative;
-  height: 300px;
-  background: radial-gradient(1200px 300px at 20% -20%, rgba(98,40,230,.35), transparent),
-              conic-gradient(from 220deg at 90% 10%, rgba(91,124,250,.35), transparent),
-              linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
-  overflow: visible;
-  border-bottom-left-radius: 24px;
-  border-bottom-right-radius: 24px;
-  box-shadow: 0 12px 40px rgba(17, 24, 39, .25);
-}
-.cover-img {
-  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
-  opacity: .95;
-}
-.cover-img.hide { display: none; }
-.cover-gradient {
-  position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,.55) 100%);
-}
-.hero-actions {
-  position: absolute; top: 16px; right: 16px; display: flex; gap: 10px; z-index: 3;
-}
-.action-pill { backdrop-filter: blur(6px); }
-
-.hero-footer {
-  position: absolute; bottom: -72px; left: 0; right: 0; z-index: 3;
-}
-
-.avatar-wrap { position: relative; }
-.avatar-ring {
-  width: 140px; height: 140px; border-radius: 50%;
-  padding: 4px; background: conic-gradient(from 0deg, var(--primary), var(--primary-2), var(--primary));
-  display: inline-flex; align-items: center; justify-content: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,.25);
-}
-.avatar-img {
-  width: 130px; height: 130px; border-radius: 50%; object-fit: cover; background: #fff;
-}
-.status-dot {
-  position: absolute; right: 4px; bottom: 6px; width: 18px; height: 18px; border-radius: 50%;
-  background: var(--success); border: 2px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,.25);
-}
-
-.display-name {
-  color: #fff; font-weight: 800; letter-spacing: .3px; margin: 8px 0 4px;
-}
-.designation { color: rgba(255,255,255,.85); font-weight: 500; }
-.designation .sep { opacity: .6; padding: 0 .4rem; }
-
-/* ===== Glass stats ===== */
-.stats-row { --pad: 16px; margin-top: 6px; }
-.glass-card {
-  background: var(--glass); border: 1px solid var(--glass-border);
-  border-radius: 14px; backdrop-filter: blur(10px);
-  padding: 14px 16px; color: #fff; height: 100%;
-  transition: transform .2s ease, box-shadow .2s ease;
-  box-shadow: 0 10px 24px rgba(0,0,0,.15);
-}
-.glass-card:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(0,0,0,.22); }
-.stat { display: grid; gap: 4px; align-content: center; text-align: center; }
-.stat-value { font-size: 1.6rem; font-weight: 800; line-height: 1; }
-.stat-value .unit { font-size: .9rem; opacity: .8; }
-.stat-label { font-size: .85rem; opacity: .9; }
-
-/* ===== Cards ===== */
-.card.neo-card {
-  background: linear-gradient(180deg, var(--card) 0%, var(--card-2) 100%);
-  border: 1px solid rgba(2,6,23,.06);
-  border-radius: 18px;
-  box-shadow: 0 8px 28px rgba(2,6,23,.08);
-  overflow: hidden;
-  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-}
-.card.neo-card:hover { transform: translateY(-2px); box-shadow: 0 14px 34px rgba(2,6,23,.12); border-color: rgba(2,6,23,.12); }
-.card-header {
-  background: linear-gradient(180deg, rgba(2,6,23,.02), transparent);
-  border-bottom: 1px solid rgba(2,6,23,.06);
-  padding: 14px 16px;
-}
-.icon-pill {
-  width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center;
-  border-radius: 12px;
-}
-.bg-primary-soft { background: rgba(91,124,250,.14); }
-.bg-success-soft { background: rgba(34,197,94,.14); }
-.bg-info-soft    { background: rgba(14,165,233,.14); }
-.bg-warning-soft { background: rgba(245,158,11,.16); }
-.bg-danger-soft  { background: rgba(239,68,68,.16); }
-
-/* ===== Info List ===== */
-.info { display: grid; gap: 10px; }
-.info-row {
-  display: grid; grid-template-columns: 28px 1fr auto; gap: 12px; align-items: center;
-  padding: 10px 10px; border-radius: 12px; transition: background .2s ease;
-}
-.info-row:hover { background: rgba(2,6,23,.04); }
-.info-row.flat:hover { background: rgba(2,6,23,.03); }
-.info-ico { font-size: 16px; opacity: .9; }
-.ico-btn {
-  border: 1px solid rgba(2,6,23,.08); background: transparent; border-radius: 10px;
-  width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;
-  transition: all .15s ease; color: inherit;
-}
-.ico-btn:hover { transform: translateY(-1px); background: rgba(2,6,23,.06); }
-
-.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
-
-/* ===== Utilities ===== */
-.text-muted { color: var(--muted) !important; }
-.shadow-soft { box-shadow: 0 6px 20px rgba(2,6,23,.12) !important; }
-
-/* ===== Responsive ===== */
-@media (max-width: 992px) {
-  .profile-hero { height: 260px; }
-  .hero-footer { bottom: -64px; }
-  .avatar-ring { width: 120px; height: 120px; }
-  .avatar-img { width: 110px; height: 110px; }
-  .display-name { font-size: 1.4rem; }
-}
-@media (max-width: 576px) {
-  .profile-hero { height: 220px; }
-  .hero-footer { bottom: -56px; }
-  .avatar-ring { width: 100px; height: 100px; }
-  .avatar-img { width: 92px; height: 92px; }
-  .stat-value { font-size: 1.3rem; }
-}
-
-/* ===== Prefers color scheme ===== */
-@media (prefers-color-scheme: dark) {
-  :root:not(.light) { color-scheme: dark; }
-  :root:not(.light) .profile-hero { box-shadow: 0 12px 40px rgba(0,0,0,.45); }
-}
-</style>
-
-<!-- ===== Scripts (micro-interactions) ===== -->
-<script>
-(function () {
-  // Theme toggle (persists in localStorage)
-  const root = document.documentElement;
-  const btn = document.getElementById('themeToggle');
-  const saved = localStorage.getItem('theme');
-  if (saved === 'dark') root.classList.add('dark');
-  if (saved === 'light') root.classList.add('light');
-
-  function setLabel() {
-    const span = btn?.querySelector('span');
-    if (!span) return;
-    const dark = root.classList.contains('dark');
-    span.textContent = dark ? 'Light' : 'Dark';
-    btn.querySelector('i').className = dark ? 'fas fa-sun me-2' : 'fas fa-moon me-2';
-  }
-  btn?.addEventListener('click', () => {
-    const dark = root.classList.toggle('dark');
-    root.classList.remove(dark ? 'light' : 'dark' ? 'dark' : ''); // noop guard
-    localStorage.setItem('theme', dark ? 'dark' : 'light');
-    setLabel();
-  });
-  setLabel();
-
-  // Copy to clipboard for data-copy buttons
-  document.querySelectorAll('.ico-btn[data-copy]').forEach((b) => {
-    b.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(b.getAttribute('data-copy'));
-        b.classList.add('copied');
-        b.innerHTML = '<i class="fas fa-check"></i>';
-        setTimeout(() => { b.classList.remove('copied'); b.innerHTML = '<i class="far fa-copy"></i>'; }, 1200);
-      } catch (e) { console.warn('Copy failed', e); }
-    });
-  });
-})();
-</script>
+<!-- Include JavaScript from users folder -->
+<script src="/users/js/profile.js"></script>

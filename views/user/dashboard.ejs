@@ -1,103 +1,938 @@
 <% layout = 'layouts/user-base' %>
 
-<div class="container-fluid">
+<!-- ✅ EXISTING SAFE VARIABLES SECTION (YEH PEHLE SE HAI) -->
+<%
+  // Safe variable assignment
+  const safeStats = typeof stats !== 'undefined' ? stats : {
+    yearlyAttendance: 0,
+    yearlyLeaves: 0, 
+    yearlyFeedback: 0,
+    todayAttendance: 'Not Marked',
+    approvedLeaves: 0,
+    pendingLeaves: 0,
+    pendingFeedback: 0,
+    currentYear: new Date().getFullYear(),
+    monthlyAttendance: 0
+  };
+  
+  const safeUser = typeof user !== 'undefined' ? user : { name: 'User' };
+  const safeRecentActivity = typeof recentActivity !== 'undefined' ? recentActivity : {
+    attendance: [],
+    leaves: [],
+    feedback: []
+  };
+  const safeNotifications = typeof notifications !== 'undefined' ? notifications : {};
+%>
+
+<!-- 🚨 ADD THIS DEBUG SECTION -->
+<div class="alert alert-warning">
+  <h4>🚨 DEBUG INFORMATION</h4>
+  <p><strong>User:</strong> <%= safeUser.name %></p>
+  <p><strong>Stats:</strong> <%= JSON.stringify(safeStats) %></p>
+  <p><strong>Recent Activity Count:</strong> 
+    Attendance: <%= safeRecentActivity.attendance.length %>,
+    Leaves: <%= safeRecentActivity.leaves.length %>,
+    Feedback: <%= safeRecentActivity.feedback.length %>
+  </p>
+  <p><strong>Current Year:</strong> <%= safeStats.currentYear %></p>
+</div>
+<!-- 🚨 END DEBUG SECTION -->
+
+<div class="container-fluid dashboard-container">
    <button class="sidebar-toggle" onclick="toggleSidebar()">
         <i class="fas fa-bars"></i>
     </button>
   
-  <!-- Header -->
-  <div class="row mb-4">
+  <!-- 🎯 HERO WELCOME SECTION -->
+  <div class="row mb-5">
     <div class="col-12">
-      <h1>User Dashboard</h1>
-      <p class="lead">Welcome, <%= typeof user !== 'undefined' ? user.name : 'User' %> 👋</p>
-    </div>
-  </div>
-
-  <!-- Stats Cards -->
-  <div class="row">
-    <div class="col-md-3 mb-4">
-      <div class="card">
-        <div class="card-body text-center">
-          <i class="fas fa-calendar-check fa-2x text-primary mb-2"></i>
-          <h3><%= typeof stats !== 'undefined' ? stats.attendanceDays : '0' %></h3>
-          <p class="text-muted">Attendance Days</p>
+      <div class="hero-welcome">
+        <div class="welcome-content">
+          <h1 class="welcome-title">
+            Welcome back, <span class="gradient-text"><%= safeUser.name %></span>! 👋
+          </h1>
+          <p class="welcome-subtitle">
+            Here's your performance overview for <strong><%= safeStats.currentYear %></strong>
+          </p>
+          <div class="welcome-stats">
+            <div class="stat-badge">
+              <i class="fas fa-calendar-check"></i>
+              <span><%= safeStats.yearlyAttendance %> Days Present</span>
+            </div>
+            <div class="stat-badge">
+              <i class="fas fa-trophy"></i>
+              <span><%= Math.round((safeStats.yearlyAttendance / 365) * 100) %>% Attendance</span>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-
-    <div class="col-md-3 mb-4">
-      <div class="card">
-        <div class="card-body text-center">
-          <i class="fas fa-plane-departure fa-2x text-warning mb-2"></i>
-          <h3><%= typeof stats !== 'undefined' ? stats.leavesApplied : '0' %></h3>
-          <p class="text-muted">Leaves Applied</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-3 mb-4">
-      <div class="card">
-        <div class="card-body text-center">
-          <i class="fas fa-comments fa-2x text-info mb-2"></i>
-          <h3><%= typeof stats !== 'undefined' ? stats.feedbackSubmitted : '0' %></h3>
-          <p class="text-muted">Feedback Submitted</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-3 mb-4">
-      <div class="card">
-        <div class="card-body text-center">
-          <i class="fas fa-user-check fa-2x text-success mb-2"></i>
-          <h3><%= typeof stats !== 'undefined' ? stats.todayAttendance : 'Present' %></h3>
-          <p class="text-muted">Today's Status</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Quick Actions -->
-  <div class="row mt-4">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Quick Actions</h5>
-          <div class="d-flex gap-2">
-            <a href="/user/attendance" class="btn btn-primary">
-              <i class="fas fa-calendar-check me-1"></i>Mark Attendance
-            </a>
-            <a href="/user/leaves" class="btn btn-warning">
-              <i class="fas fa-plane-departure me-1"></i>Apply Leave
-            </a>
-            <a href="/user/feedback" class="btn btn-info">
-              <i class="fas fa-comments me-1"></i>Give Feedback
-            </a>
+        <div class="welcome-graphic">
+          <div class="floating-icons">
+            <i class="fas fa-chart-line"></i>
+            <i class="fas fa-calendar-alt"></i>
+            <i class="fas fa-award"></i>
           </div>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- 📊 MAIN STATS CARDS WITH GRADIENTS -->
+  <div class="row g-4 mb-5">
+    <div class="col-xl-3 col-md-6">
+      <div class="stat-card attendance-card">
+        <div class="card-icon">
+          <i class="fas fa-calendar-check"></i>
+        </div>
+        <div class="card-content">
+          <h3 class="stat-number"><%= safeStats.yearlyAttendance %></h3>
+          <p class="stat-label">Present Days</p>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: <%= Math.min(safeStats.yearlyAttendance * 2, 100) %>%"></div>
+          </div>
+          <span class="stat-subtext"><%= safeStats.currentYear %> Performance</span>
+        </div>
+        <div class="card-wave"></div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+      <div class="stat-card leaves-card">
+        <div class="card-icon">
+          <i class="fas fa-plane-departure"></i>
+        </div>
+        <div class="card-content">
+          <h3 class="stat-number"><%= safeStats.yearlyLeaves %></h3>
+          <p class="stat-label">Leaves Applied</p>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: <%= Math.min(safeStats.yearlyLeaves * 10, 100) %>%"></div>
+          </div>
+          <span class="stat-subtext"><%= safeStats.approvedLeaves %> Approved</span>
+        </div>
+        <div class="card-wave"></div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+      <div class="stat-card feedback-card">
+        <div class="card-icon">
+          <i class="fas fa-comments"></i>
+        </div>
+        <div class="card-content">
+          <h3 class="stat-number"><%= safeStats.yearlyFeedback %></h3>
+          <p class="stat-label">Feedback Submitted</p>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: <%= Math.min(safeStats.yearlyFeedback * 10, 100) %>%"></div>
+          </div>
+          <span class="stat-subtext"><%= safeStats.pendingFeedback %> Pending</span>
+        </div>
+        <div class="card-wave"></div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+      <div class="stat-card today-card">
+        <div class="card-icon">
+          <i class="fas fa-user-check"></i>
+        </div>
+        <div class="card-content">
+          <h3 class="stat-number today-status <%= safeStats.todayAttendance === 'present' ? 'present' : safeStats.todayAttendance === 'Not Marked' ? 'not-marked' : 'other' %>">
+            <%= safeStats.todayAttendance %>
+          </h3>
+          <p class="stat-label">Today's Status</p>
+          <div class="today-action">
+            <% if (safeStats.todayAttendance === 'Not Marked') { %>
+              <a href="/user/attendance" class="action-btn mark-btn">
+                <i class="fas fa-plus me-2"></i>Mark Attendance
+              </a>
+            <% } else { %>
+              <span class="status-badge <%= safeStats.todayAttendance === 'present' ? 'present' : 'other' %>">
+                <i class="fas fa-check me-2"></i>Completed
+              </span>
+            <% } %>
+          </div>
+        </div>
+        <div class="card-wave"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🎯 QUICK ACTIONS & RECENT ACTIVITY GRID -->
+  <div class="row g-4">
+    <!-- Quick Actions -->
+    <div class="col-lg-4">
+      <div class="feature-card quick-actions-card">
+        <div class="card-header">
+          <h3><i class="fas fa-bolt me-2"></i>Quick Actions</h3>
+          <p>Get things done faster</p>
+        </div>
+        <div class="card-body">
+          <div class="action-grid">
+            <a href="/user/attendance" class="action-item primary">
+              <div class="action-icon">
+                <i class="fas fa-calendar-check"></i>
+              </div>
+              <div class="action-content">
+                <h4>Mark Attendance</h4>
+                <p>Record your daily presence</p>
+              </div>
+              <div class="action-arrow">
+                <i class="fas fa-chevron-right"></i>
+              </div>
+            </a>
+
+            <a href="/user/leaves" class="action-item warning">
+              <div class="action-icon">
+                <i class="fas fa-plane-departure"></i>
+              </div>
+              <div class="action-content">
+                <h4>Apply Leave</h4>
+                <p>Request time off work</p>
+              </div>
+              <div class="action-arrow">
+                <i class="fas fa-chevron-right"></i>
+              </div>
+            </a>
+
+            <a href="/user/feedback" class="action-item info">
+              <div class="action-icon">
+                <i class="fas fa-comments"></i>
+              </div>
+              <div class="action-content">
+                <h4>Give Feedback</h4>
+                <p>Share your suggestions</p>
+              </div>
+              <div class="action-arrow">
+                <i class="fas fa-chevron-right"></i>
+              </div>
+            </a>
+
+            <a href="/user/profile" class="action-item success">
+              <div class="action-icon">
+                <i class="fas fa-user"></i>
+              </div>
+              <div class="action-content">
+                <h4>My Profile</h4>
+                <p>Update personal details</p>
+              </div>
+              <div class="action-arrow">
+                <i class="fas fa-chevron-right"></i>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="col-lg-8">
+      <div class="feature-card activity-card">
+        <div class="card-header">
+          <h3><i class="fas fa-history me-2"></i>Recent Activity</h3>
+          <p>Your latest actions</p>
+        </div>
+        <div class="card-body">
+          <!-- Include Recent Activity Partial -->
+          <%- include('../partials/user-recent-activity', { 
+            recentActivity: safeRecentActivity,
+            stats: safeStats 
+          }) %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📈 ADDITIONAL FEATURES GRID -->
+  <div class="row g-4 mt-4">
+    <!-- Pending Actions -->
+    <div class="col-lg-6">
+      <div class="feature-card pending-card">
+        <div class="card-header">
+          <h3><i class="fas fa-clock me-2"></i>Pending Actions</h3>
+          <p>Requires your attention</p>
+        </div>
+        <div class="card-body">
+          <%- include('../partials/user-pending-actions', { stats: safeStats }) %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stats Section - IMPROVED DESIGN -->
+<div class="col-lg-6">
+  <div class="card stats-card">
+    <div class="card-header bg-gradient-primary text-white">
+      <h5 class="card-title mb-0">
+        <i class="fas fa-chart-pie me-2"></i>Quick Stats
+      </h5>
+      <small class="opacity-75"><%= safeStats.currentYear %> Overview</small>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <!-- Approved Leaves -->
+        <div class="col-6">
+          <div class="stat-item text-center p-3 border rounded">
+            <div class="stat-icon mb-2">
+              <i class="fas fa-check-circle fa-2x text-success"></i>
+            </div>
+            <h4 class="stat-value text-success mb-1"><%= safeStats.approvedLeaves %></h4>
+            <p class="stat-label text-muted mb-0">Approved Leaves</p>
+          </div>
+        </div>
+
+        <!-- Pending Leaves -->
+        <div class="col-6">
+          <div class="stat-item text-center p-3 border rounded">
+            <div class="stat-icon mb-2">
+              <i class="fas fa-clock fa-2x text-warning"></i>
+            </div>
+            <h4 class="stat-value text-warning mb-1"><%= safeStats.pendingLeaves %></h4>
+            <p class="stat-label text-muted mb-0">Pending Leaves</p>
+          </div>
+        </div>
+
+        <!-- Pending Feedback -->
+        <div class="col-6">
+          <div class="stat-item text-center p-3 border rounded">
+            <div class="stat-icon mb-2">
+              <i class="fas fa-hourglass-half fa-2x text-info"></i>
+            </div>
+            <h4 class="stat-value text-info mb-1"><%= safeStats.pendingFeedback %></h4>
+            <p class="stat-label text-muted mb-0">Pending Feedback</p>
+          </div>
+        </div>
+
+        <!-- Monthly Attendance -->
+        <div class="col-6">
+          <div class="stat-item text-center p-3 border rounded">
+            <div class="stat-icon mb-2">
+              <i class="fas fa-calendar-alt fa-2x text-primary"></i>
+            </div>
+            <h4 class="stat-value text-primary mb-1"><%= safeStats.monthlyAttendance %></h4>
+            <p class="stat-label text-muted mb-0">This Month</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress Section -->
+      <div class="mt-4">
+        <h6 class="text-muted mb-3">Monthly Progress</h6>
+        <div class="progress mb-2" style="height: 10px;">
+          <div class="progress-bar bg-success" role="progressbar" 
+               style="width: <%= Math.min((safeStats.monthlyAttendance || 0) * 10, 100) %>%"
+               aria-valuenow="<%= safeStats.monthlyAttendance || 0 %>" 
+               aria-valuemin="0" aria-valuemax="10">
+          </div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+          <small class="text-muted"><%= safeStats.monthlyAttendance || 0 %> present days</small>
+          <small class="text-muted"><%= new Date().toLocaleString('default', { month: 'long' }) %></small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  
   <!-- Sidebar Overlay -->
-<div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+  <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 </div>
 
-<!-- Simple CSS -->
+<!-- 🎨 SUPER ATTRACTIVE CSS -->
 <style>
-.card {
-  border: none;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+.dashboard-container {
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
 }
 
-.card-body {
+/* 🎯 HERO SECTION */
+.hero-welcome {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.welcome-content {
+  flex: 1;
+}
+
+.welcome-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.welcome-subtitle {
+  font-size: 1.1rem;
+  color: #6c757d;
+  margin-bottom: 20px;
+}
+
+.welcome-stats {
+  display: flex;
+  gap: 15px;
+}
+
+.stat-badge {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 25px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.welcome-graphic {
+  position: relative;
+}
+
+.floating-icons {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.floating-icons i {
+  position: absolute;
+  font-size: 2rem;
+  color: #667eea;
+  animation: float 3s ease-in-out infinite;
+}
+
+.floating-icons i:nth-child(1) { top: 0; left: 0; animation-delay: 0s; }
+.floating-icons i:nth-child(2) { top: 40px; right: 0; animation-delay: 1s; }
+.floating-icons i:nth-child(3) { bottom: 0; left: 40px; animation-delay: 2s; }
+
+/* 📊 STAT CARDS */
+/* 🎯 QUICK STATS IMPROVED STYLING */
+.stats-card {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.stats-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.stats-card .card-header {
+  border-radius: 15px 15px 0 0 !important;
+  border: none;
   padding: 20px;
 }
 
-.btn {
-  border-radius: 8px;
+.stats-card .card-header h5 {
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.stats-card .card-body {
+  padding: 25px;
+}
+
+.stat-item {
+  background: #f8f9fa;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  border: 1px solid #e9ecef !important;
+}
+
+.stat-item:hover {
+  background: white;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.stat-icon {
+  opacity: 0.9;
+}
+
+.stat-value {
+  font-weight: 700;
+  font-size: 1.8rem;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.progress {
+  border-radius: 10px;
+  background-color: #e9ecef;
+}
+
+.progress-bar {
+  border-radius: 10px;
+  transition: width 0.6s ease;
+}
+
+.attendance-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.leaves-card { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+.feedback-card { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+.today-card { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+
+.card-icon {
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.card-icon i {
+  font-size: 1.5rem;
+  color: white;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 5px;
+}
+
+.stat-label {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 15px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  transition: width 1s ease-in-out;
+}
+
+.stat-subtext {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.today-status.present { color: #43e97b; }
+.today-status.not-marked { color: #ff6b6b; }
+.today-status.other { color: #ffd93d; }
+
+.today-action {
+  margin-top: 15px;
+}
+
+.action-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-badge.present {
+  background: rgba(67, 233, 123, 0.2);
+  color: #43e97b;
+}
+
+.status-badge.other {
+  background: rgba(255, 217, 61, 0.2);
+  color: #ffd93d;
+}
+
+.card-wave {
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 100%;
+  height: 20px;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="rgba(255,255,255,0.1)"></path></svg>');
+  background-size: cover;
+}
+
+/* 🎯 FEATURE CARDS */
+.feature-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.card-header {
+  padding: 25px 25px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  margin-bottom: 0;
+}
+
+.card-header h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 5px;
+}
+
+.card-header p {
+  color: #6c757d;
+  margin-bottom: 20px;
+}
+
+.card-body {
+  padding: 25px;
+}
+
+/* 🚀 QUICK ACTIONS */
+.action-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.action-item {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  border-radius: 15px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.action-item:hover {
+  transform: translateX(10px);
+  text-decoration: none;
+}
+
+.action-item.primary {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  border-color: rgba(102, 126, 234, 0.2);
+}
+
+.action-item.warning {
+  background: linear-gradient(135deg, rgba(240, 147, 251, 0.1) 0%, rgba(245, 87, 108, 0.1) 100%);
+  border-color: rgba(245, 87, 108, 0.2);
+}
+
+.action-item.info {
+  background: linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(0, 242, 254, 0.1) 100%);
+  border-color: rgba(79, 172, 254, 0.2);
+}
+
+.action-item.success {
+  background: linear-gradient(135deg, rgba(67, 233, 123, 0.1) 0%, rgba(56, 249, 215, 0.1) 100%);
+  border-color: rgba(67, 233, 123, 0.2);
+}
+
+.action-item:hover.primary { background: rgba(102, 126, 234, 0.15); }
+.action-item:hover.warning { background: rgba(245, 87, 108, 0.15); }
+.action-item:hover.info { background: rgba(79, 172, 254, 0.15); }
+.action-item:hover.success { background: rgba(67, 233, 123, 0.15); }
+
+.action-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  font-size: 1.2rem;
+}
+
+.action-item.primary .action-icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.action-item.warning .action-icon {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.action-item.info .action-icon {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+}
+
+.action-item.success .action-icon {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  color: white;
+}
+
+.action-content {
+  flex: 1;
+}
+
+.action-content h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 5px;
+}
+
+.action-content p {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin: 0;
+}
+
+.action-arrow {
+  color: #6c757d;
+  transition: all 0.3s ease;
+}
+
+.action-item:hover .action-arrow {
+  color: #667eea;
+  transform: translateX(5px);
+}
+
+/* ✨ ANIMATIONS */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient 3s ease infinite;
+}
+
+/* 📱 RESPONSIVE DESIGN */
+@media (max-width: 768px) {
+  .hero-welcome {
+    flex-direction: column;
+    text-align: center;
+    padding: 30px 20px;
+  }
+  
+  .welcome-title {
+    font-size: 2rem;
+  }
+  
+  .welcome-stats {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .stat-card {
+    padding: 20px;
+  }
+  
+  .stat-number {
+    font-size: 2rem;
+  }
+  
+  .action-item {
+    padding: 15px;
+  }
+}
+
+/* 🎨 SCROLLBAR STYLING */
+.activity-timeline::-webkit-scrollbar {
+  width: 6px;
+}
+
+.activity-timeline::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.1);
+  border-radius: 10px;
+}
+
+.activity-timeline::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 10px;
+}
+
+.activity-timeline::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+/* 🌙 DARK MODE SUPPORT */
+@media (prefers-color-scheme: dark) {
+  .dashboard-container {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  }
+  
+  .hero-welcome,
+  .feature-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .card-header h3 {
+    color: #ecf0f1;
+  }
+  
+  .card-header p {
+    color: #bdc3c7;
+  }
+  
+  .action-content h4 {
+    color: #ecf0f1;
+  }
+  
+  .action-content p {
+    color: #bdc3c7;
+  }
+}
+
+/* ⚡ LOADING ANIMATIONS */
+.stat-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.feature-card {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 🎯 SIDEBAR TOGGLE BUTTON */
+.sidebar-toggle {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.sidebar-toggle:hover {
+  background: white;
+  transform: scale(1.1);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
 }
 </style>
 
-<!-- ✅ ONLY sidebar.js include karo, inline JavaScript nahi -->
+<!-- ✨ INTERACTIVE JAVASCRIPT -->
+<script>
+// Initialize animations and interactions
+document.addEventListener('DOMContentLoaded', function() {
+  // Add loading animation to progress bars
+  const progressBars = document.querySelectorAll('.progress-fill');
+  progressBars.forEach(bar => {
+    const width = bar.style.width;
+    bar.style.width = '0%';
+    setTimeout(() => {
+      bar.style.width = width;
+    }, 500);
+  });
+
+  // Add hover effects to cards
+  const cards = document.querySelectorAll('.stat-card, .feature-card');
+  cards.forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      this.style.transform = this.classList.contains('stat-card') ? 
+        'translateY(-10px)' : 'translateY(-5px)';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+      this.style.transform = 'translateY(0)';
+    });
+  });
+
+  // Real-time clock update
+  function updateClock() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true 
+    });
+    const dateString = now.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+  
+  setInterval(updateClock, 1000);
+  updateClock();
+});
+
+// Smooth scrolling for activity timeline
+function smoothScrollTo(element) {
+  element.scrollIntoView({ 
+    behavior: 'smooth',
+    block: 'nearest'
+  });
+}
+</script>
+
 <script src="/js/sidebar.js"></script>

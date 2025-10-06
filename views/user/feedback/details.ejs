@@ -1,0 +1,18 @@
+<% layout = 'layouts/user-base' %>
+
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 fw-bold">Feedback Details</h1>
+    <a href="/user/feedback/history" class="btn btn-outline-secondary">
+      <i class="fas fa-arrow-left me-2"></i>Back to History
+    </a>
+  </div>
+  
+  <!-- Feedback details content here -->
+  <div class="card">
+    <div class="card-body">
+      <h3><%= feedback.title %></h3>
+      <p><%= feedback.message %></p>
+    </div>
+  </div>
+</div>

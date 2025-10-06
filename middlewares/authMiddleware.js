@@ -21,7 +21,7 @@ const isAuthenticated = (req, res, next) => {
                   : null);
 
   if (!token) {
-    console.log('❌ No authentication token found');
+    console.log('❌ No authentication token found - Redirecting to login');
     return res.redirect('/auth/login');
   }
 
@@ -40,6 +40,9 @@ const isAuthenticated = (req, res, next) => {
     next();
   } catch (err) {
     console.log('❌ Invalid token:', err.message);
+    
+    // ✅ CLEAR THE INVALID TOKEN
+    res.clearCookie('token');
     return res.redirect('/auth/login');
   }
 };

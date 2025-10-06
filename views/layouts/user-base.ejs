@@ -48,7 +48,8 @@
         <div class="main-content">
             <!-- Header -->
             <div class="header">
-                <h1><%= pageTitle || 'User Dashboard' %></h1>
+                <h1>Welcome, <%= typeof user !== 'undefined' ? user.name : 'User' %></h1>
+                <p class="text-muted mb-0">Here's your Profile overview</p>
             </div>
             
             <%- body %>

@@ -1,0 +1,130 @@
+<!-- Pending Actions Section -->
+<div class="card">
+    <div class="card-header bg-warning text-dark">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-clock me-2"></i>Pending Actions
+        </h5>
+    </div>
+    <div class="card-body">
+        <% 
+            const pendingLeavesCount = stats.pendingLeaves || 0;
+            const pendingFeedbackCount = stats.pendingFeedback || 0;
+            const totalPending = pendingLeavesCount + pendingFeedbackCount;
+        %>
+        
+        <% if (totalPending > 0) { %>
+            <!-- Pending Leaves -->
+            <% if (pendingLeavesCount > 0) { %>
+                <div class="pending-item d-flex align-items-center justify-content-between mb-3 p-3 border rounded">
+                    <div class="d-flex align-items-center">
+                        <div class="pending-icon me-3">
+                            <i class="fas fa-plane-departure fa-2x text-warning"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1">Pending Leave Approvals</h6>
+                            <p class="text-muted mb-0"><%= pendingLeavesCount %> leave request(s) waiting</p>
+                        </div>
+                    </div>
+                    <div class="pending-action">
+                        <a href="/user/leaves" class="btn btn-sm btn-outline-warning">
+                            View
+                        </a>
+                    </div>
+                </div>
+            <% } %>
+
+            <!-- Pending Feedback -->
+            <% if (pendingFeedbackCount > 0) { %>
+                <div class="pending-item d-flex align-items-center justify-content-between mb-3 p-3 border rounded">
+                    <div class="d-flex align-items-center">
+                        <div class="pending-icon me-3">
+                            <i class="fas fa-comments fa-2x text-info"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1">Pending Feedback Responses</h6>
+                            <p class="text-muted mb-0"><%= pendingFeedbackCount %> feedback waiting for response</p>
+                        </div>
+                    </div>
+                    <div class="pending-action">
+                        <a href="/user/feedback/history" class="btn btn-sm btn-outline-info">
+                            View
+                        </a>
+                    </div>
+                </div>
+            <% } %>
+
+            <!-- Today's Attendance Reminder -->
+            <% if (stats.todayAttendance === 'Not Marked') { %>
+                <div class="pending-item d-flex align-items-center justify-content-between mb-3 p-3 border rounded bg-light">
+                    <div class="d-flex align-items-center">
+                        <div class="pending-icon me-3">
+                            <i class="fas fa-calendar-check fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1">Mark Today's Attendance</h6>
+                            <p class="text-muted mb-0">You haven't marked attendance for today</p>
+                        </div>
+                    </div>
+                    <div class="pending-action">
+                        <a href="/user/attendance" class="btn btn-sm btn-primary">
+                            Mark Now
+                        </a>
+                    </div>
+                </div>
+            <% } %>
+
+        <% } else { %>
+            <div class="text-center text-muted py-4">
+                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                <h6 class="text-success">All Clear!</h6>
+                <p class="mb-0">No pending actions. You're all caught up!</p>
+            </div>
+        <% } %>
+
+        <!-- Quick Stats Summary -->
+        <div class="row mt-4 text-center">
+            <div class="col-4">
+                <div class="border rounded p-2">
+                    <h4 class="text-warning mb-1"><%= pendingLeavesCount %></h4>
+                    <small class="text-muted">Pending Leaves</small>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="border rounded p-2">
+                    <h4 class="text-info mb-1"><%= pendingFeedbackCount %></h4>
+                    <small class="text-muted">Pending Feedback</small>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="border rounded p-2">
+                    <h4 class="text-<%= stats.todayAttendance === 'Not Marked' ? 'danger' : 'success' %> mb-1">
+                        <%= stats.todayAttendance === 'Not Marked' ? '!' : '✓' %>
+                    </h4>
+                    <small class="text-muted">Today</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.pending-item {
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+}
+
+.pending-item:hover {
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.pending-icon {
+    width: 40px;
+    text-align: center;
+}
+
+.pending-action .btn {
+    min-width: 60px;
+}
+</style>

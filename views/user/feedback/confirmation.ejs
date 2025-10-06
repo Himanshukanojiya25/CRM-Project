@@ -1,0 +1,323 @@
+<%# views/user/feedback/confirmation.ejs - Feedback Submission Confirmation Page %>
+<% layout = 'layouts/user-base' %>
+
+<!-- Include CSS -->
+<link rel="stylesheet" href="/css/feedback.css">
+
+<div class="confirmation-container">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-6">
+      
+      <!-- Success Animation -->
+      <div class="success-animation text-center mb-5">
+        <div class="success-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="success-wave"></div>
+      </div>
+
+      <!-- Confirmation Message -->
+      <div class="confirmation-card card border-0 shadow-lg">
+        <div class="card-body text-center p-5">
+          <h1 class="display-5 fw-bold text-success mb-3">🎉 Feedback Submitted Successfully!</h1>
+          <p class="lead text-muted mb-4">
+            Thank you for taking the time to share your feedback. We truly value your input and will review it carefully.
+          </p>
+
+          <!-- Next Steps -->
+          <div class="next-steps mb-5">
+            <h4 class="fw-semibold mb-3">📋 What happens next?</h4>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <div class="step-card">
+                  <div class="step-icon">
+                    <i class="fas fa-search"></i>
+                  </div>
+                  <h6>Review Process</h6>
+                  <p class="small text-muted">Our team will review your feedback within 24-48 hours</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="step-card">
+                  <div class="step-icon">
+                    <i class="fas fa-envelope"></i>
+                  </div>
+                  <h6>Status Updates</h6>
+                  <p class="small text-muted">You'll receive email notifications about any updates</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="step-card">
+                  <div class="step-icon">
+                    <i class="fas fa-comments"></i>
+                  </div>
+                  <h6>Follow-up</h6>
+                  <p class="small text-muted">Add more details or check status anytime</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feedback Summary (Optional) -->
+          <div class="feedback-summary bg-light rounded p-4 mb-4">
+            <h6 class="fw-semibold mb-3">📄 Your Feedback Summary</h6>
+            <div class="row text-start">
+              <div class="col-md-6">
+                <p class="mb-2"><strong>Category:</strong> <span class="badge bg-primary"><%= typeof category !== 'undefined' ? category : 'General' %></span></p>
+                <p class="mb-2"><strong>Priority:</strong> <span class="badge bg-warning"><%= typeof priority !== 'undefined' ? priority : 'Medium' %></span></p>
+              </div>
+              <div class="col-md-6">
+                <p class="mb-2"><strong>Submitted:</strong> Just now</p>
+                <p class="mb-2"><strong>Reference ID:</strong> #<%= Date.now().toString().slice(-6) %></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="action-buttons">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <a href="/user/feedback" class="btn btn-primary btn-lg w-100">
+                  <i class="fas fa-plus me-2"></i>New Feedback
+                </a>
+              </div>
+              <div class="col-md-4">
+                <a href="/user/feedback/history" class="btn btn-outline-primary btn-lg w-100">
+                  <i class="fas fa-history me-2"></i>View History
+                </a>
+              </div>
+              <div class="col-md-4">
+                <a href="/user/dashboard" class="btn btn-outline-secondary btn-lg w-100">
+                  <i class="fas fa-home me-2"></i>Dashboard
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Stats -->
+          <div class="quick-stats mt-5 pt-4 border-top">
+            <div class="row g-4">
+              <div class="col-4 text-center">
+                <div class="stat">
+                  <h4 class="fw-bold text-primary mb-1">24h</h4>
+                  <small class="text-muted">Avg. Response</small>
+                </div>
+              </div>
+              <div class="col-4 text-center">
+                <div class="stat">
+                  <h4 class="fw-bold text-success mb-1">95%</h4>
+                  <small class="text-muted">Satisfaction</small>
+                </div>
+              </div>
+              <div class="col-4 text-center">
+                <div class="stat">
+                  <h4 class="fw-bold text-info mb-1">100+</h4>
+                  <small class="text-muted">Feedbacks</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Support Info -->
+      <div class="support-info text-center mt-4">
+        <p class="text-muted small">
+          Need immediate assistance? 
+          <a href="/support" class="text-decoration-none">Contact our support team</a> 
+          or call us at <strong>1-800-HELP-NOW</strong>
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+.confirmation-container {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  padding: 2rem 0;
+}
+
+.success-animation {
+  position: relative;
+}
+
+.success-icon {
+  font-size: 6rem;
+  color: #28a745;
+  animation: bounceIn 1s ease-in-out;
+}
+
+.success-wave {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px;
+  height: 120px;
+  border: 4px solid #28a745;
+  border-radius: 50%;
+  animation: wave 2s infinite;
+  opacity: 0;
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes wave {
+  0% {
+    width: 120px;
+    height: 120px;
+    opacity: 0.7;
+  }
+  100% {
+    width: 200px;
+    height: 200px;
+    opacity: 0;
+  }
+}
+
+.confirmation-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 20px;
+}
+
+.step-card {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  transition: transform 0.3s ease;
+  height: 100%;
+}
+
+.step-card:hover {
+  transform: translateY(-5px);
+}
+
+.step-icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.feedback-summary {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+  border-left: 4px solid #667eea;
+}
+
+.action-buttons .btn {
+  border-radius: 12px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.action-buttons .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.quick-stats .stat {
+  padding: 1rem;
+}
+
+.quick-stats h4 {
+  font-size: 1.5rem;
+}
+
+.support-info a {
+  color: #667eea;
+  font-weight: 600;
+}
+
+.support-info a:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .success-icon {
+    font-size: 4rem;
+  }
+  
+  .confirmation-card .card-body {
+    padding: 2rem !important;
+  }
+  
+  .step-card {
+    margin-bottom: 1rem;
+  }
+  
+  .action-buttons .btn {
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .action-buttons,
+  .support-info {
+    display: none;
+  }
+  
+  .confirmation-card {
+    box-shadow: none !important;
+    border: 1px solid #dee2e6 !important;
+  }
+}
+</style>
+
+<!-- Add some interactive JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Add some interactive elements
+  const successIcon = document.querySelector('.success-icon');
+  
+  // Add click animation
+  successIcon.addEventListener('click', function() {
+    this.style.animation = 'none';
+    setTimeout(() => {
+      this.style.animation = 'bounceIn 1s ease-in-out';
+    }, 10);
+  });
+  
+  // Auto-redirect after 30 seconds (optional)
+  setTimeout(() => {
+    console.log('You can add auto-redirect here if needed');
+  }, 30000);
+  
+  // Add print functionality
+  const printButton = document.createElement('button');
+  printButton.innerHTML = '<i class="fas fa-print me-2"></i>Print Confirmation';
+  printButton.className = 'btn btn-outline-secondary btn-sm mt-3';
+  printButton.onclick = () => window.print();
+  document.querySelector('.action-buttons').appendChild(printButton);
+});
+</script>
