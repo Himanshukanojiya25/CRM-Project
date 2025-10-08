@@ -1,12 +1,38 @@
 const Attendance = require('../../models/Attendance');
 const moment = require('moment');
 
-// ✅ Get Attendance Page
+// ✅ Get Attendance Page with Monthly Data
 const getAttendancePage = async (req, res) => {
   try {
+    const currentMonth = moment().format('YYYY-MM');
+    const currentMonthFormatted = moment().format('MMMM YYYY');
+    const todayDate = moment().format('dddd, MMMM Do YYYY');
+    
+    // Generate months for dropdown
+    const months = [];
+    for(let i = 0; i < 6; i++) {
+      const month = moment().subtract(i, 'months');
+      months.push({
+        value: month.format('YYYY-MM'),
+        label: month.format('MMMM YYYY'),
+        selected: i === 0
+      });
+    }
+
+    // Get current month attendance
+    const currentMonthRecords = await Attendance.find({
+      user: req.user.id,
+      monthYear: currentMonth
+    }).sort({ date: -1 });
+
     res.render('user/attendance/list', {
       pageTitle: 'Attendance - CRM',
-      layout: 'layouts/user-base'
+      layout: 'layouts/user-base',
+      currentMonth: currentMonth,
+      currentMonthFormatted: currentMonthFormatted,
+      todayDate: todayDate,
+      months: months,
+      currentMonthRecords: currentMonthRecords
     });
   } catch (error) {
     console.error('Attendance page error:', error);
@@ -14,12 +40,9 @@ const getAttendancePage = async (req, res) => {
   }
 };
 
-// ✅ Check-In (FIXED)
+// ✅ Check-In with Enhanced Late Detection
 const checkIn = async (req, res) => {
   try {
-    console.log('Request User:', req.user); // Debug log
-    
-    // ✅ FIXED: Consistent user ID check
     if (!req.user || !req.user.id) {
       return res.status(401).json({ 
         success: false,
@@ -27,7 +50,7 @@ const checkIn = async (req, res) => {
       });
     }
 
-    const userId = req.user.id; // ✅ CHANGED: req.user._id -> req.user.id
+    const userId = req.user.id;
     const today = moment().startOf('day');
     const now = new Date();
 
@@ -58,10 +81,14 @@ const checkIn = async (req, res) => {
     attendance.ipAddress = req.ip || req.connection.remoteAddress;
     attendance.deviceType = req.headers['user-agent'];
     
-    // Set status based on check-in time
-    const checkInHour = now.getHours();
-    if (checkInHour > 10) { // After 10 AM is late
+    // Enhanced late detection (after 10:15 AM is late)
+    const checkInTime = moment(now);
+    const lateThreshold = moment(today).set({ hour: 10, minute: 15, second: 0 });
+    
+    if (checkInTime.isAfter(lateThreshold)) {
       attendance.status = 'late';
+    } else {
+      attendance.status = 'present';
     }
 
     await attendance.save();
@@ -81,10 +108,9 @@ const checkIn = async (req, res) => {
   }
 };
 
-// ✅ Check-Out (FIXED)
+// ✅ Check-Out (Same as before)
 const checkOut = async (req, res) => {
   try {
-    // ✅ FIXED: Consistent user ID check
     if (!req.user || !req.user.id) {
       return res.status(401).json({ 
         success: false,
@@ -92,11 +118,10 @@ const checkOut = async (req, res) => {
       });
     }
 
-    const userId = req.user.id; // ✅ CHANGED: req.user._id -> req.user.id
+    const userId = req.user.id;
     const today = moment().startOf('day');
     const now = new Date();
 
-    // Find today's attendance with check-in but no check-out
     const attendance = await Attendance.findOne({
       user: userId,
       date: { 
@@ -114,12 +139,10 @@ const checkOut = async (req, res) => {
       });
     }
 
-    // Calculate working hours
     attendance.checkOut = now;
     const diffMs = attendance.checkOut - attendance.checkIn;
     attendance.totalHours = parseFloat((diffMs / (1000 * 60 * 60)).toFixed(2));
 
-    // Update status if half-day (less than 4 hours)
     if (attendance.totalHours < 4) {
       attendance.status = 'half-day';
     }
@@ -141,10 +164,9 @@ const checkOut = async (req, res) => {
   }
 };
 
-// ✅ User's Attendance Records with Pagination (FIXED)
-const myRecords = async (req, res) => {
+// ✅ Monthly Attendance Records
+const getMonthlyRecords = async (req, res) => {
   try {
-    // ✅ FIXED: Consistent user ID check
     if (!req.user || !req.user.id) {
       return res.status(401).json({ 
         success: false,
@@ -152,43 +174,90 @@ const myRecords = async (req, res) => {
       });
     }
 
-    const userId = req.user.id; // ✅ CHANGED: req.user._id -> req.user.id
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 30;
-    const skip = (page - 1) * limit;
+    const userId = req.user.id;
+    const monthYear = req.params.monthYear || moment().format('YYYY-MM');
+    
+    const records = await Attendance.find({ 
+      user: userId,
+      monthYear: monthYear 
+    }).sort({ date: -1 });
 
-    const records = await Attendance.find({ user: userId })
-      .sort({ date: -1 })
-      .skip(skip)
-      .limit(limit)
-      .populate('user', 'name email');
-
-    const total = await Attendance.countDocuments({ user: userId });
+    // Calculate monthly stats
+    const totalDays = records.length;
+    const presentDays = records.filter(r => ['present', 'late'].includes(r.status)).length;
+    const absentDays = records.filter(r => r.status === 'absent').length;
+    const lateDays = records.filter(r => r.status === 'late').length;
 
     res.status(200).json({ 
       success: true,
-      message: 'Records fetched successfully',
-      data: records,
-      pagination: {
-        current: page,
-        pages: Math.ceil(total / limit),
-        total: total
+      message: 'Monthly records fetched successfully',
+      data: {
+        records: records,
+        stats: {
+          totalDays,
+          presentDays,
+          absentDays,
+          lateDays,
+          monthYear: monthYear
+        }
       }
     });
   } catch (err) {
-    console.error('Records fetch error:', err);
+    console.error('Monthly records error:', err);
     res.status(500).json({ 
       success: false,
-      message: 'Error fetching records', 
+      message: 'Error fetching monthly records', 
       error: err.message 
     });
   }
 };
 
-// ✅ Today's Status (FIXED)
+// ✅ Archive Old Attendance (Utility Function)
+const archiveOldAttendance = async (req, res) => {
+  try {
+    const threeMonthsAgo = moment().subtract(3, 'months').startOf('month');
+    const archiveThreshold = moment().subtract(1, 'month').endOf('month');
+    
+    // Archive records older than 1 month
+    const archiveResult = await Attendance.updateMany(
+      {
+        date: { $lte: archiveThreshold.toDate() },
+        isArchived: false
+      },
+      {
+        $set: {
+          isArchived: true,
+          archivedAt: new Date()
+        }
+      }
+    );
+
+    // Delete records older than 3 months
+    const deleteResult = await Attendance.deleteMany({
+      date: { $lte: threeMonthsAgo.toDate() }
+    });
+
+    res.status(200).json({ 
+      success: true,
+      message: 'Archive and cleanup completed',
+      data: {
+        archived: archiveResult.modifiedCount,
+        deleted: deleteResult.deletedCount
+      }
+    });
+  } catch (err) {
+    console.error('Archive error:', err);
+    res.status(500).json({ 
+      success: false,
+      message: 'Archive failed', 
+      error: err.message 
+    });
+  }
+};
+
+// ✅ Today's Status
 const todayStatus = async (req, res) => {
   try {
-    // ✅ FIXED: Consistent user ID check
     if (!req.user || !req.user.id) {
       return res.status(401).json({ 
         success: false,
@@ -196,7 +265,7 @@ const todayStatus = async (req, res) => {
       });
     }
 
-    const userId = req.user.id; // ✅ CHANGED: req.user._id -> req.user.id
+    const userId = req.user.id;
     const today = moment().startOf('day');
 
     const attendance = await Attendance.findOne({
@@ -222,11 +291,11 @@ const todayStatus = async (req, res) => {
   }
 };
 
-// ✅ Export ALL functions
 module.exports = { 
   getAttendancePage,
   checkIn, 
   checkOut, 
-  myRecords, 
+  getMonthlyRecords,
+  archiveOldAttendance,
   todayStatus 
 };

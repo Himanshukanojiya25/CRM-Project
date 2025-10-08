@@ -1,0 +1,33 @@
+<% const layoutData = {
+    title: 'Leave Rejected - Company CRM', 
+    body: `
+        <div style="text-align: center;">
+            <div class="icon">😔</div>
+            <h2 style="color: #dc3545; margin-bottom: 10px;">Leave Request Rejected</h2>
+            <p style="font-size: 16px; color: #666;">We regret to inform you that your leave request has been rejected.</p>
+        </div>
+
+        <div class="details-card">
+            <h3 style="margin-top: 0;">Leave Details</h3>
+            <p><strong>Employee:</strong> <%= employeeName %></p>
+            <p><strong>Leave Type:</strong> <%= leaveType %></p>
+            <p><strong>From:</strong> <%= fromDate %></p>
+            <p><strong>To:</strong> <%= toDate %></p>
+            <p><strong>Reason for Rejection:</strong> <%= rejectionReason %></p>
+            <% if (remarks) { %>
+                <p><strong>Additional Remarks:</strong> <%= remarks %></p>
+            <% } %>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="<%= dashboardUrl %>" class="btn" style="background: linear-gradient(45deg, #6c757d, #495057);">View Details</a>
+        </div>
+
+        <p style="text-align: center; color: #666; margin-top: 30px;">
+            Please contact HR if you have any questions.<br>
+            We appreciate your understanding.
+        </p>
+    `
+} %>
+
+<%- include('../../layouts/email-layout', layoutData) %>

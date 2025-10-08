@@ -1,0 +1,33 @@
+<% const layoutData = {
+    title: 'Leave Approved - Company CRM',
+    body: `
+        <div style="text-align: center;">
+            <div class="icon">🎉</div>
+            <h2 style="color: #28a745; margin-bottom: 10px;">Leave Request Approved!</h2>
+            <p style="font-size: 16px; color: #666;">Good news! Your leave request has been approved.</p>
+        </div>
+
+        <div class="details-card">
+            <h3 style="margin-top: 0;">Leave Details</h3>
+            <p><strong>Employee:</strong> <%= employeeName %></p>
+            <p><strong>Leave Type:</strong> <%= leaveType %></p>
+            <p><strong>From:</strong> <%= fromDate %></p>
+            <p><strong>To:</strong> <%= toDate %></p>
+            <p><strong>Total Days:</strong> <%= totalDays %> days</p>
+            <% if (remarks) { %>
+                <p><strong>Remarks:</strong> <%= remarks %></p>
+            <% } %>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="<%= dashboardUrl %>" class="btn">View in Dashboard</a>
+        </div>
+
+        <p style="text-align: center; color: #666; margin-top: 30px;">
+            Thank you for using our HR system.<br>
+            Have a great time off! 🌴
+        </p>
+    `
+} %>
+
+<%- include('../../layouts/email-layout', layoutData) %>

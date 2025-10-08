@@ -1,5 +1,6 @@
-const mongoose = require('mongoose'); // Add this line at the top
+const mongoose = require('mongoose');
 const Leave = require('../../models/Leave');
+const emailService = require('../../services/email/emailService'); // ✅ EMAIL SERVICE ADDED
 
 // Render apply leave page
 const renderApplyPage = (req, res) => {
@@ -14,8 +15,7 @@ const renderApplyPage = (req, res) => {
   });
 };
 
-// Apply for leave
-// Apply for leave - FIXED VERSION
+// Apply for leave - WITH EMAIL INTEGRATION
 const applyLeave = async (req, res) => {
   try {
     const { leaveType, startDate, endDate, reason } = req.body;
@@ -37,9 +37,9 @@ const applyLeave = async (req, res) => {
       userEmail: req.user.email
     });
 
-    // Create leave with current user - ✅ ENSURE user ID is properly set
+    // Create leave with current user
     const leave = new Leave({
-      user: req.user._id, // ✅ This should be proper ObjectId
+      user: req.user._id,
       leaveType,
       startDate: new Date(startDate),
       endDate: leaveType === 'full-day' ? new Date(endDate) : new Date(startDate),
@@ -54,6 +54,17 @@ const applyLeave = async (req, res) => {
     });
 
     await leave.save();
+
+    // ✅ EMAIL INTEGRATION: Admin ko notification bhejo
+    try {
+      // Leave data populate karo user details ke saath
+      const leaveWithUser = await Leave.findById(leave._id).populate('user', 'name email');
+      await emailService.sendLeaveApplicationToAdmin(leaveWithUser);
+      console.log('✅ Leave application email triggered');
+    } catch (emailError) {
+      console.error('❌ Email sending failed, but leave saved:', emailError);
+      // Email fail hone par bhi leave save ho gaya hai
+    }
 
     // ✅ DEBUG: Check leave object after saving
     console.log("✅ Leave applied successfully:", {
@@ -78,35 +89,14 @@ const getMyLeaves = async (req, res) => {
     }
 
     console.log("🔍 DEBUG: Fetching leaves for user ID:", req.user._id);
-    console.log("🔍 DEBUG: User object:", {
-      id: req.user._id,
-      email: req.user.email,
-      name: req.user.name
-    });
-
-    // 🔥 CRITICAL FIX: Convert user ID to ObjectId and ensure proper query
-    const userId = req.user._id;
     
-    // Method 1: Using mongoose.Types.ObjectId for safety
+    const userId = req.user._id;
     const leaves = await Leave.find({ 
       user: mongoose.Types.ObjectId.createFromHexString(userId.toString())
     }).sort({ createdAt: -1 });
 
-    // Method 2: Alternatively, just use the string (mongoose handles conversion)
-    // const leaves = await Leave.find({ user: userId }).sort({ createdAt: -1 });
-
     console.log("✅ DEBUG: Found", leaves.length, "leaves for user");
     
-    // Debug each leave to verify user matching
-    leaves.forEach((leave, index) => {
-      console.log(`📝 Leave ${index + 1}:`, {
-        leaveId: leave._id,
-        leaveUser: leave.user.toString(),
-        currentUser: userId.toString(),
-        matches: leave.user.toString() === userId.toString()
-      });
-    });
-
     res.render('user/leaves/list', { 
       user: req.user, 
       leaves, 

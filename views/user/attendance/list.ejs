@@ -1,61 +1,112 @@
 <% layout = 'layouts/user-base' %>
 
 <div class="attendance-container">
-     <button class="sidebar-toggle" onclick="toggleSidebar()">
+    <button class="sidebar-toggle" onclick="toggleSidebar()">
         <i class="fas fa-bars"></i>
     </button>
-    <!-- Check-In Card -->
-    <div class="attendance-card checkin-card">
-        <div class="pulse-animation"></div>
-        <i class="fas fa-fingerprint fa-3x"></i>
-        <h3>Check-In</h3>
-        <p>Start your productive day</p>
-        <button id="checkInBtn" class="glow-btn">
-            <i class="fas fa-sign-in-alt"></i> Check In
-        </button>
+    
+    <!-- Monthly Selector -->
+    <div class="month-selector">
+        <h2>Attendance - <span id="current-month"><%= currentMonthFormatted %></span></h2>
+        <select id="monthSelect" class="month-dropdown">
+            <% months.forEach(month => { %>
+                <option value="<%= month.value %>" <%= month.selected ? 'selected' : '' %>>
+                    <%= month.label %>
+                </option>
+            <% }); %>
+        </select>
     </div>
 
-    <!-- Check-Out Card -->
-    <div class="attendance-card checkout-card">
-        <div class="pulse-animation"></div>
-        <i class="fas fa-sign-out-alt fa-3x"></i>
-        <h3>Check-Out</h3>
-        <p>End your day</p>
-        <button id="checkOutBtn" class="glow-btn">
-            <i class="fas fa-sign-out-alt"></i> Check Out
-        </button>
+    <!-- Check-In/Out Cards -->
+    <div class="attendance-cards">
+        <!-- Check-In Card -->
+        <div class="attendance-card checkin-card">
+            <div class="pulse-animation"></div>
+            <i class="fas fa-fingerprint fa-3x"></i>
+            <h3>Check-In</h3>
+            <p>Start your productive day</p>
+            <button id="checkInBtn" class="glow-btn">
+                <i class="fas fa-sign-in-alt"></i> Check In
+            </button>
+            <div class="checkin-time" id="checkinTime"></div>
+        </div>
+
+        <!-- Check-Out Card -->
+        <div class="attendance-card checkout-card">
+            <div class="pulse-animation"></div>
+            <i class="fas fa-sign-out-alt fa-3x"></i>
+            <h3>Check-Out</h3>
+            <p>End your day</p>
+            <button id="checkOutBtn" class="glow-btn">
+                <i class="fas fa-sign-out-alt"></i> Check Out
+            </button>
+            <div class="checkout-time" id="checkoutTime"></div>
+        </div>
+    </div>
+
+    <!-- Current Status -->
+    <div class="status-container">
+        <h3>Today's Status: <span id="current-status" class="status-badge status-absent">ABSENT</span></h3>
+        <div class="today-time" id="todayTime">
+            <%= todayDate %>
+        </div>
+    </div>
+
+    <!-- Monthly Stats -->
+    <div class="monthly-stats">
+        <div class="stat-card">
+            <h4>Present</h4>
+            <span class="stat-count present-count" id="presentCount">0</span>
+        </div>
+        <div class="stat-card">
+            <h4>Late</h4>
+            <span class="stat-count late-count" id="lateCount">0</span>
+        </div>
+        <div class="stat-card">
+            <h4>Absent</h4>
+            <span class="stat-count absent-count" id="absentCount">0</span>
+        </div>
+        <div class="stat-card">
+            <h4>Working Days</h4>
+            <span class="stat-count total-count" id="totalCount">0</span>
+        </div>
+    </div>
+
+    <!-- Attendance Calendar View -->
+    <div class="calendar-container">
+        <h3>Monthly Calendar</h3>
+        <div class="calendar" id="attendanceCalendar">
+            <!-- Calendar will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Attendance Records -->
+    <div class="records-container">
+        <h3>Attendance History - <span id="records-month"><%= currentMonthFormatted %></span></h3>
+        <table class="records-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Check-In</th>
+                    <th>Check-Out</th>
+                    <th>Hours</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="records-body">
+                <!-- JavaScript se load hoga -->
+            </tbody>
+        </table>
     </div>
 </div>
 
-<!-- Current Status -->
-<div class="status-container">
-    <h3>Today's Status: <span id="current-status" class="status-badge status-absent">ABSENT</span></h3>
-</div>
-
-<!-- Attendance Records -->
-<div class="records-container">
-    <h3>Your Attendance History</h3>
-    <table class="records-table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Check-In</th>
-                <th>Check-Out</th>
-                <th>Hours</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody id="records-body">
-            <!-- JavaScript se load hoga -->
-        </tbody>
-    </table>
-    <!-- Sidebar Overlay -->
+<!-- Sidebar Overlay -->
 <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
-</div>
 
 <!-- Include CSS -->
 <link rel="stylesheet" href="/css/attendance.css">
 
 <!-- Include JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 <script src="/js/attendance.js"></script>
 <script src="/js/sidebar.js"></script>

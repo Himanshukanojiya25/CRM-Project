@@ -61,6 +61,10 @@ const userSchema = new mongoose.Schema({
     size: { type: Number, default: 0 },
     mimeType: { type: String, default: '' }
   },
+  profilePhoto: {
+    type: String,
+    default: '/images/default-avatar.png'
+  },
   coverPhoto: {
     url: { type: String, default: '/images/default-cover.jpg' },
     filename: { type: String, default: '' },
@@ -135,6 +139,17 @@ const userSchema = new mongoose.Schema({
     phone: { type: String, default: '', trim: true },
     address: { type: String, default: '', trim: true }
   },
+  // ADDED MISSING FIELDS
+  emergencyContactName: {
+    type: String,
+    default: '',
+    trim: true
+  },
+  emergencyContactNumber: {
+    type: String,
+    default: '',
+    trim: true
+  },
   alternateContacts: [{
     name: { type: String, trim: true },
     relationship: { type: String, trim: true },
@@ -155,12 +170,24 @@ const userSchema = new mongoose.Schema({
     pincode: { type: String, default: '', trim: true },
     country: { type: String, default: 'India', trim: true }
   },
+  // ADDED SIMPLE CURRENT ADDRESS FIELD
+  currentAddressSimple: {
+    type: String,
+    default: '',
+    trim: true
+  },
   permanentAddress: {
     street: { type: String, default: '', trim: true },
     city: { type: String, default: '', trim: true },
     state: { type: String, default: '', trim: true },
     pincode: { type: String, default: '', trim: true },
     country: { type: String, default: 'India', trim: true }
+  },
+  // ADDED SIMPLE PERMANENT ADDRESS FIELD
+  permanentAddressSimple: {
+    type: String,
+    default: '',
+    trim: true
   },
   sameAsPermanent: {
     type: Boolean,
@@ -274,6 +301,32 @@ const userSchema = new mongoose.Schema({
     branchName: { type: String, default: '', trim: true },
     accountType: { type: String, enum: ['Savings', 'Current', ''], default: 'Savings' }
   },
+  // ADDED STANDALONE BANK FIELDS
+  bankName: {
+    type: String,
+    default: '',
+    trim: true
+  },
+  accountNumber: {
+    type: String,
+    default: '',
+    trim: true
+  },
+  ifscCode: {
+    type: String,
+    default: '',
+    trim: true
+  },
+  branchName: {
+    type: String,
+    default: '',
+    trim: true
+  },
+  accountType: {
+    type: String,
+    enum: ['Savings', 'Current', ''],
+    default: 'Savings'
+  },
 
   // === SALARY DETAILS ===
   salaryDetails: {
@@ -297,6 +350,26 @@ const userSchema = new mongoose.Schema({
     documents: [{ type: String }],
     isHighest: { type: Boolean, default: false }
   }],
+  // ADDED STANDALONE EDUCATION FIELDS
+  qualification: {
+    type: String,
+    default: '',
+    trim: true
+  },
+  university: {
+    type: String,
+    default: '',
+    trim: true
+  },
+  yearOfPassing: {
+    type: Number,
+    default: null
+  },
+  percentage: {
+    type: String,
+    default: '',
+    trim: true
+  },
 
   // === WORK EXPERIENCE ===
   workExperience: [{
@@ -310,6 +383,21 @@ const userSchema = new mongoose.Schema({
     location: { type: String, default: '', trim: true },
     documents: [{ type: String }]
   }],
+  // ADDED STANDALONE EXPERIENCE FIELDS
+  previousCompany: {
+    type: String,
+    default: '',
+    trim: true
+  },
+  previousDesignation: {
+    type: String,
+    default: '',
+    trim: true
+  },
+  experienceYears: {
+    type: Number,
+    default: 0
+  },
 
   // === SKILLS & CERTIFICATIONS ===
   skills: [{
@@ -321,6 +409,11 @@ const userSchema = new mongoose.Schema({
     },
     yearsOfExperience: { type: Number, default: 0 },
     isPrimary: { type: Boolean, default: false }
+  }],
+  // ADDED SIMPLE SKILLS ARRAY
+  skillsSimple: [{
+    type: String,
+    trim: true
   }],
   certifications: [{
     name: { type: String, required: true, trim: true },
@@ -356,6 +449,17 @@ const userSchema = new mongoose.Schema({
     portfolio: { type: String, default: '', trim: true },
     facebook: { type: String, default: '', trim: true },
     instagram: { type: String, default: '', trim: true }
+  },
+  // ADDED STANDALONE SOCIAL FIELDS
+  linkedinProfile: {
+    type: String,
+    default: '',
+    trim: true
+  },
+  twitterProfile: {
+    type: String,
+    default: '',
+    trim: true
   },
 
   // === PERFORMANCE & APPRAISAL ===
@@ -471,6 +575,40 @@ userSchema.virtual('displayName').get(function() {
   return this.name.split(' ')[0];
 });
 
+// Virtual for simple skills array compatibility
+userSchema.virtual('skillsArray').get(function() {
+  if (this.skillsSimple && this.skillsSimple.length > 0) {
+    return this.skillsSimple;
+  }
+  if (this.skills && this.skills.length > 0) {
+    return this.skills.map(skill => skill.name);
+  }
+  return [];
+});
+
+// Virtual for simple address compatibility
+userSchema.virtual('currentAddressString').get(function() {
+  if (this.currentAddressSimple && this.currentAddressSimple !== '') {
+    return this.currentAddressSimple;
+  }
+  if (this.currentAddress && this.currentAddress.street) {
+    const addr = this.currentAddress;
+    return `${addr.street}, ${addr.city}, ${addr.state} - ${addr.pincode}, ${addr.country}`;
+  }
+  return '';
+});
+
+userSchema.virtual('permanentAddressString').get(function() {
+  if (this.permanentAddressSimple && this.permanentAddressSimple !== '') {
+    return this.permanentAddressSimple;
+  }
+  if (this.permanentAddress && this.permanentAddress.street) {
+    const addr = this.permanentAddress;
+    return `${addr.street}, ${addr.city}, ${addr.state} - ${addr.pincode}, ${addr.country}`;
+  }
+  return '';
+});
+
 // === METHODS ===
 userSchema.methods.updateLastLogin = function() {
   this.lastLogin = new Date();
@@ -486,10 +624,16 @@ userSchema.methods.calculateNetSalary = function() {
 userSchema.methods.calculateProfileCompletion = function() {
   let completion = 0;
   const fields = [
-    this.name, this.email, this.phone, this.designation, 
-    this.dob, this.gender, this.personalEmail, 
-    this.currentAddress.street, this.bankDetails.accountNumber,
-    this.profilePicture.url
+    this.name, 
+    this.email, 
+    this.phone, 
+    this.designation, 
+    this.dob, 
+    this.gender, 
+    this.personalEmail, 
+    this.currentAddressString,
+    this.bankName || this.bankDetails.bankName,
+    this.profilePhoto || this.profilePicture.url
   ];
   
   const completedFields = fields.filter(field => {
@@ -502,7 +646,24 @@ userSchema.methods.calculateProfileCompletion = function() {
 };
 
 userSchema.methods.getEmergencyContact = function() {
+  if (this.emergencyContactName) {
+    return {
+      name: this.emergencyContactName,
+      phone: this.emergencyContactNumber
+    };
+  }
   return this.emergencyContact.name ? this.emergencyContact : null;
+};
+
+// Method to get skills as array
+userSchema.methods.getSkillsArray = function() {
+  if (this.skillsSimple && this.skillsSimple.length > 0) {
+    return this.skillsSimple;
+  }
+  if (this.skills && this.skills.length > 0) {
+    return this.skills.map(skill => skill.name);
+  }
+  return [];
 };
 
 // === PRE-SAVE MIDDLEWARE ===
@@ -514,6 +675,38 @@ userSchema.pre('save', function(next) {
   
   // Auto-calculate profile completion
   this.calculateProfileCompletion();
+  
+  // Sync simple fields with complex objects
+  if (this.isModified('currentAddressSimple') && this.currentAddressSimple) {
+    this.currentAddress.street = this.currentAddressSimple;
+  }
+  
+  if (this.isModified('permanentAddressSimple') && this.permanentAddressSimple) {
+    this.permanentAddress.street = this.permanentAddressSimple;
+  }
+  
+  // Sync emergency contact fields
+  if (this.isModified('emergencyContactName') || this.isModified('emergencyContactNumber')) {
+    this.emergencyContact.name = this.emergencyContactName;
+    this.emergencyContact.phone = this.emergencyContactNumber;
+  }
+  
+  // Sync bank fields
+  if (this.isModified('bankName') || this.isModified('accountNumber')) {
+    this.bankDetails.bankName = this.bankName;
+    this.bankDetails.accountNumber = this.accountNumber;
+    this.bankDetails.ifscCode = this.ifscCode;
+    this.bankDetails.branchName = this.branchName;
+    this.bankDetails.accountType = this.accountType;
+  }
+  
+  // Sync social fields
+  if (this.isModified('linkedinProfile')) {
+    this.socialLinks.linkedin = this.linkedinProfile;
+  }
+  if (this.isModified('twitterProfile')) {
+    this.socialLinks.twitter = this.twitterProfile;
+  }
   
   // Update last profile update timestamp
   if (this.isModified()) {
@@ -536,6 +729,15 @@ userSchema.statics.findByDepartment = function(departmentId) {
   return this.find({ department: departmentId });
 };
 
+userSchema.statics.updateProfileCompletionForAll = async function() {
+  const users = await this.find();
+  for (const user of users) {
+    user.calculateProfileCompletion();
+    await user.save();
+  }
+  return users.length;
+};
+
 // === INDEXES ===
 userSchema.index({ email: 1 });
 userSchema.index({ employeeId: 1 });
@@ -544,5 +746,6 @@ userSchema.index({ role: 1 });
 userSchema.index({ status: 1 });
 userSchema.index({ 'currentAddress.city': 1 });
 userSchema.index({ joiningDate: 1 });
+userSchema.index({ profileCompletion: -1 });
 
 module.exports = mongoose.model('User', userSchema);

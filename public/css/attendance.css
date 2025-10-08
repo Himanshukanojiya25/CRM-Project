@@ -1,4 +1,4 @@
-/* Attendance Page Animations */
+/* Attendance Page - Complete Responsive */
 .attendance-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -6,6 +6,8 @@
     padding: 2rem;
     max-width: 1200px;
     margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .attendance-card {
@@ -20,6 +22,8 @@
     transition: all 0.3s ease;
     cursor: pointer;
     animation: slideUp 0.5s ease;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .attendance-card:hover {
@@ -62,6 +66,9 @@
     cursor: pointer;
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
+    width: 100%;
+    max-width: 200px;
+    box-sizing: border-box;
 }
 
 .glow-btn:hover {
@@ -86,6 +93,7 @@
     display: inline-block;
     min-width: 100px;
     text-align: center;
+    font-size: 0.9rem;
 }
 
 .status-present { background: #4CAF50; color: white; }
@@ -108,6 +116,7 @@
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    font-size: 0.9rem;
 }
 
 .records-table th,
@@ -141,33 +150,6 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Mobile Responsive */
-@media (max-width: 768px) {
-    .attendance-container {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-        padding: 1rem;
-    }
-    
-    .attendance-card {
-        padding: 1.5rem;
-    }
-    
-    .glow-btn {
-        padding: 10px 20px;
-        font-size: 1rem;
-    }
-    
-    .records-table {
-        font-size: 0.9rem;
-    }
-    
-    .records-table th,
-    .records-table td {
-        padding: 8px 10px;
-    }
-}
-
 /* Status Container */
 .status-container {
     background: white;
@@ -178,12 +160,15 @@
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     text-align: center;
     animation: fadeIn 0.6s ease;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .status-container h3 {
     color: #2d2dff;
     margin-bottom: 1rem;
     font-weight: bold;
+    font-size: 1.3rem;
 }
 
 /* Records Container */
@@ -195,12 +180,16 @@
     max-width: 1200px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     animation: slideUp 0.7s ease;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: auto;
 }
 
 .records-container h3 {
     color: #2d2dff;
     margin-bottom: 1.5rem;
     font-weight: bold;
+    font-size: 1.3rem;
 }
 
 /* Loading Animation */
@@ -231,6 +220,8 @@
     z-index: 10000;
     animation: slideInRight 0.3s ease;
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    max-width: 300px;
+    word-wrap: break-word;
 }
 
 .notification.success {
@@ -249,4 +240,547 @@
 @keyframes slideOutRight {
     from { transform: translateX(0); opacity: 1; }
     to { transform: translateX(100%); opacity: 0; }
+}
+
+/* ========== NEW FEATURES ========== */
+
+/* Month Selector */
+.month-selector {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 15px;
+    margin: 2rem auto;
+    max-width: 1200px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: fadeIn 0.6s ease;
+    width: 100%;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.month-selector h2 {
+    color: #2d2dff;
+    margin: 0;
+    font-weight: bold;
+    font-size: 1.4rem;
+}
+
+#current-month {
+    color: #ff6b6b;
+    font-weight: bold;
+}
+
+.month-dropdown {
+    padding: 10px 20px;
+    border: 2px solid #2d2dff;
+    border-radius: 25px;
+    background: white;
+    color: #333;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 200px;
+    box-sizing: border-box;
+}
+
+.month-dropdown:hover {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 15px rgba(255,107,107,0.3);
+}
+
+/* Monthly Stats */
+.monthly-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin: 2rem auto;
+    max-width: 1200px;
+    animation: slideUp 0.7s ease;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.stat-card h4 {
+    color: #333;
+    margin: 0 0 1rem 0;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-count {
+    font-size: 2rem;
+    font-weight: bold;
+    display: block;
+    line-height: 1;
+}
+
+.present-count { color: #4CAF50; }
+.late-count { color: #FF9800; }
+.absent-count { color: #F44336; }
+.total-count { color: #2196F3; }
+
+/* Calendar Container */
+.calendar-container {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 15px;
+    margin: 2rem auto;
+    max-width: 1200px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    animation: slideUp 0.8s ease;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: auto;
+}
+
+.calendar-container h3 {
+    color: #2d2dff;
+    margin-bottom: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    font-size: 1.3rem;
+}
+
+.calendar {
+    min-width: 100%;
+    width: max-content;
+}
+
+.calendar-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.month-name {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #2d2dff;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    min-width: 600px;
+}
+
+.calendar-day {
+    padding: 12px 8px;
+    text-align: center;
+    border-radius: 8px;
+    background: #f8f9fa;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+}
+
+.calendar-day.header {
+    background: linear-gradient(135deg, #2d2dff, #000000);
+    color: white;
+    font-weight: bold;
+    font-size: 0.8rem;
+    padding: 10px 5px;
+}
+
+.calendar-day.empty {
+    background: transparent;
+    border: none;
+}
+
+.calendar-day.attendance-present {
+    background: #4CAF50;
+    color: white;
+    font-weight: bold;
+}
+
+.calendar-day.attendance-late {
+    background: #FF9800;
+    color: white;
+    font-weight: bold;
+}
+
+.calendar-day.attendance-absent {
+    background: #F44336;
+    color: white;
+    font-weight: bold;
+}
+
+.calendar-day.attendance-half-day {
+    background: #2196F3;
+    color: white;
+    font-weight: bold;
+}
+
+/* Check-in/out Time Display */
+.checkin-time, .checkout-time {
+    margin-top: 10px;
+    font-size: 0.8rem;
+    opacity: 0.9;
+    font-weight: 500;
+    background: rgba(255,255,255,0.2);
+    padding: 5px 10px;
+    border-radius: 15px;
+    display: inline-block;
+}
+
+/* Today Time Display */
+.today-time {
+    color: #666;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-top: 10px;
+}
+
+/* ========== COMPLETE RESPONSIVE FIXES ========== */
+
+/* Large Desktop */
+@media (min-width: 1201px) {
+    .attendance-container {
+        max-width: 1200px;
+    }
+}
+
+/* Desktop */
+@media (max-width: 1200px) {
+    .attendance-container {
+        padding: 1.5rem;
+        max-width: 100%;
+    }
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+    .attendance-container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 1.5rem;
+    }
+    
+    .monthly-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .calendar-container {
+        padding: 1rem;
+        margin: 1.5rem auto;
+    }
+    
+    .calendar-grid {
+        min-width: 500px;
+    }
+    
+    .calendar-day {
+        padding: 10px 5px;
+        min-height: 45px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .attendance-container {
+        padding: 1rem;
+        gap: 1rem;
+        grid-template-columns: 1fr;
+    }
+    
+    .attendance-card {
+        padding: 1.5rem;
+        margin: 0 auto;
+        max-width: 100%;
+    }
+    
+    .month-selector {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+        padding: 1rem;
+        margin: 1rem auto;
+    }
+    
+    .month-selector h2 {
+        font-size: 1.2rem;
+    }
+    
+    .month-dropdown {
+        min-width: 150px;
+        width: 100%;
+        max-width: 250px;
+        font-size: 0.9rem;
+    }
+    
+    .monthly-stats {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin: 1rem auto;
+    }
+    
+    .stat-card {
+        padding: 1.2rem;
+        min-height: 100px;
+    }
+    
+    .stat-card h4 {
+        font-size: 0.85rem;
+        margin-bottom: 0.8rem;
+    }
+    
+    .stat-count {
+        font-size: 1.8rem;
+    }
+    
+    .calendar-container {
+        padding: 1rem;
+        margin: 1rem auto;
+        border-radius: 10px;
+    }
+    
+    .calendar-container h3 {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+    }
+    
+    .calendar-grid {
+        min-width: 400px;
+        gap: 3px;
+    }
+    
+    .calendar-day {
+        padding: 8px 4px;
+        min-height: 40px;
+        font-size: 0.75rem;
+    }
+    
+    .calendar-day.header {
+        padding: 8px 3px;
+        font-size: 0.7rem;
+    }
+    
+    .status-container,
+    .records-container {
+        padding: 1rem;
+        margin: 1rem auto;
+        border-radius: 10px;
+    }
+    
+    .status-container h3,
+    .records-container h3 {
+        font-size: 1.2rem;
+    }
+    
+    .records-table {
+        font-size: 0.75rem;
+        min-width: 600px;
+    }
+    
+    .records-table th,
+    .records-table td {
+        padding: 8px 10px;
+    }
+    
+    .glow-btn {
+        padding: 10px 20px;
+        font-size: 1rem;
+        max-width: 180px;
+    }
+    
+    .status-badge {
+        min-width: 80px;
+        padding: 6px 12px;
+        font-size: 0.75rem;
+    }
+    
+    .checkin-time, 
+    .checkout-time {
+        font-size: 0.75rem;
+    }
+    
+    .today-time {
+        font-size: 0.8rem;
+    }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+    .attendance-container {
+        padding: 0.5rem;
+    }
+    
+    .attendance-card {
+        padding: 1rem;
+    }
+    
+    .month-selector h2 {
+        font-size: 1.1rem;
+    }
+    
+    .month-dropdown {
+        font-size: 0.85rem;
+        padding: 8px 15px;
+    }
+    
+    .stat-card {
+        padding: 1rem;
+        min-height: 90px;
+    }
+    
+    .stat-count {
+        font-size: 1.6rem;
+    }
+    
+    .calendar-grid {
+        min-width: 350px;
+    }
+    
+    .calendar-day {
+        padding: 6px 3px;
+        min-height: 35px;
+        font-size: 0.7rem;
+    }
+    
+    .calendar-day.header {
+        padding: 6px 2px;
+        font-size: 0.65rem;
+    }
+    
+    .records-table {
+        min-width: 500px;
+        font-size: 0.7rem;
+    }
+    
+    .records-table th,
+    .records-table td {
+        padding: 6px 8px;
+    }
+    
+    .glow-btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+        max-width: 160px;
+    }
+}
+
+/* Extra Small Mobile */
+@media (max-width: 360px) {
+    .attendance-container {
+        padding: 0.25rem;
+    }
+    
+    .attendance-card {
+        padding: 0.8rem;
+    }
+    
+    .month-selector {
+        padding: 0.8rem;
+    }
+    
+    .month-selector h2 {
+        font-size: 1rem;
+    }
+    
+    .calendar-grid {
+        min-width: 320px;
+    }
+    
+    .calendar-day {
+        padding: 5px 2px;
+        min-height: 30px;
+        font-size: 0.65rem;
+    }
+    
+    .stat-card h4 {
+        font-size: 0.8rem;
+    }
+    
+    .stat-count {
+        font-size: 1.4rem;
+    }
+    
+    .records-table {
+        min-width: 450px;
+    }
+}
+
+/* Mobile Navbar Fix */
+@media (max-width: 768px) {
+    /* Ensure content doesn't hide behind navbar */
+    .attendance-container {
+        margin-top: 20px;
+    }
+    
+    /* Mobile sidebar adjustments */
+    .sidebar-toggle {
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        z-index: 1001;
+        background: rgba(255,255,255,0.9);
+        border: none;
+        padding: 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    /* Prevent horizontal scroll on body */
+    body {
+        overflow-x: hidden;
+        width: 100%;
+    }
+    
+    /* Ensure all containers are properly sized */
+    .status-container,
+    .records-container,
+    .month-selector,
+    .calendar-container,
+    .monthly-stats {
+        width: calc(100% - 2rem);
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .attendance-card,
+    .glow-btn,
+    .sidebar-toggle {
+        display: none;
+    }
+    
+    .attendance-container {
+        grid-template-columns: 1fr;
+    }
 }

@@ -1,324 +1,717 @@
 <% layout = 'layouts/user-base' %>
 
 <style>
-    /* Custom Styles for Edit Profile Page */
-    :root {
-        --primary-color: #6a11cb;
-        --secondary-color: #2575fc;
-        --card-bg: #fff;
-        --input-border: #e9ecef;
-        --input-focus-border: var(--primary-color);
-        --btn-primary-bg: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --card-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    --hover-shadow: 0 25px 50px rgba(0,0,0,0.15);
+}
+
+.edit-profile-container {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.profile-header {
+    background: var(--primary-gradient);
+    border-radius: 20px;
+    color: white;
+    padding: 3rem 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: rgba(255,255,255,0.1);
+    transform: rotate(45deg);
+}
+
+.profile-header-content {
+    position: relative;
+    z-index: 2;
+}
+
+.header-icon {
+    width: 80px;
+    height: 80px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    backdrop-filter: blur(10px);
+}
+
+.header-icon i {
+    font-size: 2rem;
+    color: white;
+}
+
+.form-section {
+    background: white;
+    border-radius: 20px;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--card-shadow);
+    border: 1px solid rgba(255,255,255,0.2);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.form-section:hover {
+    box-shadow: var(--hover-shadow);
+    transform: translateY(-2px);
+}
+
+.section-title {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 3px solid;
+    border-image: var(--primary-gradient) 1;
+}
+
+.form-card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: var(--card-shadow);
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.form-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--hover-shadow);
+}
+
+.form-floating>.form-control, 
+.form-floating>.form-select {
+    height: calc(3.5rem + 2px);
+    line-height: 1.25;
+    border-radius: 12px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.form-floating>label {
+    padding: 1rem 0.75rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.form-floating>.form-control:focus, 
+.form-floating>.form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+    transform: translateY(-1px);
+}
+
+.form-floating>.form-control:focus~label, 
+.form-floating>.form-select:focus~label {
+    color: #667eea;
+    transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+}
+
+.upload-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 2px dashed #dee2e6;
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.upload-card:hover {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #f0f4ff 0%, #e6f0ff 100%);
+    transform: translateY(-2px);
+}
+
+.upload-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--primary-gradient);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.btn-primary {
+    background: var(--primary-gradient);
+    border: none;
+    border-radius: 50px;
+    padding: 1rem 2.5rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s;
+}
+
+.btn-primary:hover::before {
+    left: 100%;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+}
+
+.btn-outline-secondary {
+    border: 2px solid #6c757d;
+    border-radius: 50px;
+    padding: 1rem 2rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+    background: #6c757d;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.alert {
+    border-radius: 15px;
+    border: none;
+    padding: 1.5rem;
+    font-weight: 500;
+}
+
+.alert-success {
+    background: var(--success-gradient);
+    color: white;
+}
+
+.alert-danger {
+    background: var(--secondary-gradient);
+    color: white;
+}
+
+.progress {
+    height: 12px;
+    border-radius: 10px;
+    background: #f8f9fa;
+}
+
+.progress-bar {
+    background: var(--primary-gradient);
+    border-radius: 10px;
+    transition: width 0.6s ease;
+}
+
+.form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+.form-check-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+}
+
+/* Animation classes */
+.fade-in {
+    animation: fadeIn 0.6s ease-in;
+}
+
+.slide-up {
+    animation: slideUp 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0;
+        transform: translateY(30px);
     }
-    .form-card {
-        border-radius: 15px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    to { 
+        opacity: 1;
+        transform: translateY(0);
     }
-    .form-control, .form-select {
-        border-radius: 8px;
-        border: 1px solid var(--input-border);
-        padding: 12px 15px;
-        transition: all 0.3s ease;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .profile-header {
+        padding: 2rem 1rem;
     }
-    .form-control:focus, .form-select:focus {
-        border-color: var(--input-focus-border);
-        box-shadow: 0 0 0 0.25rem rgba(106, 17, 203, 0.25);
+    
+    .form-section {
+        padding: 1.5rem;
     }
-    .profile-photo-upload-card, .cover-photo-upload-card, .document-upload-card {
-        border-radius: 15px;
-        border: none;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        transition: transform 0.3s ease;
-    }
-    .btn-primary {
-        background: var(--btn-primary-bg);
-        border: none;
-        padding: 12px 25px;
-        border-radius: 50px;
-        font-weight: 600;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-    }
-    .form-section-title {
-        color: var(--primary-color);
-        font-weight: bold;
-        border-left: 4px solid var(--primary-color);
-        padding-left: 1rem;
-        margin-bottom: 2rem;
-    }
-    .form-group-title {
-        color: var(--text-dark);
-        font-weight: 600;
+    
+    .btn-primary, .btn-outline-secondary {
+        width: 100%;
         margin-bottom: 1rem;
     }
+}
 </style>
 
-<div class="container-fluid px-4 py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 mb-2 text-gray-800">Edit Profile</h1>
-            <p class="mb-0 text-muted">Update your professional and personal details</p>
-        </div>
-        <div>
-            <a href="/user/profile" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-2"></i>Back to Profile
-            </a>
-        </div>
-    </div>
-
-    <% if (success && success.length > 0) { %>
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <%= success %>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <% } %>
-    <% if (error && error.length > 0) { %>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <%= error %>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <% } %>
-
-    <div class="row g-4">
-        <div class="col-lg-8">
-            <div class="card form-card mb-4">
-                <div class="card-body p-4">
-                    <form action="/user/profile/update" method="POST">
-                        <h4 class="form-section-title">Personal Details</h4>
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label for="name" class="form-label">Full Name</label>
-                                <input type="text" class="form-control" id="name" name="name" value="<%= user.name %>" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="phone" class="form-label">Phone Number</label>
-                                <input type="tel" class="form-control" id="phone" name="phone" value="<%= user.phone %>">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="personalEmail" class="form-label">Personal Email</label>
-                                <input type="email" class="form-control" id="personalEmail" name="personalEmail" value="<%= user.personalEmail %>">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="dob" class="form-label">Date of Birth</label>
-                                <input type="date" class="form-control" id="dob" name="dob" value="<%= user.dob ? new Date(user.dob).toISOString().slice(0, 10) : '' %>">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="gender" class="form-label">Gender</label>
-                                <select class="form-select" id="gender" name="gender">
-                                    <option value="" disabled selected>Select Gender</option>
-                                    <option value="Male" <%= user.gender === 'Male' ? 'selected' : '' %>>Male</option>
-                                    <option value="Female" <%= user.gender === 'Female' ? 'selected' : '' %>>Female</option>
-                                    <option value="Other" <%= user.gender === 'Other' ? 'selected' : '' %>>Other</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="bloodGroup" class="form-label">Blood Group</label>
-                                <select class="form-select" id="bloodGroup" name="bloodGroup">
-                                    <option value="" disabled selected>Select Blood Group</option>
-                                    <option value="A+" <%= user.bloodGroup === 'A+' ? 'selected' : '' %>>A+</option>
-                                    <option value="A-" <%= user.bloodGroup === 'A-' ? 'selected' : '' %>>A-</option>
-                                    <option value="B+" <%= user.bloodGroup === 'B+' ? 'selected' : '' %>>B+</option>
-                                    <option value="B-" <%= user.bloodGroup === 'B-' ? 'selected' : '' %>>B-</option>
-                                    <option value="AB+" <%= user.bloodGroup === 'AB+' ? 'selected' : '' %>>AB+</option>
-                                    <option value="AB-" <%= user.bloodGroup === 'AB-' ? 'selected' : '' %>>AB-</option>
-                                    <option value="O+" <%= user.bloodGroup === 'O+' ? 'selected' : '' %>>O+</option>
-                                    <option value="O-" <%= user.bloodGroup === 'O-' ? 'selected' : '' %>>O-</option>
-                                </select>
-                            </div>
-                            <div class="col-12">
-                                <label for="currentAddress" class="form-label">Current Address</label>
-                                <input type="text" class="form-control" id="currentAddress" name="currentAddress" value="<%= user.currentAddress %>">
-                            </div>
-                            <div class="col-12">
-                                <label for="permanentAddress" class="form-label">Permanent Address</label>
-                                <input type="text" class="form-control" id="permanentAddress" name="permanentAddress" value="<%= user.permanentAddress %>">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="emergencyContactName" class="form-label">Emergency Contact Name</label>
-                                <input type="text" class="form-control" id="emergencyContactName" name="emergencyContactName" value="<%= user.emergencyContactName %>">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="emergencyContactNumber" class="form-label">Emergency Contact Number</label>
-                                <input type="tel" class="form-control" id="emergencyContactNumber" name="emergencyContactNumber" value="<%= user.emergencyContactNumber %>">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="linkedinProfile" class="form-label">LinkedIn Profile URL</label>
-                                <input type="url" class="form-control" id="linkedinProfile" name="linkedinProfile" value="<%= user.linkedinProfile %>">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="twitterProfile" class="form-label">Twitter Profile URL</label>
-                                <input type="url" class="form-control" id="twitterProfile" name="twitterProfile" value="<%= user.twitterProfile %>">
-                            </div>
-                        </div>
-
-                        <h4 class="form-section-title">Professional Details</h4>
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label for="employeeId" class="form-label">Employee ID</label>
-                                <input type="text" class="form-control" id="employeeId" name="employeeId" value="<%= user.employeeId %>">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="designation" class="form-label">Designation</label>
-                                <input type="text" class="form-control" id="designation" name="designation" value="<%= user.designation %>">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="employeeType" class="form-label">Employee Type</label>
-                                <select class="form-select" id="employeeType" name="employeeType">
-                                    <option value="" disabled selected>Select Employee Type</option>
-                                    <option value="Full-time" <%= user.employeeType === 'Full-time' ? 'selected' : '' %>>Full-time</option>
-                                    <option value="Part-time" <%= user.employeeType === 'Part-time' ? 'selected' : '' %>>Part-time</option>
-                                    <option value="Contract" <%= user.employeeType === 'Contract' ? 'selected' : '' %>>Contract</option>
-                                    <option value="Intern" <%= user.employeeType === 'Intern' ? 'selected' : '' %>>Intern</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="workLocation" class="form-label">Work Location</label>
-                                <select class="form-select" id="workLocation" name="workLocation">
-                                    <option value="" disabled selected>Select Work Location</option>
-                                    <option value="Office" <%= user.workLocation === 'Office' ? 'selected' : '' %>>Office</option>
-                                    <option value="Remote" <%= user.workLocation === 'Remote' ? 'selected' : '' %>>Remote</option>
-                                    <option value="Hybrid" <%= user.workLocation === 'Hybrid' ? 'selected' : '' %>>Hybrid</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="shiftTimings" class="form-label">Shift Timings</label>
-                                <input type="text" class="form-control" id="shiftTimings" name="shiftTimings" value="<%= user.shiftTimings %>">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="employeeStatus" class="form-label">Employee Status</label>
-                                <select class="form-select" id="employeeStatus" name="employeeStatus">
-                                    <option value="" disabled selected>Select Status</option>
-                                    <option value="Probation" <%= user.employeeStatus === 'Probation' ? 'selected' : '' %>>Probation</option>
-                                    <option value="Confirmed" <%= user.employeeStatus === 'Confirmed' ? 'selected' : '' %>>Confirmed</option>
-                                </select>
-                            </div>
-                            <div class="col-md-12">
-                                <label for="team" class="form-label">Team</label>
-                                <input type="text" class="form-control" id="team" name="team" value="<%= user.team %>">
-                            </div>
-                        </div>
-
-                        <h4 class="form-section-title">Bank Details</h4>
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label for="bankName" class="form-label">Bank Name</label>
-                                <input type="text" class="form-control" id="bankName" name="bankName" value="<%= user.bankName %>">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="accountNumber" class="form-label">Account Number</label>
-                                <input type="text" class="form-control" id="accountNumber" name="accountNumber" value="<%= user.accountNumber %>">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="ifscCode" class="form-label">IFSC Code</label>
-                                <input type="text" class="form-control" id="ifscCode" name="ifscCode" value="<%= user.ifscCode %>">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="branchName" class="form-label">Branch Name</label>
-                                <input type="text" class="form-control" id="branchName" name="branchName" value="<%= user.branchName %>">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="accountType" class="form-label">Account Type</label>
-                                <select class="form-select" id="accountType" name="accountType">
-                                    <option value="" disabled selected>Select Account Type</option>
-                                    <option value="Savings" <%= user.accountType === 'Savings' ? 'selected' : '' %>>Savings</option>
-                                    <option value="Current" <%= user.accountType === 'Current' ? 'selected' : '' %>>Current</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <h4 class="form-section-title">Education & Experience</h4>
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label for="qualification" class="form-label">Highest Qualification</label>
-                                <input type="text" class="form-control" id="qualification" name="qualification" value="<%= user.qualification %>">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="university" class="form-label">University / Institute</label>
-                                <input type="text" class="form-control" id="university" name="university" value="<%= user.university %>">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="yearOfPassing" class="form-label">Year of Passing</label>
-                                <input type="number" class="form-control" id="yearOfPassing" name="yearOfPassing" value="<%= user.yearOfPassing || '' %>">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="percentage" class="form-label">Percentage / GPA</label>
-                                <input type="text" class="form-control" id="percentage" name="percentage" value="<%= user.percentage %>">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="previousCompany" class="form-label">Previous Company</label>
-                                <input type="text" class="form-control" id="previousCompany" name="previousCompany" value="<%= user.previousCompany %>">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="previousDesignation" class="form-label">Previous Designation</label>
-                                <input type="text" class="form-control" id="previousDesignation" name="previousDesignation" value="<%= user.previousDesignation %>">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="experienceYears" class="form-label">Experience (in Years)</label>
-                                <input type="number" class="form-control" id="experienceYears" name="experienceYears" value="<%= user.experienceYears || '' %>">
-                            </div>
-                            <div class="col-md-12">
-                                <label for="skills" class="form-label">Skills (comma separated)</label>
-                                <input type="text" class="form-control" id="skills" name="skills" value="<%= user.skills.join(', ') %>">
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-end">
-                            <button type="submit" class="btn btn-primary mt-3">
-                                <i class="fas fa-save me-2"></i>Save Changes
-                            </button>
-                        </div>
-                    </form>
+<div class="edit-profile-container">
+    <div class="container">
+        <!-- Header Section -->
+        <div class="profile-header fade-in">
+            <div class="profile-header-content">
+                <div class="header-icon">
+                    <i class="fas fa-user-edit"></i>
                 </div>
+                <h1 class="display-5 fw-bold mb-3">Edit Your Profile</h1>
+                <p class="lead mb-0 opacity-90">Update your professional and personal information to keep your profile complete</p>
             </div>
         </div>
+
+        <!-- Alert Messages -->
+        <% if (success && success.length > 0) { %>
+            <div class="alert alert-success alert-dismissible fade show slide-up" role="alert">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-check-circle me-3 fa-lg"></i>
+                    <div class="flex-grow-1">
+                        <strong>Success!</strong> <%= success %>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                </div>
+            </div>
+        <% } %>
         
-        <div class="col-lg-4">
-            <div class="card profile-photo-upload-card mb-4">
-                <div class="card-body">
-                    <h5 class="form-group-title"><i class="fas fa-camera me-2 text-primary"></i>Profile Photo</h5>
-                    <form action="/user/profile/upload-profile-photo" method="POST" enctype="multipart/form-data">
-                        <input type="file" name="profilePhoto" id="profilePhoto" class="form-control mb-2">
-                        <button type="submit" class="btn btn-sm btn-outline-primary">Upload</button>
-                    </form>
+        <% if (error && error.length > 0) { %>
+            <div class="alert alert-danger alert-dismissible fade show slide-up" role="alert">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-exclamation-circle me-3 fa-lg"></i>
+                    <div class="flex-grow-1">
+                        <strong>Error!</strong> <%= error %>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
                 </div>
             </div>
-            
-            <div class="card cover-photo-upload-card mb-4">
-                <div class="card-body">
-                    <h5 class="form-group-title"><i class="fas fa-image me-2 text-info"></i>Cover Photo</h5>
-                    <form action="/user/profile/upload-cover-photo" method="POST" enctype="multipart/form-data">
-                        <input type="file" name="coverPhoto" id="coverPhoto" class="form-control mb-2">
-                        <button type="submit" class="btn btn-sm btn-outline-info">Upload</button>
-                    </form>
-                </div>
+        <% } %>
+
+        <div class="row g-4">
+            <!-- Main Form Content -->
+            <div class="col-lg-8">
+                <form action="/user/profile/update" method="POST" id="profileForm">
+                    <!-- Personal Details Section -->
+                    <div class="form-section slide-up">
+                        <h3 class="section-title">
+                            <i class="fas fa-user-circle me-2"></i>Personal Details
+                        </h3>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="name" name="name" 
+                                           value="<%= user.name %>" required>
+                                    <label for="name"><i class="fas fa-signature me-2"></i>Full Name</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="tel" class="form-control" id="phone" name="phone" 
+                                           value="<%= user.phone %>">
+                                    <label for="phone"><i class="fas fa-phone me-2"></i>Phone Number</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="email" class="form-control" id="personalEmail" name="personalEmail" 
+                                           value="<%= user.personalEmail %>">
+                                    <label for="personalEmail"><i class="fas fa-envelope me-2"></i>Personal Email</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="date" class="form-control" id="dob" name="dob" 
+                                           value="<%= user.dob ? new Date(user.dob).toISOString().split('T')[0] : '' %>">
+                                    <label for="dob"><i class="fas fa-birthday-cake me-2"></i>Date of Birth</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select" id="gender" name="gender">
+                                        <option value="">Select Gender</option>
+                                        <option value="Male" <%= user.gender === 'Male' ? 'selected' : '' %>>Male</option>
+                                        <option value="Female" <%= user.gender === 'Female' ? 'selected' : '' %>>Female</option>
+                                        <option value="Other" <%= user.gender === 'Other' ? 'selected' : '' %>>Other</option>
+                                    </select>
+                                    <label for="gender"><i class="fas fa-venus-mars me-2"></i>Gender</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select" id="bloodGroup" name="bloodGroup">
+                                        <option value="">Select Blood Group</option>
+                                        <option value="A+" <%= user.bloodGroup === 'A+' ? 'selected' : '' %>>A+</option>
+                                        <option value="A-" <%= user.bloodGroup === 'A-' ? 'selected' : '' %>>A-</option>
+                                        <option value="B+" <%= user.bloodGroup === 'B+' ? 'selected' : '' %>>B+</option>
+                                        <option value="B-" <%= user.bloodGroup === 'B-' ? 'selected' : '' %>>B-</option>
+                                        <option value="AB+" <%= user.bloodGroup === 'AB+' ? 'selected' : '' %>>AB+</option>
+                                        <option value="AB-" <%= user.bloodGroup === 'AB-' ? 'selected' : '' %>>AB-</option>
+                                        <option value="O+" <%= user.bloodGroup === 'O+' ? 'selected' : '' %>>O+</option>
+                                        <option value="O-" <%= user.bloodGroup === 'O-' ? 'selected' : '' %>>O-</option>
+                                    </select>
+                                    <label for="bloodGroup"><i class="fas fa-tint me-2"></i>Blood Group</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="currentAddress" name="currentAddress" 
+                                           value="<%= user.currentAddress || user.currentAddressSimple %>">
+                                    <label for="currentAddress"><i class="fas fa-home me-2"></i>Current Address</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="permanentAddress" name="permanentAddress" 
+                                           value="<%= user.permanentAddress || user.permanentAddressSimple %>">
+                                    <label for="permanentAddress"><i class="fas fa-building me-2"></i>Permanent Address</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Emergency Contact Section -->
+                    <div class="form-section slide-up">
+                        <h3 class="section-title">
+                            <i class="fas fa-first-aid me-2"></i>Emergency Contact
+                        </h3>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="emergencyContactName" name="emergencyContactName" 
+                                           value="<%= user.emergencyContactName || user.emergencyContact?.name %>">
+                                    <label for="emergencyContactName"><i class="fas fa-user me-2"></i>Contact Name</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="tel" class="form-control" id="emergencyContactNumber" name="emergencyContactNumber" 
+                                           value="<%= user.emergencyContactNumber || user.emergencyContact?.phone %>">
+                                    <label for="emergencyContactNumber"><i class="fas fa-phone-alt me-2"></i>Contact Number</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Professional Details Section -->
+                    <div class="form-section slide-up">
+                        <h3 class="section-title">
+                            <i class="fas fa-briefcase me-2"></i>Professional Details
+                        </h3>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="employeeId" name="employeeId" 
+                                           value="<%= user.employeeId %>">
+                                    <label for="employeeId"><i class="fas fa-id-card me-2"></i>Employee ID</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="designation" name="designation" 
+                                           value="<%= user.designation %>">
+                                    <label for="designation"><i class="fas fa-user-tie me-2"></i>Designation</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select" id="employeeType" name="employeeType">
+                                        <option value="">Select Employee Type</option>
+                                        <option value="Full-time" <%= user.employeeType === 'Full-time' ? 'selected' : '' %>>Full-time</option>
+                                        <option value="Part-time" <%= user.employeeType === 'Part-time' ? 'selected' : '' %>>Part-time</option>
+                                        <option value="Contract" <%= user.employeeType === 'Contract' ? 'selected' : '' %>>Contract</option>
+                                        <option value="Intern" <%= user.employeeType === 'Intern' ? 'selected' : '' %>>Intern</option>
+                                    </select>
+                                    <label for="employeeType"><i class="fas fa-briefcase me-2"></i>Employee Type</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select" id="workLocation" name="workLocation">
+                                        <option value="">Select Work Location</option>
+                                        <option value="Office" <%= user.workLocation === 'Office' ? 'selected' : '' %>>Office</option>
+                                        <option value="Remote" <%= user.workLocation === 'Remote' ? 'selected' : '' %>>Remote</option>
+                                        <option value="Hybrid" <%= user.workLocation === 'Hybrid' ? 'selected' : '' %>>Hybrid</option>
+                                    </select>
+                                    <label for="workLocation"><i class="fas fa-location-arrow me-2"></i>Work Location</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="shiftTimings" name="shiftTimings" 
+                                           value="<%= user.shiftTimings %>">
+                                    <label for="shiftTimings"><i class="fas fa-clock me-2"></i>Shift Timings</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select" id="employeeStatus" name="employeeStatus">
+                                        <option value="">Select Status</option>
+                                        <option value="Probation" <%= user.employeeStatus === 'Probation' ? 'selected' : '' %>>Probation</option>
+                                        <option value="Confirmed" <%= user.employeeStatus === 'Confirmed' ? 'selected' : '' %>>Confirmed</option>
+                                    </select>
+                                    <label for="employeeStatus"><i class="fas fa-user-check me-2"></i>Employee Status</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="team" name="team" 
+                                           value="<%= user.team %>">
+                                    <label for="team"><i class="fas fa-users me-2"></i>Team</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Education & Experience Section -->
+                    <div class="form-section slide-up">
+                        <h3 class="section-title">
+                            <i class="fas fa-graduation-cap me-2"></i>Education & Experience
+                        </h3>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="qualification" name="qualification" 
+                                           value="<%= user.qualification %>">
+                                    <label for="qualification"><i class="fas fa-graduation-cap me-2"></i>Highest Qualification</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="university" name="university" 
+                                           value="<%= user.university %>">
+                                    <label for="university"><i class="fas fa-university me-2"></i>University</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="number" class="form-control" id="yearOfPassing" name="yearOfPassing" 
+                                           value="<%= user.yearOfPassing %>">
+                                    <label for="yearOfPassing"><i class="fas fa-calendar-alt me-2"></i>Year of Passing</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="percentage" name="percentage" 
+                                           value="<%= user.percentage %>">
+                                    <label for="percentage"><i class="fas fa-percentage me-2"></i>Percentage/CGPA</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="previousCompany" name="previousCompany" 
+                                           value="<%= user.previousCompany %>">
+                                    <label for="previousCompany"><i class="fas fa-building me-2"></i>Previous Company</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="previousDesignation" name="previousDesignation" 
+                                           value="<%= user.previousDesignation %>">
+                                    <label for="previousDesignation"><i class="fas fa-user-tie me-2"></i>Previous Designation</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="number" class="form-control" id="experienceYears" name="experienceYears" 
+                                           value="<%= user.experienceYears %>" step="0.1" min="0">
+                                    <label for="experienceYears"><i class="fas fa-briefcase me-2"></i>Experience (Years)</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="skills" name="skills" 
+                                           value="<%= (user.skillsSimple && user.skillsSimple.length > 0) ? user.skillsSimple.join(', ') : (user.skills && user.skills.length > 0 ? user.skills.map(s => s.name).join(', ') : '') %>"
+                                           placeholder="e.g., JavaScript, React, Node.js">
+                                    <label for="skills"><i class="fas fa-tools me-2"></i>Skills (comma separated)</label>
+                                </div>
+                                <div class="form-text text-muted mt-2">
+                                    <i class="fas fa-info-circle me-1"></i>Enter your skills separated by commas
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="form-section slide-up">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <a href="/user/profile" class="btn btn-outline-secondary w-100 py-3">
+                                    <i class="fas fa-arrow-left me-2"></i>Back to Profile
+                                </a>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="submit" class="btn btn-primary w-100 py-3" id="submitBtn">
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
 
-            <div class="card document-upload-card mb-4">
-                <div class="card-body">
-                    <h5 class="form-group-title"><i class="fas fa-file-upload me-2 text-success"></i>Upload Documents</h5>
-                    <form action="/user/profile/upload-document" method="POST" enctype="multipart/form-data">
-                        <div class="mb-3">
-                            <label for="document" class="form-label">Choose Document</label>
-                            <input type="file" name="document" id="document" class="form-control mb-2" required>
+            <!-- Sidebar - Upload Section -->
+            <div class="col-lg-4">
+                <!-- Profile Photo Upload -->
+                <div class="form-card mb-4 slide-up">
+                    <div class="card-body text-center p-4">
+                        <div class="upload-icon">
+                            <i class="fas fa-camera"></i>
                         </div>
-                        <div class="mb-3">
-                            <label for="documentType" class="form-label">Document Type</label>
-                            <select class="form-select" name="documentType" id="documentType" required>
-                                <option value="" disabled selected>Select Document Type</option>
-                                <option value="aadharDocument">Aadhar Card</option>
-                                <option value="panDocument">PAN Card</option>
-                                <option value="resumeDocument">Resume</option>
-                                <option value="offerLetterDocument">Offer Letter</option>
-                                <option value="experienceLetterDocument">Experience Letter</option>
-                            </select>
+                        <h5 class="fw-bold mb-3">Profile Photo</h5>
+                        <form action="/user/profile/upload-profile-photo" method="POST" enctype="multipart/form-data" class="mb-3">
+                            <div class="mb-3">
+                                <input type="file" name="profilePhoto" id="profilePhoto" class="form-control" accept="image/*">
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-sm w-100">
+                                <i class="fas fa-upload me-2"></i>Upload Photo
+                            </button>
+                        </form>
+                        <% if (user.profilePhoto && user.profilePhoto !== '/images/default-avatar.png') { %>
+                            <div class="current-photo mt-3">
+                                <small class="text-muted">Current Photo</small>
+                                <img src="<%= user.profilePhoto %>" alt="Current Profile" class="img-thumbnail mt-2" style="max-width: 100px; border-radius: 50%;">
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Cover Photo Upload -->
+                <div class="form-card mb-4 slide-up">
+                    <div class="card-body text-center p-4">
+                        <div class="upload-icon">
+                            <i class="fas fa-image"></i>
                         </div>
-                        <button type="submit" class="btn btn-sm btn-outline-success">Upload Document</button>
-                    </form>
+                        <h5 class="fw-bold mb-3">Cover Photo</h5>
+                        <form action="/user/profile/upload-cover-photo" method="POST" enctype="multipart/form-data" class="mb-3">
+                            <div class="mb-3">
+                                <input type="file" name="coverPhoto" id="coverPhoto" class="form-control" accept="image/*">
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-sm w-100">
+                                <i class="fas fa-upload me-2"></i>Upload Cover
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Profile Completion -->
+                <div class="form-card slide-up">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3">Profile Completion</h5>
+                        <div class="progress mb-3" style="height: 15px;">
+                            <div class="progress-bar" role="progressbar" 
+                                 style="width: <%= user.profileCompletion || 0 %>%;" 
+                                 aria-valuenow="<%= user.profileCompletion || 0 %>" 
+                                 aria-valuemin="0" aria-valuemax="100">
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <h4 class="text-primary fw-bold"><%= user.profileCompletion || 0 %>%</h4>
+                            <p class="text-muted mb-0">Complete your profile to unlock all features</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('profileForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Form submission handler
+    form.addEventListener('submit', function(e) {
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving Changes...';
+        submitBtn.disabled = true;
+        
+        // Re-enable after 5 seconds if still processing
+        setTimeout(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }, 5000);
+    });
+
+    // Real-time form validation
+    const inputs = form.querySelectorAll('input[required]');
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.value.trim() === '') {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            }
+        });
+    });
+
+    // Skills input formatting
+    const skillsInput = document.getElementById('skills');
+    if (skillsInput) {
+        skillsInput.addEventListener('blur', function() {
+            // Remove extra spaces and format
+            const skills = this.value.split(',')
+                .map(skill => skill.trim())
+                .filter(skill => skill !== '')
+                .join(', ');
+            this.value = skills;
+        });
+    }
+
+    // Add animation to form sections on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.animation = 'slideUp 0.6s ease-out forwards';
+            }
+        });
+    }, observerOptions);
+
+    // Observe all form sections
+    document.querySelectorAll('.form-section').forEach(section => {
+        observer.observe(section);
+    });
+});
+</script>

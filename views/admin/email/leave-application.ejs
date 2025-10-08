@@ -1,0 +1,33 @@
+<% const layoutData = {
+    title: 'New Leave Application - Company CRM',
+    body: `
+        <div style="text-align: center;">
+            <div class="icon">📋</div>
+            <h2 style="color: #007bff; margin-bottom: 10px;">New Leave Application</h2>
+            <p style="font-size: 16px; color: #666;">An employee has submitted a new leave request.</p>
+        </div>
+
+        <div class="details-card">
+            <h3 style="margin-top: 0;">Application Details</h3>
+            <p><strong>Employee:</strong> <%= employeeName %></p>
+            <p><strong>Department:</strong> <%= department %></p>
+            <p><strong>Leave Type:</strong> <%= leaveType %></p>
+            <p><strong>From:</strong> <%= fromDate %></p>
+            <p><strong>To:</strong> <%= toDate %></p>
+            <p><strong>Total Days:</strong> <%= totalDays %> days</p>
+            <p><strong>Reason:</strong> <%= reason %></p>
+            <p><strong>Applied On:</strong> <%= appliedDate %></p>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="<%= adminDashboardUrl %>" class="btn">Review Application</a>
+        </div>
+
+        <p style="text-align: center; color: #666; margin-top: 30px;">
+            Please review this request in the admin dashboard.<br>
+            Action required within 24 hours.
+        </p>
+    `
+} %>
+
+<%- include('../../layouts/email-layout', layoutData) %>

@@ -1,6 +1,6 @@
-// controllers/admin/leaveController.js
 const Leave = require('../../models/Leave');
 const User = require('../../models/User');
+const emailService = require('../../services/email/emailService'); // ✅ EMAIL SERVICE ADDED
 
 // Get all pending leave requests
 exports.getPendingLeaves = async (req, res) => {
@@ -13,27 +13,16 @@ exports.getPendingLeaves = async (req, res) => {
       });
     }
 
-    // ✅ CRITICAL FIX: Proper population with select fields
     const pendingLeaves = await Leave.find({ status: 'pending' })
       .populate({
         path: 'user',
-        select: 'name email employeeId department', // ✅ Specific fields select karo
+        select: 'name email employeeId department',
         model: 'User'
       })
       .sort({ createdAt: -1 });
 
     console.log('Fetched pending leaves:', pendingLeaves.length);
     
-    // ✅ Debugging: Check each leave's user data
-    pendingLeaves.forEach((leave, index) => {
-      console.log(`Leave ${index + 1}:`, {
-        leaveId: leave._id,
-        userId: leave.user ? leave.user._id : 'No User',
-        userName: leave.user ? leave.user.name : 'No Name',
-        userEmail: leave.user ? leave.user.email : 'No Email'
-      });
-    });
-
     res.render('admin/leaves/list', {
       leaves: pendingLeaves || [],
       pageTitle: 'Pending Leave Requests',
@@ -49,7 +38,7 @@ exports.getPendingLeaves = async (req, res) => {
   }
 };
 
-// Approve leave request
+// Approve leave request - WITH EMAIL INTEGRATION
 exports.approveLeave = async (req, res) => {
   try {
     const leaveId = req.params.id;
@@ -69,11 +58,20 @@ exports.approveLeave = async (req, res) => {
         updatedAt: Date.now(),
       },
       { new: true }
-    ).populate('user', 'name email'); // ✅ Population add karo
+    ).populate('user', 'name email'); // ✅ Population for email
 
     if (!leave) {
       console.error(`Leave request not found: ${leaveId}`);
       return res.status(404).send('Leave request not found.');
+    }
+
+    // ✅ EMAIL INTEGRATION: User ko approved email bhejo
+    try {
+      await emailService.sendLeaveApprovedEmail(leave);
+      console.log('✅ Leave approved email sent to:', leave.user.email);
+    } catch (emailError) {
+      console.error('❌ Email sending failed, but leave approved:', emailError);
+      // Email fail hone par bhi leave approve ho gaya hai
     }
 
     console.log(`Leave approved: ${leaveId} for user: ${leave.user.name}`);
@@ -84,7 +82,7 @@ exports.approveLeave = async (req, res) => {
   }
 };
 
-// Reject leave request
+// Reject leave request - WITH EMAIL INTEGRATION
 exports.rejectLeave = async (req, res) => {
   try {
     const leaveId = req.params.id;
@@ -105,11 +103,20 @@ exports.rejectLeave = async (req, res) => {
         updatedAt: Date.now(),
       },
       { new: true }
-    ).populate('user', 'name email'); // ✅ Population add karo
+    ).populate('user', 'name email'); // ✅ Population for email
 
     if (!leave) {
       console.error(`Leave request not found: ${leaveId}`);
       return res.status(404).send('Leave request not found.');
+    }
+
+    // ✅ EMAIL INTEGRATION: User ko rejected email bhejo
+    try {
+      await emailService.sendLeaveRejectedEmail(leave);
+      console.log('✅ Leave rejected email sent to:', leave.user.email);
+    } catch (emailError) {
+      console.error('❌ Email sending failed, but leave rejected:', emailError);
+      // Email fail hone par bhi leave reject ho gaya hai
     }
 
     console.log(`Leave rejected: ${leaveId} for user: ${leave.user.name}`);

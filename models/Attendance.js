@@ -27,7 +27,26 @@ const attendanceSchema = new mongoose.Schema({
     default: 'present'
   },
   ipAddress: String,
-  deviceType: String
+  deviceType: String,
+  // New fields for archiving
+  monthYear: {
+    type: String, // Format: "2024-12"
+    index: true
+  },
+  isArchived: {
+    type: Boolean,
+    default: false
+  },
+  archivedAt: Date
 }, { timestamps: true });
+
+// Auto-calculate monthYear before saving
+attendanceSchema.pre('save', function(next) {
+  if (this.date) {
+    const date = new Date(this.date);
+    this.monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+  }
+  next();
+});
 
 module.exports = mongoose.model('Attendance', attendanceSchema);

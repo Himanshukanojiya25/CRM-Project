@@ -13,8 +13,12 @@ const nodemailer = require('nodemailer');
 const passport = require('passport');
 const flash = require('connect-flash');
 const MongoStore = require('connect-mongo');
+const cron = require('node-cron');
 
-// ✅ NEW: Swagger import
+// ✅ NEW: Attendance Archive import
+const AttendanceArchive = require('./utils/attendanceArchive');
+
+// ✅ Swagger import
 const swaggerDocs = require('./config/swagger');
 
 dotenv.config();
@@ -30,7 +34,7 @@ app.use(helmet({
       scriptSrcAttr: ["'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com", "https://kit.fontawesome.com", "https://cdnjs.cloudflare.com"],
       fontSrc: ["'self'", "https://cdn.jsdelivr.net", "https://fonts.gstatic.com", "https://kit.fontawesome.com", "https://cdnjs.cloudflare.com"],
-      imgSrc: ["'self'", "data:", "https:", "http:", "blob:", "https://cdnjs.cloudflare.com"], // ✅ ADDED: blob: for file uploads
+      imgSrc: ["'self'", "data:", "https:", "http:", "blob:", "https://cdnjs.cloudflare.com"],
       connectSrc: ["'self'"],
       frameSrc: ["'self'", "https://accounts.google.com", "https://github.com"],
       objectSrc: ["'none'"]
@@ -56,7 +60,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 
-// ✅ Session Middleware (FIXED - MongoStore added)
+// ✅ Session Middleware
 app.use(session({
   secret: process.env.JWT_SECRET || 'your_secret_key',
   resave: false,
@@ -79,7 +83,7 @@ app.use(passport.session());
 // ✅ Flash Middleware
 app.use(flash());
 
-// ✅ Global flash variables (har view me available)
+// ✅ Global flash variables
 app.use((req, res, next) => {
   res.locals.success = req.flash('success');
   res.locals.error = req.flash('error');
@@ -89,26 +93,16 @@ app.use((req, res, next) => {
 // ✅ Passport Config
 require('./config/passport');
 
-// ✅ ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅
-// ✅ FIXED: Static Files Configuration - TERI FOLDER STRUCTURE KE HISAB SE
-// ✅ ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅
-
-// ✅ Serve main public directory
+// ✅ Static Files Configuration
 app.use(express.static(path.join(__dirname, 'public')));
-
-// ✅ ✅✅✅✅✅ CRITICAL FIX: Serve uploads folder with proper path
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
-
-// ✅ ✅✅✅✅✅ SPECIFIC FIX: Serve feedback uploads directly - TERI STRUCTURE KE HISAB SE
 app.use('/uploads/feedback/attachments', express.static(path.join(__dirname, 'public/uploads/feedback/attachments')));
 app.use('/uploads/feedback/screenshots', express.static(path.join(__dirname, 'public/uploads/feedback/screenshots')));
-
-// ✅ ✅✅✅✅✅ ADDITIONAL: Serve other upload folders bhi
 app.use('/uploads/covers', express.static(path.join(__dirname, 'public/uploads/covers')));
 app.use('/uploads/documents', express.static(path.join(__dirname, 'public/uploads/documents')));
 app.use('/uploads/profiles', express.static(path.join(__dirname, 'public/uploads/profiles')));
 
-// ✅ Log static file serving (for debugging)
+// ✅ Log static file serving
 console.log('📁 Static file paths configured:');
 console.log('   - Public directory:', path.join(__dirname, 'public'));
 console.log('   - Uploads directory:', path.join(__dirname, 'public/uploads'));
@@ -141,6 +135,7 @@ const userLeaveRoutes = require('./routes/user/leavesRoutes');
 const adminLeaveRoutes = require('./routes/admin/leavesRoutes');
 const authRoutes = require('./routes/authRoutes');
 const testRoutes = require('./routes/testRoutes');
+const testEmailRoutes = require('./routes/testEmail');
 const employeeRoutes = require('./routes/admin/employeeRoutes');
 const profileRoutes = require('./routes/user/profileRoutes');
 
@@ -155,6 +150,7 @@ app.use('/admin/dashboard', adminDashboardRoutes);
 app.use('/user/dashboard', userDashboardRoutes);
 app.use('/auth', authRoutes);
 app.use('/test', testRoutes);
+app.use('/test', testEmailRoutes);
 app.use('/admin/employees', employeeRoutes);
 app.use('/user/profile', profileRoutes);
 
@@ -189,6 +185,31 @@ app.get('/user/dashboard', (req, res) => {
   });
 });
 
+// ✅ Manual Archive Trigger Route (For Testing)
+app.get('/admin/trigger-archive', async (req, res) => {
+  try {
+    if (!req.user || req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Admin access required' });
+    }
+
+    console.log('🔄 Manual archive triggered by admin...');
+    const result = await AttendanceArchive.autoArchiveAndCleanup();
+    
+    res.json({
+      success: true,
+      message: 'Archive completed successfully',
+      data: result
+    });
+  } catch (error) {
+    console.error('Manual archive failed:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Archive failed',
+      error: error.message
+    });
+  }
+});
+
 // ✅ Test Email Route
 app.get('/test-email', async (req, res) => {
   try {
@@ -216,7 +237,7 @@ app.get('/test-email', async (req, res) => {
   }
 });
 
-// ✅ Test File Upload Route (NEW ADDED)
+// ✅ Test File Upload Route
 app.get('/test-upload', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -271,7 +292,6 @@ app.get('/test-upload', (req, res) => {
         <div id="status"></div>
         
         <script>
-            // Check if upload directories are accessible
             async function checkDirectories() {
                 const statusDiv = document.getElementById('status');
                 const directories = [
@@ -307,8 +327,44 @@ mongoose.connect(process.env.DB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log('✅ MongoDB Connected'))
+.then(() => {
+  console.log('✅ MongoDB Connected');
+  
+  // ✅ Start Cron Jobs after DB connection
+  startCronJobs();
+})
 .catch(err => console.error('❌ MongoDB Connection Error:', err));
+
+// ✅ Cron Job Function
+function startCronJobs() {
+  console.log('🕐 Initializing Cron Jobs...');
+  
+  // ✅ Run auto archive on 1st of every month at 2:00 AM
+  cron.schedule('0 2 1 * *', async () => {
+    console.log('🔄 Running monthly attendance archive...');
+    try {
+      const result = await AttendanceArchive.autoArchiveAndCleanup();
+      console.log('✅ Archive completed:', result);
+    } catch (error) {
+      console.error('❌ Archive failed:', error);
+    }
+  });
+
+  // ✅ Additional: Weekly cleanup check every Sunday at 3:00 AM
+  cron.schedule('0 3 * * 0', async () => {
+    console.log('🔄 Running weekly attendance cleanup check...');
+    try {
+      const deleted = await AttendanceArchive.cleanupOldRecords();
+      console.log(`✅ Weekly cleanup: Deleted ${deleted} old records`);
+    } catch (error) {
+      console.error('❌ Weekly cleanup failed:', error);
+    }
+  });
+
+  console.log('✅ Cron Jobs Initialized:');
+  console.log('   - Monthly archive: 1st of month at 2:00 AM');
+  console.log('   - Weekly cleanup: Every Sunday at 3:00 AM');
+}
 
 // ✅ Start Server
 const PORT = process.env.PORT || 8080;
@@ -316,6 +372,7 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`📁 Uploads accessible at: http://localhost:${PORT}/uploads/`);
   console.log(`🔧 Test upload page: http://localhost:${PORT}/test-upload`);
+  console.log(`🔧 Manual archive trigger: http://localhost:${PORT}/admin/trigger-archive`);
   console.log(`📚 Swagger Docs available at http://localhost:${PORT}/api-docs`);
   swaggerDocs(app);
 });

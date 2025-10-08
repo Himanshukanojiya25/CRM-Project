@@ -1,64 +1,258 @@
-<div class="container-fluid">
-    <h2>Leave Application Form</h2>
-    <hr>
-    
-    <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
-        <div class="alert alert-danger"><%= errorMessage %></div>
-    <% } %>
-    
-    <% if (typeof successMessage !== 'undefined' && successMessage) { %>
-        <div class="alert alert-success"><%= successMessage %></div>
-    <% } %>
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <!-- Header Section -->
+            <div class="leave-header text-center mb-5">
+                <div class="header-icon bg-primary-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
+                    <i class="fas fa-calendar-plus fa-2x text-white"></i>
+                </div>
+                <h1 class="h2 fw-bold text-dark mb-2">Apply for Leave</h1>
+                <p class="text-muted">Fill out the form below to submit your leave application</p>
+            </div>
 
-    <form action="/user/leaves/apply" method="POST">
-        <div class="mb-3">
-            <label for="leaveType" class="form-label">Leave Type</label>
-            <select class="form-select" id="leaveType" name="leaveType" required>
-                <option value="full-day">Full Day</option>
-                <option value="half-day">Half Day</option>
-            </select>
-        </div>
-        
-        <div class="mb-3">
-            <label for="startDate" class="form-label">From Date</label>
-            <input type="date" class="form-control" id="startDate" name="startDate" required>
-        </div>
-        
-        <div class="mb-3" id="endDateContainer">
-            <label for="endDate" class="form-label">To Date</label>
-            <input type="date" class="form-control" id="endDate" name="endDate">
-        </div>
+            <!-- Alert Messages -->
+            <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <%= errorMessage %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <% } %>
+            
+            <% if (typeof successMessage !== 'undefined' && successMessage) { %>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <%= successMessage %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <% } %>
 
-        <div class="mb-3">
-            <label for="reason" class="form-label">Reason</label>
-            <textarea class="form-control" id="reason" name="reason" rows="3" required></textarea>
-        </div>
+            <!-- Leave Application Form -->
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <form action="/user/leaves/apply" method="POST" id="leaveForm">
+                        <!-- Leave Type -->
+                        <div class="mb-4">
+                            <label for="leaveType" class="form-label fw-semibold text-dark mb-3">
+                                <i class="fas fa-tag text-primary me-2"></i>Leave Type
+                            </label>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-check-card" id="fullDayCard">
+                                        <input class="form-check-input" type="radio" name="leaveType" id="fullDay" value="full-day" checked>
+                                        <label class="form-check-label w-100" for="fullDay">
+                                            <div class="card card-hover h-100 text-center">
+                                                <div class="card-body py-4">
+                                                    <i class="fas fa-sun fa-2x text-warning mb-3"></i>
+                                                    <h6 class="fw-semibold mb-1">Full Day</h6>
+                                                    <small class="text-muted">Multiple days leave</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check-card" id="halfDayCard">
+                                        <input class="form-check-input" type="radio" name="leaveType" id="halfDay" value="half-day">
+                                        <label class="form-check-label w-100" for="halfDay">
+                                            <div class="card card-hover h-100 text-center">
+                                                <div class="card-body py-4">
+                                                    <i class="fas fa-clock fa-2x text-info mb-3"></i>
+                                                    <h6 class="fw-semibold mb-1">Half Day</h6>
+                                                    <small class="text-muted">Single day half leave</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-        <button type="submit" class="btn btn-primary">Submit Application</button>
-        <a href="/user/leaves" class="btn btn-secondary">Cancel</a>
-    </form>
+                        <!-- Date Selection -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="date" class="form-control" id="startDate" name="startDate" required>
+                                    <label for="startDate">
+                                        <i class="fas fa-calendar-day text-primary me-2"></i>From Date
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6" id="endDateContainer">
+                                <div class="form-floating">
+                                    <input type="date" class="form-control" id="endDate" name="endDate">
+                                    <label for="endDate">
+                                        <i class="fas fa-calendar-week text-primary me-2"></i>To Date
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Days Counter -->
+                        <div class="mb-4" id="daysCounter" style="display: none;">
+                            <div class="alert alert-info border-0">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-calculator fa-lg text-primary me-3"></i>
+                                    <div>
+                                        <strong>Total Days: <span id="totalDays">0</span></strong>
+                                        <small class="d-block text-muted">Based on your selected dates</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reason -->
+                        <div class="mb-4">
+                            <label for="reason" class="form-label fw-semibold text-dark mb-3">
+                                <i class="fas fa-comment-dots text-primary me-2"></i>Reason for Leave
+                            </label>
+                            <div class="form-floating">
+                                <textarea class="form-control" id="reason" name="reason" placeholder="Please provide a reason for your leave" style="height: 120px;" required></textarea>
+                                <label for="reason">Please provide a detailed reason for your leave...</label>
+                            </div>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>Be specific about your leave purpose
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-3 justify-content-end pt-3">
+                            <a href="/user/leaves" class="btn btn-lg btn-outline-secondary px-4">
+                                <i class="fas fa-arrow-left me-2"></i>Back
+                            </a>
+                            <button type="submit" class="btn btn-lg btn-primary px-4" id="submitBtn">
+                                <i class="fas fa-paper-plane me-2"></i>Submit Application
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Quick Tips -->
+            <div class="mt-4">
+                <div class="card bg-light border-0">
+                    <div class="card-body">
+                        <h6 class="fw-semibold mb-3">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>Quick Tips
+                        </h6>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Apply leaves at least 2 days in advance</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Provide clear and genuine reasons</li>
+                            <li class="mb-0"><i class="fas fa-check-circle text-success me-2"></i>Check your remaining leave balance</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
+<style>
+.leave-header .header-icon {
+    width: 80px;
+    height: 80px;
+}
+
+.bg-primary-gradient {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+.form-check-card {
+    position: relative;
+}
+
+.form-check-card .form-check-input {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1;
+}
+
+.form-check-card .card {
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.form-check-card .form-check-input:checked + .card {
+    border-color: #007bff;
+    background-color: #f8f9ff;
+}
+
+.form-check-card .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.form-floating .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+</style>
+
 <script>
-    const leaveTypeSelect = document.getElementById('leaveType');
+document.addEventListener('DOMContentLoaded', function() {
+    const leaveTypeRadios = document.querySelectorAll('input[name="leaveType"]');
     const endDateContainer = document.getElementById('endDateContainer');
     const endDateInput = document.getElementById('endDate');
     const startDateInput = document.getElementById('startDate');
-  
-    leaveTypeSelect.addEventListener('change', (event) => {
-        if (event.target.value === 'half-day') {
-            endDateContainer.style.display = 'none';
-            endDateInput.removeAttribute('required');
-        } else {
-            endDateContainer.style.display = 'block';
-            endDateInput.setAttribute('required', 'required');
+    const daysCounter = document.getElementById('daysCounter');
+    const totalDaysSpan = document.getElementById('totalDays');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Leave Type Change Handler
+    leaveTypeRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'half-day') {
+                endDateContainer.style.display = 'none';
+                endDateInput.removeAttribute('required');
+                daysCounter.style.display = 'none';
+            } else {
+                endDateContainer.style.display = 'block';
+                endDateInput.setAttribute('required', 'required');
+                calculateDays();
+            }
+            
+            // Update card styles
+            document.querySelectorAll('.form-check-card .card').forEach(card => {
+                card.classList.remove('border-primary');
+            });
+            this.closest('.form-check-card').querySelector('.card').classList.add('border-primary');
+        });
+    });
+
+    // Date Change Handlers
+    startDateInput.addEventListener('change', function() {
+        endDateInput.min = this.value;
+        if (document.querySelector('input[name="leaveType"]:checked').value === 'full-day') {
+            calculateDays();
         }
     });
 
-    startDateInput.addEventListener('change', (event) => {
-        endDateInput.min = event.target.value;
+    endDateInput.addEventListener('change', calculateDays);
+
+    // Calculate Days Function
+    function calculateDays() {
+        const start = new Date(startDateInput.value);
+        const end = new Date(endDateInput.value);
+        
+        if (start && end && end >= start) {
+            const timeDiff = end.getTime() - start.getTime();
+            const dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+            totalDaysSpan.textContent = dayDiff;
+            daysCounter.style.display = 'block';
+        } else {
+            daysCounter.style.display = 'none';
+        }
+    }
+
+    // Form Submission
+    document.getElementById('leaveForm').addEventListener('submit', function(e) {
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+        submitBtn.disabled = true;
     });
 
-    // Run on page load
-    leaveTypeSelect.dispatchEvent(new Event('change'));
+    // Initialize
+    document.querySelector('input[name="leaveType"]:checked').dispatchEvent(new Event('change'));
+});
 </script>

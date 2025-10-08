@@ -1,553 +1,628 @@
-<%# views/user/profile/view.ejs - CLEAN VERSION (NO JS/CSS) %>
 <% layout = 'layouts/user-base' %>
 
-<!-- Include CSS from users folder -->
-<link rel="stylesheet" href="/users/css/profile.css">
+<style>
+.profile-container {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
 
-<div class="profile-container container py-4 py-lg-5">
-  <div class="row g-4">
+.user-card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+}
 
-    <!-- Left Sidebar - User Card -->
-    <div class="col-lg-4">
-      <div class="card user-card sticky-top" style="top: 20px;">
-        <div class="card-body text-center">
-          <!-- Profile Picture - CLEAN VERSION -->
-          <div class="avatar-wrapper">
-            <img 
-              src="<%= user.profilePhoto %>" 
-              alt="<%= user.name %>" 
-              class="avatar-img"
-              id="profileImage"
-            >
-            <span class="status-dot <%= user.status === 'Active' ? 'bg-success' : 'bg-warning' %>" 
-                  title="<%= user.status || 'Active' %>"></span>
-          </div>
+.avatar-wrapper {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    margin: 0 auto;
+}
 
-          <h4 class="card-title mt-3 mb-1"><%= user.name %></h4>
-          <p class="text-muted mb-2"><%= user.designation %></p>
-          <p class="text-muted small mb-3">
-            <i class="fas fa-building me-1"></i>
-            <% if (user.department && user.department.name) { %>
-              <%= user.department.name %>
-            <% } else { %>
-              No Department
-            <% } %>
-          </p>
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid #fff;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
 
-          <!-- Action Buttons -->
-          <div class="d-flex justify-content-center align-items-center gap-2 mt-3">
-            <a href="/user/profile/edit" class="btn btn-primary btn-sm px-3">
-              <i class="fas fa-edit me-1"></i> Edit Profile
-            </a>
-            <button class="btn btn-outline-secondary btn-sm px-3" id="shareProfileBtn">
-              <i class="fas fa-share-alt me-1"></i> Share
-            </button>
-            <button type="button" class="btn btn-outline-secondary btn-sm icon-btn" id="themeToggle" title="Toggle Theme">
-              <i class="fas fa-moon"></i>
-            </button>
-          </div>
+.status-dot {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+}
 
-          <!-- Profile Completion -->
-          <% if (user.profileCompletion !== undefined) { %>
-          <div class="mt-4">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-              <small class="text-muted">Profile Completion</small>
-              <small class="text-muted"><%= user.profileCompletion %>%</small>
+.summary-card {
+    border: none;
+    border-radius: 15px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.summary-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
+}
+
+.summary-card .value {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.summary-card .label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.nav-tabs {
+    border-bottom: 2px solid #f8f9fa;
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    color: #6c757d;
+    font-weight: 600;
+    padding: 1rem 2rem;
+    border-radius: 10px 10px 0 0;
+    margin-right: 0.5rem;
+}
+
+.nav-tabs .nav-link.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+}
+
+.info-list .info-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.info-list .info-item:last-child {
+    border-bottom: none;
+}
+
+.info-icon {
+    width: 45px;
+    height: 45px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    color: white;
+}
+
+.progress {
+    height: 10px;
+    border-radius: 10px;
+    background: #f8f9fa;
+}
+
+.progress-bar {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+}
+
+.badge {
+    padding: 0.6rem 1.2rem;
+    border-radius: 25px;
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+.card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.card-header {
+    background: white;
+    border: none;
+    border-radius: 20px 20px 0 0 !important;
+    padding: 1.5rem 2rem;
+}
+
+.tab-content {
+    background: white;
+    border-radius: 0 0 20px 20px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 50px;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.section-title {
+    color: #2c3e50;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 3px solid #667eea;
+}
+
+.info-label {
+    color: #6c757d;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.info-value {
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 1rem;
+}
+</style>
+
+<div class="profile-container">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Left Sidebar - Enhanced User Card -->
+            <div class="col-lg-4">
+                <div class="card user-card sticky-top" style="top: 2rem;">
+                    <div class="card-body text-center p-4">
+                        <!-- Profile Picture -->
+                        <div class="avatar-wrapper mb-4">
+                            <img 
+                                src="<%= user.profilePhoto || '/images/default-avatar.png' %>" 
+                                alt="<%= user.name %>" 
+                                class="avatar-img"
+                                id="profileImage"
+                                onerror="this.src='/images/default-avatar.png'"
+                            >
+                            <span class="status-dot bg-success" title="Active"></span>
+                        </div>
+
+                        <h3 class="card-title mb-2 text-dark fw-bold"><%= user.name %></h3>
+                        <p class="text-primary mb-2 fw-semibold fs-5"><%= user.designation || 'Employee' %></p>
+                        <p class="text-muted mb-3">
+                            <i class="fas fa-building me-2"></i>
+                            <%= user.department && user.department.name ? user.department.name : 'No Department' %>
+                        </p>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-center gap-2 mt-4">
+                            <a href="/user/profile/edit" class="btn btn-primary px-4">
+                                <i class="fas fa-edit me-2"></i>Edit Profile
+                            </a>
+                        </div>
+
+                        <!-- Profile Completion -->
+                        <div class="mt-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted fw-semibold">Profile Completion</span>
+                                <span class="text-primary fw-bold fs-6"><%= user.profileCompletion || 0 %>%</span>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar" role="progressbar" 
+                                     style="width: <%= user.profileCompletion || 0 %>%;" 
+                                     aria-valuenow="<%= user.profileCompletion || 0 %>" 
+                                     aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <div class="card-footer bg-transparent border-top">
+                        <h6 class="fw-bold mb-3 text-dark">Contact Information</h6>
+                        <div class="info-list">
+                            <div class="info-item">
+                                <div class="info-icon">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="info-label">Work Email</div>
+                                    <div class="info-value"><%= user.email %></div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary copy-btn" data-copy="<%= user.email %>">
+                                    <i class="far fa-copy"></i>
+                                </button>
+                            </div>
+
+                            <% if (user.phone && user.phone !== '') { %>
+                            <div class="info-item">
+                                <div class="info-icon">
+                                    <i class="fas fa-phone"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="info-label">Work Phone</div>
+                                    <div class="info-value"><%= user.phone %></div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary copy-btn" data-copy="<%= user.phone %>">
+                                    <i class="far fa-copy"></i>
+                                </button>
+                            </div>
+                            <% } %>
+
+                            <% if (user.employeeId && user.employeeId !== '' && user.employeeId !== 'Not assigned') { %>
+                            <div class="info-item">
+                                <div class="info-icon">
+                                    <i class="fas fa-id-card"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="info-label">Employee ID</div>
+                                    <div class="info-value"><%= user.employeeId %></div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary copy-btn" data-copy="<%= user.employeeId %>">
+                                    <i class="far fa-copy"></i>
+                                </button>
+                            </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="progress" style="height: 6px;">
-              <div class="progress-bar" role="progressbar" 
-                   style="width: <%= user.profileCompletion %>%;" 
-                   aria-valuenow="<%= user.profileCompletion %>" 
-                   aria-valuemin="0" aria-valuemax="100"></div>
+
+            <!-- Main Content Area -->
+            <div class="col-lg-8">
+                <!-- Quick Stats -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3 col-6">
+                        <div class="card summary-card text-center">
+                            <div class="card-body py-4">
+                                <h3 class="value"><%= user.leavesRemaining || 12 %></h3>
+                                <p class="label">Leaves Left</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="card summary-card text-center">
+                            <div class="card-body py-4">
+                                <h3 class="value"><%= user.attendancePercentage || 100 %>%</h3>
+                                <p class="label">Attendance</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="card summary-card text-center">
+                            <div class="card-body py-4">
+                                <h3 class="value"><%= user.totalExperience || '0 years' %></h3>
+                                <p class="label">Experience</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="card summary-card text-center">
+                            <div class="card-body py-4">
+                                <h3 class="value">
+                                    <% if (user.performanceRating && user.performanceRating > 0) { %>
+                                        <%= user.performanceRating %>/5
+                                    <% } else { %>
+                                        N/A
+                                    <% } %>
+                                </h3>
+                                <p class="label">Performance</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Information Tabs -->
+                <div class="card">
+                    <div class="card-header px-4">
+                        <ul class="nav nav-tabs card-header-tabs border-0" id="profileTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#professional" type="button">
+                                    <i class="fas fa-briefcase me-2"></i> Professional
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#personal" type="button">
+                                    <i class="fas fa-user me-2"></i> Personal
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#education" type="button">
+                                    <i class="fas fa-graduation-cap me-2"></i> Education
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="card-body tab-content p-4" id="profileTabsContent">
+                        <!-- Professional Tab -->
+                        <div class="tab-pane fade show active" id="professional" role="tabpanel">
+                            <h5 class="section-title">Professional Information</h5>
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="info-label">Employee ID</div>
+                                    <div class="info-value"><%= user.employeeId || 'Not assigned' %></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-label">Designation</div>
+                                    <div class="info-value"><%= user.designation || 'Employee' %></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-label">Department</div>
+                                    <div class="info-value">
+                                        <%= user.department && user.department.name ? user.department.name : 'No Department' %>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-label">Employee Type</div>
+                                    <div class="info-value"><%= user.employeeType || 'Full-time' %></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-label">Work Location</div>
+                                    <div class="info-value"><%= user.workLocation || 'Office' %></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-label">Shift Timings</div>
+                                    <div class="info-value"><%= user.shiftTimings || '9:30 AM - 6:30 PM' %></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-label">Employee Status</div>
+                                    <div class="info-value"><%= user.employeeStatus || 'Probation' %></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-label">Team</div>
+                                    <div class="info-value"><%= user.team || 'Not assigned' %></div>
+                                </div>
+                            </div>
+
+                            <!-- Skills Section -->
+                            <% if (user.skills && Array.isArray(user.skills) && user.skills.length > 0) { %>
+                            <div class="mt-5">
+                                <h6 class="section-title">Skills & Expertise</h6>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <% user.skills.forEach(skill => { %>
+                                        <% if (skill && skill !== '') { %>
+                                            <span class="badge bg-primary"><%= skill %></span>
+                                        <% } %>
+                                    <% }) %>
+                                </div>
+                            </div>
+                            <% } else { %>
+                            <div class="mt-5 text-center py-4">
+                                <i class="fas fa-tools fa-2x text-muted mb-3"></i>
+                                <p class="text-muted">No skills added yet</p>
+                                <a href="/user/profile/edit" class="btn btn-primary btn-sm">Add Skills</a>
+                            </div>
+                            <% } %>
+                        </div>
+
+                        <!-- Personal Tab -->
+                        <div class="tab-pane fade" id="personal" role="tabpanel">
+                            <h5 class="section-title">Personal Details</h5>
+                            <div class="row g-4">
+                                <% if (user.dob) { %>
+                                <div class="col-md-6">
+                                    <div class="info-label">Date of Birth</div>
+                                    <div class="info-value">
+                                        <%= new Date(user.dob).toLocaleDateString() %>
+                                        <% if (user.age) { %> (<%= user.age %> years)<% } %>
+                                    </div>
+                                </div>
+                                <% } %>
+                                
+                                <% if (user.gender && user.gender !== '') { %>
+                                <div class="col-md-6">
+                                    <div class="info-label">Gender</div>
+                                    <div class="info-value"><%= user.gender %></div>
+                                </div>
+                                <% } %>
+
+                                <% if (user.bloodGroup && user.bloodGroup !== '') { %>
+                                <div class="col-md-6">
+                                    <div class="info-label">Blood Group</div>
+                                    <div class="info-value"><%= user.bloodGroup %></div>
+                                </div>
+                                <% } %>
+
+                                <% if (user.personalEmail && user.personalEmail !== '') { %>
+                                <div class="col-md-6">
+                                    <div class="info-label">Personal Email</div>
+                                    <div class="info-value"><%= user.personalEmail %></div>
+                                </div>
+                                <% } %>
+
+                                <% if (user.currentAddress && user.currentAddress !== '') { %>
+                                <div class="col-12">
+                                    <div class="info-label">Current Address</div>
+                                    <div class="info-value"><%= user.currentAddress %></div>
+                                </div>
+                                <% } %>
+
+                                <% if (user.permanentAddress && user.permanentAddress !== '') { %>
+                                <div class="col-12">
+                                    <div class="info-label">Permanent Address</div>
+                                    <div class="info-value"><%= user.permanentAddress %></div>
+                                </div>
+                                <% } %>
+
+                                <% if (user.emergencyContactName && user.emergencyContactName !== '') { %>
+                                <div class="col-md-6">
+                                    <div class="info-label">Emergency Contact</div>
+                                    <div class="info-value">
+                                        <%= user.emergencyContactName %>
+                                        <% if (user.emergencyContactNumber && user.emergencyContactNumber !== '') { %>
+                                        <br><small class="text-muted"><%= user.emergencyContactNumber %></small>
+                                        <% } %>
+                                    </div>
+                                </div>
+                                <% } %>
+                            </div>
+
+                            <% 
+                            const hasPersonalData = user.dob || 
+                                (user.gender && user.gender !== '') || 
+                                (user.personalEmail && user.personalEmail !== '') ||
+                                (user.currentAddress && user.currentAddress !== '') ||
+                                (user.emergencyContactName && user.emergencyContactName !== '');
+                            
+                            if (!hasPersonalData) { 
+                            %>
+                            <div class="text-center py-5">
+                                <i class="fas fa-user fa-2x text-muted mb-3"></i>
+                                <p class="text-muted">No personal details added</p>
+                                <a href="/user/profile/edit" class="btn btn-primary">Add Personal Details</a>
+                            </div>
+                            <% } %>
+                        </div>
+
+                        <!-- Education Tab -->
+                        <div class="tab-pane fade" id="education" role="tabpanel">
+                            <h5 class="section-title">Education & Experience</h5>
+                            
+                            <% 
+                            const hasEducation = (user.qualification && user.qualification !== '') || 
+                                                (user.university && user.university !== '');
+                            %>
+                            
+                            <% if (hasEducation) { %>
+                            <div class="row g-4">
+                                <% if (user.qualification && user.qualification !== '') { %>
+                                <div class="col-md-6">
+                                    <div class="info-label">Highest Qualification</div>
+                                    <div class="info-value"><%= user.qualification %></div>
+                                </div>
+                                <% } %>
+
+                                <% if (user.university && user.university !== '') { %>
+                                <div class="col-md-6">
+                                    <div class="info-label">University</div>
+                                    <div class="info-value"><%= user.university %></div>
+                                </div>
+                                <% } %>
+
+                                <% if (user.yearOfPassing) { %>
+                                <div class="col-md-6">
+                                    <div class="info-label">Year of Passing</div>
+                                    <div class="info-value"><%= user.yearOfPassing %></div>
+                                </div>
+                                <% } %>
+
+                                <% if (user.percentage && user.percentage !== '') { %>
+                                <div class="col-md-6">
+                                    <div class="info-label">Percentage/CGPA</div>
+                                    <div class="info-value"><%= user.percentage %></div>
+                                </div>
+                                <% } %>
+                            </div>
+                            <% } else { %>
+                            <div class="text-center py-4">
+                                <i class="fas fa-graduation-cap fa-2x text-muted mb-3"></i>
+                                <p class="text-muted">No education details added</p>
+                                <a href="/user/profile/edit" class="btn btn-primary btn-sm">Add Education</a>
+                            </div>
+                            <% } %>
+
+                            <!-- Experience Section -->
+                            <% 
+                            const hasExperience = (user.previousCompany && user.previousCompany !== '') || 
+                                                (user.experienceYears && user.experienceYears > 0);
+                            %>
+                            
+                            <% if (hasExperience) { %>
+                            <div class="mt-5">
+                                <h6 class="section-title">Work Experience</h6>
+                                <div class="row g-4">
+                                    <% if (user.previousCompany && user.previousCompany !== '') { %>
+                                    <div class="col-md-6">
+                                        <div class="info-label">Previous Company</div>
+                                        <div class="info-value"><%= user.previousCompany %></div>
+                                    </div>
+                                    <% } %>
+
+                                    <% if (user.previousDesignation && user.previousDesignation !== '') { %>
+                                    <div class="col-md-6">
+                                        <div class="info-label">Previous Designation</div>
+                                        <div class="info-value"><%= user.previousDesignation %></div>
+                                    </div>
+                                    <% } %>
+
+                                    <% if (user.experienceYears > 0) { %>
+                                    <div class="col-md-6">
+                                        <div class="info-label">Total Experience</div>
+                                        <div class="info-value"><%= user.experienceYears %> years</div>
+                                    </div>
+                                    <% } %>
+                                </div>
+                            </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-          <% } %>
         </div>
-
-        <!-- Contact Information -->
-        <div class="card-footer">
-          <div class="info-list">
-            <div class="info-item">
-              <i class="fas fa-envelope info-icon"></i>
-              <div>
-                <small class="text-muted">Work Email</small>
-                <span><%= user.email %></span>
-              </div>
-              <button class="btn btn-sm btn-outline-secondary copy-btn ms-auto" data-copy="<%= user.email %>">
-                <i class="far fa-copy"></i>
-              </button>
-            </div>
-
-            <% if (user.phone) { %>
-            <div class="info-item">
-              <i class="fas fa-phone info-icon"></i>
-              <div>
-                <small class="text-muted">Work Phone</small>
-                <span><%= user.phone %></span>
-              </div>
-              <button class="btn btn-sm btn-outline-secondary copy-btn ms-auto" data-copy="<%= user.phone %>">
-                <i class="far fa-copy"></i>
-              </button>
-            </div>
-            <% } %>
-
-            <% if (user.personalEmail) { %>
-            <div class="info-item">
-              <i class="fas fa-envelope-open info-icon"></i>
-              <div>
-                <small class="text-muted">Personal Email</small>
-                <span><%= user.personalEmail %></span>
-              </div>
-              <button class="btn btn-sm btn-outline-secondary copy-btn ms-auto" data-copy="<%= user.personalEmail %>">
-                <i class="far fa-copy"></i>
-              </button>
-            </div>
-            <% } %>
-
-            <% if (user.emergencyContactName) { %>
-            <div class="info-item">
-              <i class="fas fa-phone-alt info-icon"></i>
-              <div>
-                <small class="text-muted">Emergency Contact</small>
-                <span><%= user.emergencyContactName %></span>
-                <% if (user.emergencyContactNumber) { %>
-                <small class="text-muted d-block"><%= user.emergencyContactNumber %></small>
-                <% } %>
-              </div>
-            </div>
-            <% } %>
-
-            <div class="info-item">
-              <i class="fas fa-id-card info-icon"></i>
-              <div>
-                <small class="text-muted">Employee ID</small>
-                <span><%= user.employeeId %></span>
-              </div>
-              <% if (user.employeeId && user.employeeId !== 'Not assigned') { %>
-              <button class="btn btn-sm btn-outline-secondary copy-btn ms-auto" data-copy="<%= user.employeeId %>">
-                <i class="far fa-copy"></i>
-              </button>
-              <% } %>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
-
-    <!-- Main Content Area -->
-    <div class="col-lg-8">
-      <!-- Quick Stats -->
-      <div class="row g-3 mb-4">
-        <div class="col-md-3 col-6">
-          <div class="card summary-card">
-            <div class="card-body">
-              <h5 class="value"><%= user.leavesRemaining %></h5>
-              <p class="label">Leaves Left</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3 col-6">
-          <div class="card summary-card">
-            <div class="card-body">
-              <h5 class="value"><%= user.attendancePercentage %>%</h5>
-              <p class="label">Attendance</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3 col-6">
-          <div class="card summary-card">
-            <div class="card-body">
-              <h5 class="value"><%= user.totalExperience %></h5>
-              <p class="label">Experience</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3 col-6">
-          <div class="card summary-card">
-            <div class="card-body">
-              <h5 class="value">
-                <% if (user.performanceRating && user.performanceRating > 0) { %>
-                  <%= user.performanceRating %>/5
-                <% } else { %>
-                  N/A
-                <% } %>
-              </h5>
-              <p class="label">Performance</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Detailed Information Tabs -->
-      <div class="card">
-        <div class="card-header">
-          <ul class="nav nav-tabs card-header-tabs" id="profileTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-              <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#professional" type="button">
-                <i class="fas fa-briefcase me-1"></i> Professional
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#personal" type="button">
-                <i class="fas fa-user me-1"></i> Personal
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#education" type="button">
-                <i class="fas fa-graduation-cap me-1"></i> Education
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#account" type="button">
-                <i class="fas fa-file-invoice me-1"></i> Account & IDs
-              </button>
-            </li>
-          </ul>
-        </div>
-
-        <div class="card-body tab-content p-4" id="profileTabsContent">
-          <!-- Professional Tab -->
-          <div class="tab-pane fade show active" id="professional" role="tabpanel">
-            <h5 class="mb-4"><i class="fas fa-briefcase me-2"></i>Professional Information</h5>
-            <div class="row g-4">
-              <div class="col-md-6">
-                <small class="text-muted">Employee ID</small>
-                <p><%= user.employeeId %></p>
-              </div>
-              <div class="col-md-6">
-                <small class="text-muted">Date of Joining</small>
-                <p>
-                  <% if (user.joiningDate) { %>
-                    <%= new Date(user.joiningDate).toLocaleDateString() %>
-                  <% } else { %>
-                    —
-                  <% } %>
-                </p>
-              </div>
-              <div class="col-md-6">
-                <small class="text-muted">Designation</small>
-                <p><%= user.designation %></p>
-              </div>
-              <div class="col-md-6">
-                <small class="text-muted">Department</small>
-                <p>
-                  <% if (user.department && user.department.name) { %>
-                    <%= user.department.name %>
-                  <% } else { %>
-                    No Department
-                  <% } %>
-                </p>
-              </div>
-              <div class="col-md-6">
-                <small class="text-muted">Reporting Manager</small>
-                <p>
-                  <% if (user.reportingManager && user.reportingManager.name) { %>
-                    <%= user.reportingManager.name %>
-                  <% } else { %>
-                    N/A
-                  <% } %>
-                </p>
-              </div>
-              <div class="col-md-6">
-                <small class="text-muted">Employee Type</small>
-                <p><%= user.employeeType %></p>
-              </div>
-              <div class="col-md-6">
-                <small class="text-muted">Work Location</small>
-                <p><%= user.workLocation %></p>
-              </div>
-              <div class="col-md-6">
-                <small class="text-muted">Employee Status</small>
-                <p><%= user.employeeStatus %></p>
-              </div>
-              <div class="col-md-6">
-                <small class="text-muted">Shift Timings</small>
-                <p><%= user.shiftTimings %></p>
-              </div>
-              <div class="col-md-6">
-                <small class="text-muted">Team</small>
-                <p><%= user.team %></p>
-              </div>
-            </div>
-
-            <!-- Skills Section -->
-            <% if (user.skills && user.skills.length > 0) { %>
-            <div class="mt-5">
-              <h6 class="mb-3">Skills</h6>
-              <div class="d-flex flex-wrap gap-2">
-                <% user.skills.forEach(skill => { %>
-                  <span class="badge bg-primary py-2 px-3"><%= skill %></span>
-                <% }) %>
-              </div>
-            </div>
-            <% } %>
-          </div>
-
-          <!-- Personal Tab -->
-          <div class="tab-pane fade" id="personal" role="tabpanel">
-            <h5 class="mb-4"><i class="fas fa-user me-2"></i>Personal Details</h5>
-            <div class="row g-4">
-              <% if (user.dob) { %>
-              <div class="col-md-6">
-                <small class="text-muted">Date of Birth</small>
-                <p>
-                  <%= new Date(user.dob).toLocaleDateString() %>
-                  <% if (user.age) { %> (<%= user.age %> years)<% } %>
-                </p>
-              </div>
-              <% } %>
-              
-              <% if (user.gender) { %>
-              <div class="col-md-6">
-                <small class="text-muted">Gender</small>
-                <p><%= user.gender %></p>
-              </div>
-              <% } %>
-
-              <% if (user.bloodGroup) { %>
-              <div class="col-md-6">
-                <small class="text-muted">Blood Group</small>
-                <p><%= user.bloodGroup %></p>
-              </div>
-              <% } %>
-
-              <% if (user.personalEmail) { %>
-              <div class="col-md-6">
-                <small class="text-muted">Personal Email</small>
-                <p><%= user.personalEmail %></p>
-              </div>
-              <% } %>
-
-              <% if (user.currentAddress) { %>
-              <div class="col-12">
-                <small class="text-muted">Current Address</small>
-                <p><%= user.currentAddress %></p>
-              </div>
-              <% } %>
-
-              <% if (user.permanentAddress) { %>
-              <div class="col-12">
-                <small class="text-muted">Permanent Address</small>
-                <p><%= user.permanentAddress %></p>
-              </div>
-              <% } %>
-            </div>
-          </div>
-
-          <!-- Education Tab -->
-          <div class="tab-pane fade" id="education" role="tabpanel">
-            <h5 class="mb-4"><i class="fas fa-graduation-cap me-2"></i>Education Details</h5>
-            
-            <% if (user.qualification || user.university) { %>
-            <div class="row g-4">
-              <% if (user.qualification) { %>
-              <div class="col-md-6">
-                <small class="text-muted">Highest Qualification</small>
-                <p><%= user.qualification %></p>
-              </div>
-              <% } %>
-
-              <% if (user.university) { %>
-              <div class="col-md-6">
-                <small class="text-muted">University</small>
-                <p><%= user.university %></p>
-              </div>
-              <% } %>
-
-              <% if (user.yearOfPassing) { %>
-              <div class="col-md-6">
-                <small class="text-muted">Year of Passing</small>
-                <p><%= user.yearOfPassing %></p>
-              </div>
-              <% } %>
-
-              <% if (user.percentage) { %>
-              <div class="col-md-6">
-                <small class="text-muted">Percentage/CGPA</small>
-                <p><%= user.percentage %></p>
-              </div>
-              <% } %>
-            </div>
-            <% } else { %>
-            <div class="text-center py-4">
-              <i class="fas fa-graduation-cap fa-2x text-muted mb-3"></i>
-              <p class="text-muted">No education details added</p>
-              <a href="/user/profile/edit" class="btn btn-primary btn-sm">Add Education</a>
-            </div>
-            <% } %>
-
-            <!-- Experience Section -->
-            <% if (user.previousCompany || user.experienceYears > 0) { %>
-            <div class="mt-5">
-              <h6 class="mb-3">Work Experience</h6>
-              <div class="row g-4">
-                <% if (user.previousCompany) { %>
-                <div class="col-md-6">
-                  <small class="text-muted">Previous Company</small>
-                  <p><%= user.previousCompany %></p>
-                </div>
-                <% } %>
-
-                <% if (user.previousDesignation) { %>
-                <div class="col-md-6">
-                  <small class="text-muted">Previous Designation</small>
-                  <p><%= user.previousDesignation %></p>
-                </div>
-                <% } %>
-
-                <% if (user.experienceYears > 0) { %>
-                <div class="col-md-6">
-                  <small class="text-muted">Total Experience</small>
-                  <p><%= user.experienceYears %> years</p>
-                </div>
-                <% } %>
-              </div>
-            </div>
-            <% } %>
-          </div>
-
-          <!-- Account & IDs Tab -->
-          <div class="tab-pane fade" id="account" role="tabpanel">
-            <h5 class="mb-4"><i class="fas fa-file-invoice me-2"></i>Account & Government IDs</h5>
-            
-            <!-- Bank Details -->
-            <% if (user.bankName || user.accountNumber) { %>
-            <div class="mb-5">
-              <h6 class="mb-3">Bank Account Details</h6>
-              <div class="row g-3">
-                <% if (user.accountNumber) { %>
-                <div class="col-md-6 info-with-copy">
-                  <div>
-                    <small class="text-muted">Account Number</small>
-                    <p><%= user.accountNumber %></p>
-                  </div>
-                  <button class="btn btn-sm btn-outline-secondary copy-btn" data-copy="<%= user.accountNumber %>">
-                    <i class="far fa-copy"></i>
-                  </button>
-                </div>
-                <% } %>
-
-                <% if (user.ifscCode) { %>
-                <div class="col-md-6 info-with-copy">
-                  <div>
-                    <small class="text-muted">IFSC Code</small>
-                    <p><%= user.ifscCode %></p>
-                  </div>
-                  <button class="btn btn-sm btn-outline-secondary copy-btn" data-copy="<%= user.ifscCode %>">
-                    <i class="far fa-copy"></i>
-                  </button>
-                </div>
-                <% } %>
-
-                <% if (user.bankName) { %>
-                <div class="col-md-6">
-                  <small class="text-muted">Bank Name</small>
-                  <p><%= user.bankName %></p>
-                </div>
-                <% } %>
-
-                <% if (user.accountType) { %>
-                <div class="col-md-6">
-                  <small class="text-muted">Account Type</small>
-                  <p><%= user.accountType %></p>
-                </div>
-                <% } %>
-
-                <% if (user.branchName) { %>
-                <div class="col-md-6">
-                  <small class="text-muted">Branch Name</small>
-                  <p><%= user.branchName %></p>
-                </div>
-                <% } %>
-              </div>
-            </div>
-            <% } %>
-
-            <!-- Government IDs -->
-            <div class="row g-4">
-              <% if (user.panNumber) { %>
-              <div class="col-md-6 info-with-copy">
-                <div>
-                  <small class="text-muted">PAN Number</small>
-                  <p><%= user.panNumber %></p>
-                </div>
-                <button class="btn btn-sm btn-outline-secondary copy-btn" data-copy="<%= user.panNumber %>">
-                  <i class="far fa-copy"></i>
-                </button>
-              </div>
-              <% } %>
-
-              <% if (user.aadharNumber) { %>
-              <div class="col-md-6 info-with-copy">
-                <div>
-                  <small class="text-muted">Aadhar Number</small>
-                  <p><%= user.aadharNumber %></p>
-                </div>
-                <button class="btn btn-sm btn-outline-secondary copy-btn" data-copy="<%= user.aadharNumber %>">
-                  <i class="far fa-copy"></i>
-                </button>
-              </div>
-              <% } %>
-
-              <% if (user.passportNumber) { %>
-              <div class="col-md-6 info-with-copy">
-                <div>
-                  <small class="text-muted">Passport Number</small>
-                  <p><%= user.passportNumber %></p>
-                </div>
-                <button class="btn btn-sm btn-outline-secondary copy-btn" data-copy="<%= user.passportNumber %>">
-                  <i class="far fa-copy"></i>
-                </button>
-              </div>
-              <% } %>
-
-              <% if (user.drivingLicense) { %>
-              <div class="col-md-6 info-with-copy">
-                <div>
-                  <small class="text-muted">Driving License</small>
-                  <p><%= user.drivingLicense %></p>
-                </div>
-                <button class="btn btn-sm btn-outline-secondary copy-btn" data-copy="<%= user.drivingLicense %>">
-                  <i class="far fa-copy"></i>
-                </button>
-              </div>
-              <% } %>
-
-              <% if (user.uanNumber) { %>
-              <div class="col-md-6">
-                <small class="text-muted">UAN Number</small>
-                <p><%= user.uanNumber %></p>
-              </div>
-              <% } %>
-
-              <% if (user.pfNumber) { %>
-              <div class="col-md-6">
-                <small class="text-muted">PF Number</small>
-                <p><%= user.pfNumber %></p>
-              </div>
-              <% } %>
-
-              <% if (user.esicNumber) { %>
-              <div class="col-md-6">
-                <small class="text-muted">ESIC Number</small>
-                <p><%= user.esicNumber %></p>
-              </div>
-              <% } %>
-            </div>
-
-            <% if (!user.bankName && !user.panNumber && !user.aadharNumber) { %>
-            <div class="text-center py-4">
-              <i class="fas fa-file-invoice fa-2x text-muted mb-3"></i>
-              <p class="text-muted">No account details added</p>
-              <a href="/user/profile/edit" class="btn btn-primary btn-sm">Add Account Details</a>
-            </div>
-            <% } %>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 
-<!-- Include JavaScript from users folder -->
-<script src="/users/js/profile.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Profile page loaded successfully');
+    
+    // Copy to clipboard functionality
+    document.querySelectorAll('.copy-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const textToCopy = this.getAttribute('data-copy');
+            if (!textToCopy) return;
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const originalHTML = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-check"></i>';
+                this.classList.remove('btn-outline-primary');
+                this.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    this.innerHTML = originalHTML;
+                    this.classList.remove('btn-success');
+                    this.classList.add('btn-outline-primary');
+                }, 2000);
+            }).catch(err => {
+                console.error('Copy failed:', err);
+            });
+        });
+    });
+
+    // Tab activation
+    const triggerTabList = [].slice.call(document.querySelectorAll('#profileTabs button'));
+    triggerTabList.forEach(function (triggerEl) {
+        const tabTrigger = new bootstrap.Tab(triggerEl);
+        triggerEl.addEventListener('click', function (event) {
+            event.preventDefault();
+            tabTrigger.show();
+        });
+    });
+});
+
+function shareProfile() {
+    if (navigator.share) {
+        navigator.share({
+            title: '<%= user.name %> - Profile',
+            text: 'Check out <%= user.name %>\'s profile',
+            url: window.location.href
+        });
+    } else {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            alert('Profile link copied to clipboard!');
+        });
+    }
+}
+</script>

@@ -2,10 +2,11 @@ const express = require('express');
 const router = express.Router();
 const { isAuthenticated } = require('../../middlewares/authMiddleware');
 const { 
-  getAttendancePage,  // ✅ Import naya function
+  getAttendancePage,
   checkIn, 
   checkOut, 
-  myRecords, 
+  getMonthlyRecords,
+  archiveOldAttendance,
   todayStatus 
 } = require('../../controllers/user/attendanceController');
 
@@ -18,17 +19,13 @@ router.post('/check-in', isAuthenticated, checkIn);
 // ✅ Route: User Check-Out (API)
 router.post('/check-out', isAuthenticated, checkOut);
 
-// ✅ Route: Get All Records (API)
-router.get('/my-records', isAuthenticated, myRecords);
+// ✅ Route: Get Monthly Records (API)
+router.get('/monthly/:monthYear?', isAuthenticated, getMonthlyRecords);
+
+// ✅ Route: Archive Old Data (API - Can be called via cron job)
+router.post('/archive', isAuthenticated, archiveOldAttendance);
 
 // ✅ Route: Today's Status (API)
 router.get('/today-status', isAuthenticated, todayStatus);
-
-// routes/user/attendanceRoutes.js mein
-router.post('/check-in', isAuthenticated, (req, res, next) => {
-  console.log('CHECK-IN ROUTE - User:', req.user);
-  console.log('CHECK-IN ROUTE - Session:', req.session);
-  next();
-}, checkIn);
 
 module.exports = router;
