@@ -214,7 +214,7 @@ class AttendanceManager {
         tbody.innerHTML = '';
 
         if (!records || records.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="no-data">No attendance records found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="no-data">No attendance records found</td></tr>';
             return;
         }
 
@@ -224,11 +224,22 @@ class AttendanceManager {
             const checkInTime = record.checkIn ? new Date(record.checkIn).toLocaleTimeString() : '-';
             const checkOutTime = record.checkOut ? new Date(record.checkOut).toLocaleTimeString() : '-';
             
+            // ✅ FIXED: Total hours display with proper formatting
+            let totalHoursDisplay = '-';
+            if (record.totalHours && record.totalHours > 0) {
+                totalHoursDisplay = `${record.totalHours} hrs`;
+            } else if (record.checkIn && record.checkOut) {
+                // Calculate hours if not stored in database
+                const diffMs = new Date(record.checkOut) - new Date(record.checkIn);
+                const hours = parseFloat((diffMs / (1000 * 60 * 60)).toFixed(2));
+                totalHoursDisplay = `${hours} hrs`;
+            }
+            
             row.innerHTML = `
                 <td>${date.toLocaleDateString('en-IN')}</td>
                 <td>${checkInTime}</td>
                 <td>${checkOutTime}</td>
-                <td>${record.totalHours || '-'}</td>
+                <td><strong class="hours-display">${totalHoursDisplay}</strong></td>
                 <td><span class="status-badge status-${record.status}">${record.status.toUpperCase()}</span></td>
             `;
             tbody.appendChild(row);
@@ -279,8 +290,20 @@ class AttendanceManager {
             
             if (dayElement) {
                 dayElement.classList.add(`attendance-${record.status}`);
-                const checkInTime = record.checkIn ? new Date(record.checkIn).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'No check-in';
-                dayElement.title = `${record.status} - ${checkInTime}`;
+                
+                // Create tooltip with hours info
+                let tooltip = `${record.status}`;
+                if (record.checkIn) {
+                    tooltip += ` - IN: ${new Date(record.checkIn).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+                }
+                if (record.checkOut) {
+                    tooltip += ` - OUT: ${new Date(record.checkOut).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+                }
+                if (record.totalHours) {
+                    tooltip += ` - ${record.totalHours} hrs`;
+                }
+                
+                dayElement.title = tooltip;
             }
         });
     }
