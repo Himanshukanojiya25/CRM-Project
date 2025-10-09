@@ -1,7 +1,7 @@
 // Attendance JavaScript with Monthly Features
 class AttendanceManager {
     constructor() {
-        this.currentMonth = moment().format('YYYY-MM');
+        this.currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
         this.init();
     }
 
@@ -14,19 +14,34 @@ class AttendanceManager {
 
     bindEvents() {
         // Check-in/out buttons
-        document.getElementById('checkInBtn').addEventListener('click', () => this.checkIn());
-        document.getElementById('checkOutBtn').addEventListener('click', () => this.checkOut());
+        const checkInBtn = document.getElementById('checkInBtn');
+        const checkOutBtn = document.getElementById('checkOutBtn');
+        
+        if (checkInBtn) {
+            checkInBtn.addEventListener('click', () => this.checkIn());
+        }
+        if (checkOutBtn) {
+            checkOutBtn.addEventListener('click', () => this.checkOut());
+        }
         
         // Month selector
-        document.getElementById('monthSelect').addEventListener('change', (e) => {
-            this.currentMonth = e.target.value;
-            this.loadMonthlyData(this.currentMonth);
-            this.generateCalendar();
-        });
+        const monthSelect = document.getElementById('monthSelect');
+        if (monthSelect) {
+            monthSelect.addEventListener('change', (e) => {
+                this.currentMonth = e.target.value;
+                this.loadMonthlyData(this.currentMonth);
+                this.generateCalendar();
+            });
+        }
     }
 
     async checkIn() {
         try {
+            console.log('🕐 Attempting checkin...');
+            const checkInBtn = document.getElementById('checkInBtn');
+            checkInBtn.disabled = true;
+            checkInBtn.textContent = 'Checking In...';
+
             const response = await fetch('/user/attendance/check-in', {
                 method: 'POST',
                 headers: {
@@ -35,22 +50,35 @@ class AttendanceManager {
             });
 
             const result = await response.json();
+            console.log('📊 Checkin response:', result);
             
             if (result.success) {
-                this.showNotification('Checked in successfully!', 'success');
+                this.showNotification('✅ Checked in successfully!', 'success');
                 this.loadTodayStatus();
                 this.loadMonthlyData(this.currentMonth);
             } else {
-                this.showNotification(result.message, 'error');
+                this.showNotification('❌ ' + result.message, 'error');
+                checkInBtn.disabled = false;
+                checkInBtn.textContent = 'Check In';
             }
         } catch (error) {
-            this.showNotification('Check-in failed!', 'error');
             console.error('Check-in error:', error);
+            this.showNotification('❌ Check-in failed! Please try again.', 'error');
+            const checkInBtn = document.getElementById('checkInBtn');
+            if (checkInBtn) {
+                checkInBtn.disabled = false;
+                checkInBtn.textContent = 'Check In';
+            }
         }
     }
 
     async checkOut() {
         try {
+            console.log('🕐 Attempting checkout...');
+            const checkOutBtn = document.getElementById('checkOutBtn');
+            checkOutBtn.disabled = true;
+            checkOutBtn.textContent = 'Checking Out...';
+
             const response = await fetch('/user/attendance/check-out', {
                 method: 'POST',
                 headers: {
@@ -59,17 +87,25 @@ class AttendanceManager {
             });
 
             const result = await response.json();
+            console.log('📊 Checkout response:', result);
             
             if (result.success) {
-                this.showNotification('Checked out successfully!', 'success');
+                this.showNotification('✅ Checked out successfully!', 'success');
                 this.loadTodayStatus();
                 this.loadMonthlyData(this.currentMonth);
             } else {
-                this.showNotification(result.message, 'error');
+                this.showNotification('❌ ' + result.message, 'error');
+                checkOutBtn.disabled = false;
+                checkOutBtn.textContent = 'Check Out';
             }
         } catch (error) {
-            this.showNotification('Check-out failed!', 'error');
             console.error('Check-out error:', error);
+            this.showNotification('❌ Check-out failed! Please try again.', 'error');
+            const checkOutBtn = document.getElementById('checkOutBtn');
+            if (checkOutBtn) {
+                checkOutBtn.disabled = false;
+                checkOutBtn.textContent = 'Check Out';
+            }
         }
     }
 
@@ -105,55 +141,93 @@ class AttendanceManager {
         const statusElement = document.getElementById('current-status');
         const checkinTime = document.getElementById('checkinTime');
         const checkoutTime = document.getElementById('checkoutTime');
+        const checkInBtn = document.getElementById('checkInBtn');
+        const checkOutBtn = document.getElementById('checkOutBtn');
+        
+        if (!statusElement) return;
         
         // Update status
-        statusElement.textContent = data.status.toUpperCase();
-        statusElement.className = `status-badge status-${data.status}`;
+        const status = data.status || 'absent';
+        statusElement.textContent = status.toUpperCase();
+        statusElement.className = `status-badge status-${status}`;
         
-        // Update times
+        // Update times and buttons
         if (data.checkIn) {
-            checkinTime.textContent = `At: ${moment(data.checkIn).format('HH:mm:ss')}`;
-            document.getElementById('checkInBtn').disabled = true;
+            const checkInDate = new Date(data.checkIn);
+            checkinTime.textContent = `At: ${checkInDate.toLocaleTimeString()}`;
+            if (checkInBtn) {
+                checkInBtn.disabled = true;
+                checkInBtn.textContent = 'Checked In';
+            }
         } else {
             checkinTime.textContent = '';
-            document.getElementById('checkInBtn').disabled = false;
+            if (checkInBtn) {
+                checkInBtn.disabled = false;
+                checkInBtn.textContent = 'Check In';
+            }
         }
         
         if (data.checkOut) {
-            checkoutTime.textContent = `At: ${moment(data.checkOut).format('HH:mm:ss')}`;
-            document.getElementById('checkOutBtn').disabled = true;
+            const checkOutDate = new Date(data.checkOut);
+            checkoutTime.textContent = `At: ${checkOutDate.toLocaleTimeString()}`;
+            if (checkOutBtn) {
+                checkOutBtn.disabled = true;
+                checkOutBtn.textContent = 'Checked Out';
+            }
         } else if (data.checkIn) {
             checkoutTime.textContent = '';
-            document.getElementById('checkOutBtn').disabled = false;
+            if (checkOutBtn) {
+                checkOutBtn.disabled = false;
+                checkOutBtn.textContent = 'Check Out';
+            }
         } else {
             checkoutTime.textContent = '';
-            document.getElementById('checkOutBtn').disabled = true;
+            if (checkOutBtn) {
+                checkOutBtn.disabled = true;
+                checkOutBtn.textContent = 'Check Out';
+            }
         }
     }
 
     updateMonthlyStats(stats) {
-        document.getElementById('presentCount').textContent = stats.presentDays;
-        document.getElementById('lateCount').textContent = stats.lateDays;
-        document.getElementById('absentCount').textContent = stats.absentDays;
-        document.getElementById('totalCount').textContent = stats.totalDays;
-        document.getElementById('records-month').textContent = moment(stats.monthYear, 'YYYY-MM').format('MMMM YYYY');
+        const presentCount = document.getElementById('presentCount');
+        const lateCount = document.getElementById('lateCount');
+        const absentCount = document.getElementById('absentCount');
+        const totalCount = document.getElementById('totalCount');
+        const recordsMonth = document.getElementById('records-month');
+        
+        if (presentCount) presentCount.textContent = stats.presentDays || 0;
+        if (lateCount) lateCount.textContent = stats.lateDays || 0;
+        if (absentCount) absentCount.textContent = stats.absentDays || 0;
+        if (totalCount) totalCount.textContent = stats.totalDays || 0;
+        if (recordsMonth) {
+            const [year, month] = stats.monthYear.split('-');
+            const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long' });
+            recordsMonth.textContent = `${monthName} ${year}`;
+        }
     }
 
     renderRecords(records) {
         const tbody = document.getElementById('records-body');
+        if (!tbody) return;
+
         tbody.innerHTML = '';
 
-        if (records.length === 0) {
+        if (!records || records.length === 0) {
             tbody.innerHTML = '<tr><td colspan="5" class="no-data">No attendance records found</td></tr>';
             return;
         }
 
         records.forEach(record => {
             const row = document.createElement('tr');
+            const date = new Date(record.date);
+            const checkInTime = record.checkIn ? new Date(record.checkIn).toLocaleTimeString() : '-';
+            const checkOutTime = record.checkOut ? new Date(record.checkOut).toLocaleTimeString() : '-';
+            
             row.innerHTML = `
-                <td>${moment(record.date).format('DD MMM YYYY')}</td>
-                <td>${record.checkIn ? moment(record.checkIn).format('HH:mm:ss') : '-'}</td>
-                <td>${record.checkOut ? moment(record.checkOut).format('HH:mm:ss') : '-'}</td>
+                <td>${date.toLocaleDateString('en-IN')}</td>
+                <td>${checkInTime}</td>
+                <td>${checkOutTime}</td>
                 <td>${record.totalHours || '-'}</td>
                 <td><span class="status-badge status-${record.status}">${record.status.toUpperCase()}</span></td>
             `;
@@ -163,10 +237,13 @@ class AttendanceManager {
 
     generateCalendar() {
         const calendar = document.getElementById('attendanceCalendar');
-        const currentMonth = moment(this.currentMonth, 'YYYY-MM');
+        if (!calendar) return;
+
+        const [year, month] = this.currentMonth.split('-');
+        const currentMonthDate = new Date(year, month - 1, 1);
         
         let html = '<div class="calendar-header">';
-        html += `<span class="month-name">${currentMonth.format('MMMM YYYY')}</span>`;
+        html += `<span class="month-name">${currentMonthDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</span>`;
         html += '</div><div class="calendar-grid">';
         
         // Add day headers
@@ -176,16 +253,16 @@ class AttendanceManager {
         });
         
         // Add empty cells for days before month start
-        const firstDay = currentMonth.startOf('month').day();
+        const firstDay = currentMonthDate.getDay();
         for (let i = 0; i < firstDay; i++) {
             html += '<div class="calendar-day empty"></div>';
         }
         
         // Add days of month
-        const daysInMonth = currentMonth.daysInMonth();
+        const daysInMonth = new Date(year, month, 0).getDate();
         for (let day = 1; day <= daysInMonth; day++) {
-            const date = currentMonth.clone().date(day);
-            html += `<div class="calendar-day" data-date="${date.format('YYYY-MM-DD')}">${day}</div>`;
+            const dateStr = `${year}-${month.padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+            html += `<div class="calendar-day" data-date="${dateStr}">${day}</div>`;
         }
         
         html += '</div>';
@@ -193,13 +270,17 @@ class AttendanceManager {
     }
 
     updateCalendar(records) {
+        if (!records) return;
+        
         records.forEach(record => {
-            const dateStr = moment(record.date).format('YYYY-MM-DD');
+            const recordDate = new Date(record.date);
+            const dateStr = `${recordDate.getFullYear()}-${(recordDate.getMonth() + 1).toString().padStart(2, '0')}-${recordDate.getDate().toString().padStart(2, '0')}`;
             const dayElement = document.querySelector(`.calendar-day[data-date="${dateStr}"]`);
             
             if (dayElement) {
                 dayElement.classList.add(`attendance-${record.status}`);
-                dayElement.title = `${record.status} - ${record.checkIn ? moment(record.checkIn).format('HH:mm') : 'No check-in'}`;
+                const checkInTime = record.checkIn ? new Date(record.checkIn).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'No check-in';
+                dayElement.title = `${record.status} - ${checkInTime}`;
             }
         });
     }
@@ -209,12 +290,27 @@ class AttendanceManager {
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
         notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 4px;
+            color: white;
+            z-index: 10000;
+            font-weight: bold;
+            font-size: 14px;
+            ${type === 'success' ? 'background: #28a745;' : 'background: #dc3545;'}
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        `;
         
         document.body.appendChild(notification);
         
         // Remove after 3 seconds
         setTimeout(() => {
-            notification.remove();
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
         }, 3000);
     }
 }

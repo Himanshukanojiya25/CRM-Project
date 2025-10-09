@@ -1,4 +1,5 @@
-const { checkIn } = require('../../services/admin/attendance'); // ✅ Service import
+const attendanceService = require('../../services/admin/attendanceService'); // service exposes checkIn
+const Attendance = require('../../models/Attendance');
 
 const checkIn = async (req, res) => {
   try {
@@ -9,8 +10,8 @@ const checkIn = async (req, res) => {
     const ipAddr = req.ip || req.connection.remoteAddress;
     const deviceType = req.headers['user-agent'];
 
-    // ✅ Call the service function with proper parameters
-    const result = await checkIn(userId, ipAddr, deviceType); // ✅ ADDED: await and result capture
+  // ✅ Call the service function with proper parameters
+  const result = await attendanceService.checkIn(userId, ipAddr, deviceType); // call service
     
     // ✅ Send success response with data from service
     res.status(200).json({ 
@@ -36,4 +37,20 @@ const checkIn = async (req, res) => {
   }
 };
 
-module.exports = { checkIn };
+// Simple admin handler to fetch all attendance records (with optional query filters)
+const getAllAttendance = async (req, res) => {
+  try {
+    const query = {};
+    // Optional filters: user, monthYear
+    if (req.query.user) query.user = req.query.user;
+    if (req.query.monthYear) query.monthYear = req.query.monthYear;
+
+    const records = await Attendance.find(query).sort({ date: -1 }).limit(100);
+    res.status(200).json({ success: true, data: records });
+  } catch (err) {
+    console.error('Get all attendance error:', err);
+    res.status(500).json({ success: false, message: 'Error fetching attendance', error: err.message });
+  }
+};
+
+module.exports = { checkIn, getAllAttendance };

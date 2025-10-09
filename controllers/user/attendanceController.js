@@ -1,29 +1,49 @@
 const Attendance = require('../../models/Attendance');
-const moment = require('moment');
 
 // ✅ Get Attendance Page with Monthly Data
 const getAttendancePage = async (req, res) => {
   try {
-    const currentMonth = moment().format('YYYY-MM');
-    const currentMonthFormatted = moment().format('MMMM YYYY');
-    const todayDate = moment().format('dddd, MMMM Do YYYY');
+    const currentDate = new Date();
+    const currentMonth = currentDate.toISOString().slice(0, 7);
+    const currentMonthFormatted = currentDate.toLocaleString('default', { 
+      month: 'long', 
+      year: 'numeric' 
+    });
+    const todayDate = currentDate.toLocaleDateString('en-IN', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
     
     // Generate months for dropdown
     const months = [];
     for(let i = 0; i < 6; i++) {
-      const month = moment().subtract(i, 'months');
+      const date = new Date();
+      date.setMonth(date.getMonth() - i);
+      const value = date.toISOString().slice(0, 7);
+      const label = date.toLocaleString('default', { month: 'long', year: 'numeric' });
       months.push({
-        value: month.format('YYYY-MM'),
-        label: month.format('MMMM YYYY'),
+        value: value,
+        label: label,
         selected: i === 0
       });
     }
 
     // Get current month attendance
+    const startDate = new Date(currentMonth + '-01');
+    const endDate = new Date(startDate);
+    endDate.setMonth(endDate.getMonth() + 1);
+
     const currentMonthRecords = await Attendance.find({
       user: req.user.id,
-      monthYear: currentMonth
+      date: {
+        $gte: startDate,
+        $lt: endDate
+      }
     }).sort({ date: -1 });
+
+    console.log('📊 Found records for month:', currentMonthRecords.length);
 
     res.render('user/attendance/list', {
       pageTitle: 'Attendance - CRM',
@@ -40,157 +60,251 @@ const getAttendancePage = async (req, res) => {
   }
 };
 
-// ✅ Check-In with Enhanced Late Detection
+// ✅ FIXED CHECK-IN FUNCTION
 const checkIn = async (req, res) => {
   try {
+    console.log('🚨 CHECKIN STARTED - User:', req.user.id);
+    
     if (!req.user || !req.user.id) {
       return res.status(401).json({ 
         success: false,
-        message: 'User not authenticated. Please login again.' 
+        message: 'User not authenticated' 
       });
     }
 
     const userId = req.user.id;
-    const today = moment().startOf('day');
     const now = new Date();
+    
+    // ✅ FIXED: Simple date calculation
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
-    // Check if already checked in today
+    console.log('📅 Date range for query:', {
+      today: today,
+      tomorrow: tomorrow
+    });
+
+    // Check existing record
     const existing = await Attendance.findOne({
       user: userId,
       date: { 
-        $gte: today.toDate(), 
-        $lte: moment(today).endOf('day').toDate() 
+        $gte: today, 
+        $lt: tomorrow 
       }
     });
+
+    console.log('🔍 Existing record found:', existing);
 
     if (existing && existing.checkIn) {
       return res.status(400).json({ 
         success: false,
-        message: 'Already checked in today',
-        data: existing 
+        message: 'Already checked in today'
       });
     }
 
-    // Create or update attendance
-    const attendance = existing || new Attendance({
+    // ✅ FIXED: Create new record with MANUAL monthYear
+    const attendance = new Attendance({
       user: userId,
-      date: today.toDate()
+      date: today,
+      monthYear: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`, // ✅ MANUALLY SET
+      checkIn: now,
+      status: 'present',
+      ipAddress: req.ip || req.connection.remoteAddress,
+      deviceType: req.headers['user-agent']
     });
-
-    attendance.checkIn = now;
-    attendance.ipAddress = req.ip || req.connection.remoteAddress;
-    attendance.deviceType = req.headers['user-agent'];
-    
-    // Enhanced late detection (after 10:15 AM is late)
-    const checkInTime = moment(now);
-    const lateThreshold = moment(today).set({ hour: 10, minute: 15, second: 0 });
-    
-    if (checkInTime.isAfter(lateThreshold)) {
-      attendance.status = 'late';
-    } else {
-      attendance.status = 'present';
-    }
 
     await attendance.save();
-    
+
+    console.log('✅ CHECKIN SUCCESSFUL:', {
+      id: attendance._id,
+      date: attendance.date,
+      checkIn: attendance.checkIn,
+      status: attendance.status,
+      monthYear: attendance.monthYear
+    });
+
     res.status(200).json({ 
       success: true,
-      message: 'Checked in successfully', 
+      message: 'Checked in successfully!', 
       data: attendance 
     });
+
   } catch (err) {
-    console.error('Check-in error:', err);
+    console.error('❌ CHECKIN ERROR:', err);
     res.status(500).json({ 
       success: false,
-      message: 'Check-in failed', 
+      message: 'Check-in failed. Please try again.', 
       error: err.message 
     });
   }
 };
 
-// ✅ Check-Out (Same as before)
+// ✅ FIXED CHECK-OUT FUNCTION  
 const checkOut = async (req, res) => {
   try {
+    console.log('🚨 CHECKOUT STARTED - User:', req.user.id);
+    
     if (!req.user || !req.user.id) {
       return res.status(401).json({ 
         success: false,
-        message: 'User not authenticated. Please login again.' 
+        message: 'User not authenticated' 
       });
     }
 
     const userId = req.user.id;
-    const today = moment().startOf('day');
     const now = new Date();
+    
+    // ✅ FIXED: Same simple date calculation as checkin
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
+    console.log('🔍 Searching for checkin record:', { 
+      userId, 
+      today, 
+      tomorrow 
+    });
+
+    // Find today's attendance
     const attendance = await Attendance.findOne({
       user: userId,
       date: { 
-        $gte: today.toDate(), 
-        $lte: moment(today).endOf('day').toDate() 
+        $gte: today, 
+        $lt: tomorrow 
       },
-      checkIn: { $exists: true },
-      checkOut: { $exists: false }
+      checkIn: { $exists: true, $ne: null }
     });
+
+    console.log('📊 Found record:', attendance);
 
     if (!attendance) {
       return res.status(400).json({ 
         success: false,
-        message: 'No valid check-in found for today or already checked out' 
+        message: 'Please check-in first before checking out.' 
       });
     }
 
+    if (attendance.checkOut) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Already checked out today.' 
+      });
+    }
+
+    // Update checkout
     attendance.checkOut = now;
     const diffMs = attendance.checkOut - attendance.checkIn;
     attendance.totalHours = parseFloat((diffMs / (1000 * 60 * 60)).toFixed(2));
 
+    // Update status based on hours
     if (attendance.totalHours < 4) {
       attendance.status = 'half-day';
+    } else if (attendance.totalHours >= 8) {
+      attendance.status = 'present';
     }
 
     await attendance.save();
 
+    console.log('✅ CHECKOUT SUCCESSFUL:', {
+      checkIn: attendance.checkIn,
+      checkOut: attendance.checkOut, 
+      totalHours: attendance.totalHours,
+      status: attendance.status
+    });
+
     res.status(200).json({ 
       success: true,
-      message: 'Checked out successfully', 
+      message: 'Checked out successfully!', 
       data: attendance 
     });
+
   } catch (err) {
-    console.error('Check-out error:', err);
+    console.error('❌ CHECKOUT ERROR:', err);
     res.status(500).json({ 
       success: false,
-      message: 'Check-out failed', 
+      message: 'Check-out failed. Please try again.', 
       error: err.message 
     });
   }
 };
 
-// ✅ Monthly Attendance Records
+// ✅ FIXED TODAY'S STATUS FUNCTION
+const todayStatus = async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ 
+        success: false,
+        message: 'User not authenticated' 
+      });
+    }
+
+    const userId = req.user.id;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const attendance = await Attendance.findOne({
+      user: userId,
+      date: { 
+        $gte: today, 
+        $lt: tomorrow 
+      }
+    });
+
+    console.log('📊 TODAY STATUS:', attendance);
+
+    res.status(200).json({ 
+      success: true,
+      message: "Today's status fetched",
+      data: attendance || { status: 'absent' }
+    });
+  } catch (err) {
+    console.error('Today status error:', err);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error fetching today status', 
+      error: err.message 
+    });
+  }
+};
+
+// ✅ FIXED MONTHLY RECORDS
 const getMonthlyRecords = async (req, res) => {
   try {
     if (!req.user || !req.user.id) {
       return res.status(401).json({ 
         success: false,
-        message: 'User not authenticated. Please login again.' 
+        message: 'User not authenticated' 
       });
     }
 
     const userId = req.user.id;
-    const monthYear = req.params.monthYear || moment().format('YYYY-MM');
+    const monthYear = req.params.monthYear || new Date().toISOString().slice(0, 7);
     
+    const startDate = new Date(monthYear + '-01');
+    const endDate = new Date(startDate);
+    endDate.setMonth(endDate.getMonth() + 1);
+
     const records = await Attendance.find({ 
       user: userId,
-      monthYear: monthYear 
+      date: { $gte: startDate, $lt: endDate }
     }).sort({ date: -1 });
 
     // Calculate monthly stats
     const totalDays = records.length;
     const presentDays = records.filter(r => ['present', 'late'].includes(r.status)).length;
-    const absentDays = records.filter(r => r.status === 'absent').length;
+    const absentDays = totalDays - presentDays;
     const lateDays = records.filter(r => r.status === 'late').length;
 
     res.status(200).json({ 
       success: true,
-      message: 'Monthly records fetched successfully',
       data: {
         records: records,
         stats: {
@@ -206,42 +320,25 @@ const getMonthlyRecords = async (req, res) => {
     console.error('Monthly records error:', err);
     res.status(500).json({ 
       success: false,
-      message: 'Error fetching monthly records', 
-      error: err.message 
+      message: 'Error fetching monthly records' 
     });
   }
 };
 
-// ✅ Archive Old Attendance (Utility Function)
+// ✅ SIMPLE ARCHIVE FUNCTION
 const archiveOldAttendance = async (req, res) => {
   try {
-    const threeMonthsAgo = moment().subtract(3, 'months').startOf('month');
-    const archiveThreshold = moment().subtract(1, 'month').endOf('month');
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
     
-    // Archive records older than 1 month
-    const archiveResult = await Attendance.updateMany(
-      {
-        date: { $lte: archiveThreshold.toDate() },
-        isArchived: false
-      },
-      {
-        $set: {
-          isArchived: true,
-          archivedAt: new Date()
-        }
-      }
-    );
-
-    // Delete records older than 3 months
     const deleteResult = await Attendance.deleteMany({
-      date: { $lte: threeMonthsAgo.toDate() }
+      date: { $lte: threeMonthsAgo }
     });
 
     res.status(200).json({ 
       success: true,
-      message: 'Archive and cleanup completed',
+      message: 'Archive completed',
       data: {
-        archived: archiveResult.modifiedCount,
         deleted: deleteResult.deletedCount
       }
     });
@@ -249,44 +346,7 @@ const archiveOldAttendance = async (req, res) => {
     console.error('Archive error:', err);
     res.status(500).json({ 
       success: false,
-      message: 'Archive failed', 
-      error: err.message 
-    });
-  }
-};
-
-// ✅ Today's Status
-const todayStatus = async (req, res) => {
-  try {
-    if (!req.user || !req.user.id) {
-      return res.status(401).json({ 
-        success: false,
-        message: 'User not authenticated. Please login again.' 
-      });
-    }
-
-    const userId = req.user.id;
-    const today = moment().startOf('day');
-
-    const attendance = await Attendance.findOne({
-      user: userId,
-      date: { 
-        $gte: today.toDate(), 
-        $lte: moment(today).endOf('day').toDate() 
-      }
-    });
-
-    res.status(200).json({ 
-      success: true,
-      message: "Today's status fetched",
-      data: attendance || { status: 'absent' }
-    });
-  } catch (err) {
-    console.error('Today status error:', err);
-    res.status(500).json({ 
-      success: false,
-      message: 'Error fetching today status', 
-      error: err.message 
+      message: 'Archive failed' 
     });
   }
 };

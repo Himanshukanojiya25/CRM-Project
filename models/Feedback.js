@@ -4,7 +4,8 @@ const feedbackSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
+    index: true
   },
   
   // ✅ FEEDBACK CATEGORY & TYPE
@@ -12,21 +13,24 @@ const feedbackSchema = new mongoose.Schema({
     type: String,
     enum: ['general', 'bug', 'feature', 'complaint', 'appreciation', 'suggestion'],
     default: 'general',
-    required: true
+    required: true,
+    index: true
   },
   
   // ✅ FEEDBACK PRIORITY
   priority: {
     type: String,
     enum: ['low', 'medium', 'high', 'urgent'],
-    default: 'medium'
+    default: 'medium',
+    index: true
   },
   
   // ✅ FEEDBACK STATUS
   status: {
     type: String,
     enum: ['pending', 'under_review', 'in_progress', 'resolved', 'rejected', 'closed'],
-    default: 'pending'
+    default: 'pending',
+    index: true
   },
   
   // ✅ RATING SYSTEM (1-5 stars)
@@ -170,7 +174,20 @@ const feedbackSchema = new mongoose.Schema({
     default: 'unknown'
   },
   
-  // ✅ AUTO-CALCULATED FIELDS
+  // ✅ AUTO-CALCULATED FIELDS FOR REAL-TIME DASHBOARD
+  year: {
+    type: Number,
+    index: true
+  },
+  
+  month: {
+    type: Number,
+    min: 1,
+    max: 12,
+    index: true
+  },
+  
+  // ✅ SYSTEM FIELDS
   isAnonymous: {
     type: Boolean,
     default: false
@@ -189,7 +206,8 @@ const feedbackSchema = new mongoose.Schema({
   // ✅ TIMESTAMPS
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
+    index: true
   },
   
   updatedAt: {
@@ -200,21 +218,32 @@ const feedbackSchema = new mongoose.Schema({
   lastActivityAt: {
     type: Date,
     default: Date.now
-  }
+  },
+
+  // ✅ ARCHIVING SUPPORT
+  isArchived: {
+    type: Boolean,
+    default: false,
+    index: true
+  },
+  
+  archivedAt: Date
 
 }, {
-  timestamps: true // This adds createdAt and updatedAt automatically
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
-// ✅ INDEXES FOR BETTER PERFORMANCE
+// ✅ COMPOUND INDEXES FOR BETTER PERFORMANCE
 feedbackSchema.index({ user: 1, createdAt: -1 });
+feedbackSchema.index({ user: 1, status: 1 });
 feedbackSchema.index({ category: 1, status: 1 });
-feedbackSchema.index({ priority: 1 });
-feedbackSchema.index({ status: 1 });
-feedbackSchema.index({ createdAt: -1 });
-feedbackSchema.index({ 'adminResponse.respondedAt': 1 });
+feedbackSchema.index({ priority: 1, status: 1 });
+feedbackSchema.index({ status: 1, createdAt: -1 });
+feedbackSchema.index({ year: 1, month: 1 });
 
-// ✅ VIRTUAL FIELDS
+// ✅ VIRTUAL FIELDS FOR REAL-TIME DASHBOARD
 feedbackSchema.virtual('responseTime').get(function() {
   if (this.adminResponse && this.adminResponse.respondedAt && this.createdAt) {
     return this.adminResponse.respondedAt - this.createdAt;
@@ -235,6 +264,61 @@ feedbackSchema.virtual('daysOpen').get(function() {
     return Math.ceil((this.resolutionDetails.resolvedAt - this.createdAt) / (1000 * 60 * 60 * 24));
   }
   return Math.ceil((new Date() - this.createdAt) / (1000 * 60 * 60 * 24));
+});
+
+feedbackSchema.virtual('isUrgent').get(function() {
+  return this.priority === 'urgent' || this.priority === 'high';
+});
+
+feedbackSchema.virtual('isPending').get(function() {
+  return this.status === 'pending' || this.status === 'under_review';
+});
+
+feedbackSchema.virtual('formattedCreatedAt').get(function() {
+  return this.createdAt.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+});
+
+// ✅ PRE-SAVE MIDDLEWARE
+feedbackSchema.pre('save', function(next) {
+  this.updatedAt = new Date();
+  
+  // Auto-calculate year and month for filtering
+  const createdDate = new Date(this.createdAt);
+  this.year = createdDate.getFullYear();
+  this.month = createdDate.getMonth() + 1;
+  
+  // Auto-generate tags based on category and content
+  if (this.isModified('category') || this.isModified('title')) {
+    const baseTags = [this.category];
+    
+    // Add priority tags
+    if (this.priority === 'urgent' || this.priority === 'high') {
+      baseTags.push('urgent');
+    }
+    
+    // Add content-based tags from title
+    const titleWords = this.title.toLowerCase().split(' ');
+    const commonWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'];
+    
+    titleWords.forEach(word => {
+      if (word.length > 3 && !commonWords.includes(word)) {
+        baseTags.push(word);
+      }
+    });
+    
+    this.tags = [...new Set(baseTags)]; // Remove duplicates
+  }
+  
+  // Update last activity timestamp
+  if (this.isModified() && !this.isModified('lastActivityAt')) {
+    this.lastActivityAt = new Date();
+  }
+  
+  next();
 });
 
 // ✅ INSTANCE METHODS
@@ -271,13 +355,31 @@ feedbackSchema.methods.addAdminResponse = function(adminId, message, internalNot
   return this.save();
 };
 
-// ✅ STATIC METHODS
+feedbackSchema.methods.changeStatus = function(newStatus) {
+  this.status = newStatus;
+  this.lastActivityAt = new Date();
+  return this.save();
+};
+
+feedbackSchema.methods.calculateSatisfaction = function() {
+  if (!this.rating) return null;
+  
+  // Simple satisfaction score based on rating
+  return (this.rating / 5) * 100;
+};
+
+// ✅ STATIC METHODS FOR REAL-TIME DASHBOARD
 feedbackSchema.statics.getByStatus = function(status) {
-  return this.find({ status: status }).populate('user', 'name email profilePhoto').sort({ createdAt: -1 });
+  return this.find({ status: status })
+    .populate('user', 'name email profilePhoto')
+    .populate('adminResponse.respondedBy', 'name email')
+    .sort({ createdAt: -1 });
 };
 
 feedbackSchema.statics.getByCategory = function(category) {
-  return this.find({ category: category }).populate('user', 'name email profilePhoto').sort({ createdAt: -1 });
+  return this.find({ category: category })
+    .populate('user', 'name email profilePhoto')
+    .sort({ createdAt: -1 });
 };
 
 feedbackSchema.statics.getHighPriority = function() {
@@ -287,55 +389,131 @@ feedbackSchema.statics.getHighPriority = function() {
       { priority: 'urgent' }
     ],
     status: { $in: ['pending', 'under_review', 'in_progress'] }
-  }).populate('user', 'name email profilePhoto').sort({ createdAt: -1 });
+  })
+  .populate('user', 'name email profilePhoto')
+  .sort({ createdAt: -1 });
 };
 
-feedbackSchema.statics.getUserFeedback = function(userId) {
-  return this.find({ user: userId })
+feedbackSchema.statics.getUserFeedback = function(userId, limit = null) {
+  const query = this.find({ user: userId })
     .populate('user', 'name email profilePhoto')
     .populate('adminResponse.respondedBy', 'name email')
     .populate('resolutionDetails.resolvedBy', 'name email')
     .sort({ createdAt: -1 });
+  
+  if (limit) {
+    query.limit(limit);
+  }
+  
+  return query;
 };
 
-// ✅ PRE-SAVE MIDDLEWARE
-feedbackSchema.pre('save', function(next) {
-  this.updatedAt = new Date();
-  
-  // Auto-generate tags based on category and content
-  if (this.isModified('category') || this.isModified('title')) {
-    const baseTags = [this.category];
-    
-    // Add urgency tags
-    if (this.priority === 'urgent' || this.priority === 'high') {
-      baseTags.push('urgent');
-    }
-    
-    // Add content-based tags from title
-    const titleWords = this.title.toLowerCase().split(' ');
-    const commonWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'];
-    
-    titleWords.forEach(word => {
-      if (word.length > 3 && !commonWords.includes(word)) {
-        baseTags.push(word);
-      }
-    });
-    
-    this.tags = [...new Set(baseTags)]; // Remove duplicates
-  }
-  
-  next();
-});
+feedbackSchema.statics.getPendingFeedback = function(userId) {
+  return this.countDocuments({
+    user: userId,
+    status: { $in: ['pending', 'under_review'] }
+  });
+};
 
-// ✅ TOJSON TRANSFORM
-feedbackSchema.set('toJSON', {
-  virtuals: true,
-  transform: function(doc, ret) {
-    ret.id = ret._id;
-    delete ret._id;
-    delete ret.__v;
-    return ret;
-  }
-});
+feedbackSchema.statics.getRecentFeedback = function(userId, limit = 10) {
+  return this.find({
+    user: userId
+  })
+  .sort({ createdAt: -1 })
+  .limit(limit)
+  .select('title category status priority createdAt rating')
+  .lean();
+};
+
+feedbackSchema.statics.getFeedbackStats = function(userId, year = null) {
+  const currentYear = year || new Date().getFullYear();
+  
+  return this.aggregate([
+    {
+      $match: {
+        user: mongoose.Types.ObjectId(userId),
+        year: currentYear
+      }
+    },
+    {
+      $group: {
+        _id: '$status',
+        count: { $sum: 1 },
+        averageRating: { $avg: '$rating' }
+      }
+    }
+  ]);
+};
+
+feedbackSchema.statics.getCategoryStats = function(userId, year = null) {
+  const currentYear = year || new Date().getFullYear();
+  
+  return this.aggregate([
+    {
+      $match: {
+        user: mongoose.Types.ObjectId(userId),
+        year: currentYear
+      }
+    },
+    {
+      $group: {
+        _id: '$category',
+        count: { $sum: 1 },
+        averageRating: { $avg: '$rating' }
+      }
+    },
+    {
+      $sort: { count: -1 }
+    }
+  ]);
+};
+
+// ✅ BULK OPERATIONS FOR PERFORMANCE
+feedbackSchema.statics.bulkArchive = function(userId, beforeDate) {
+  return this.updateMany(
+    {
+      user: userId,
+      createdAt: { $lt: beforeDate },
+      isArchived: false,
+      status: { $in: ['resolved', 'closed', 'rejected'] }
+    },
+    {
+      $set: {
+        isArchived: true,
+        archivedAt: new Date()
+      }
+    }
+  );
+};
+
+// ✅ ANALYTICS METHODS
+feedbackSchema.statics.getResponseTimeMetrics = function(userId) {
+  return this.aggregate([
+    {
+      $match: {
+        user: mongoose.Types.ObjectId(userId),
+        'adminResponse.respondedAt': { $exists: true }
+      }
+    },
+    {
+      $project: {
+        responseTime: {
+          $divide: [
+            { $subtract: ['$adminResponse.respondedAt', '$createdAt'] },
+            1000 * 60 * 60 * 24 // Convert to days
+          ]
+        }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        averageResponseTime: { $avg: '$responseTime' },
+        minResponseTime: { $min: '$responseTime' },
+        maxResponseTime: { $max: '$responseTime' }
+      }
+    }
+  ]);
+};
 
 module.exports = mongoose.model('Feedback', feedbackSchema);

@@ -1,8 +1,8 @@
 <% layout = 'layouts/user-base' %>
 
-<!-- ✅ EXISTING SAFE VARIABLES SECTION (YEH PEHLE SE HAI) -->
+<!-- ✅ ENHANCED SAFE VARIABLES WITH REAL-TIME SUPPORT -->
 <%
-  // Safe variable assignment
+  // Safe variable assignment with real-time support
   const safeStats = typeof stats !== 'undefined' ? stats : {
     yearlyAttendance: 0,
     yearlyLeaves: 0, 
@@ -12,7 +12,10 @@
     pendingLeaves: 0,
     pendingFeedback: 0,
     currentYear: new Date().getFullYear(),
-    monthlyAttendance: 0
+    monthlyAttendance: 0,
+    currentMonth: new Date().toLocaleString('default', { month: 'long' }),
+    attendancePercentage: 0,
+    monthlyProgress: 0
   };
   
   const safeUser = typeof user !== 'undefined' ? user : { name: 'User' };
@@ -22,28 +25,29 @@
     feedback: []
   };
   const safeNotifications = typeof notifications !== 'undefined' ? notifications : {};
+  
+  // ✅ FIXED: Safe variables for new fields
+  const safeLastUpdated = typeof lastUpdated !== 'undefined' ? lastUpdated : new Date();
+  const safeDataFreshness = typeof dataFreshness !== 'undefined' ? dataFreshness : 'real-time';
 %>
 
-<!-- 🚨 ADD THIS DEBUG SECTION -->
-<div class="alert alert-warning">
-  <h4>🚨 DEBUG INFORMATION</h4>
-  <p><strong>User:</strong> <%= safeUser.name %></p>
-  <p><strong>Stats:</strong> <%= JSON.stringify(safeStats) %></p>
-  <p><strong>Recent Activity Count:</strong> 
-    Attendance: <%= safeRecentActivity.attendance.length %>,
-    Leaves: <%= safeRecentActivity.leaves.length %>,
-    Feedback: <%= safeRecentActivity.feedback.length %>
-  </p>
-  <p><strong>Current Year:</strong> <%= safeStats.currentYear %></p>
+<!-- 🔄 REAL-TIME UPDATE INDICATOR -->
+<div class="real-time-indicator" id="realTimeIndicator">
+  <div class="indicator-content">
+    <i class="fas fa-sync-alt spin"></i>
+    <span>Live Data</span>
+    <div class="last-updated">
+      Updated: <span id="lastUpdatedTime"><%= new Date(safeLastUpdated).toLocaleTimeString() %></span>
+    </div>
+  </div>
 </div>
-<!-- 🚨 END DEBUG SECTION -->
 
 <div class="container-fluid dashboard-container">
    <button class="sidebar-toggle" onclick="toggleSidebar()">
         <i class="fas fa-bars"></i>
     </button>
   
-  <!-- 🎯 HERO WELCOME SECTION -->
+  <!-- 🎯 ENHANCED HERO WELCOME SECTION -->
   <div class="row mb-5">
     <div class="col-12">
       <div class="hero-welcome">
@@ -52,7 +56,11 @@
             Welcome back, <span class="gradient-text"><%= safeUser.name %></span>! 👋
           </h1>
           <p class="welcome-subtitle">
-            Here's your performance overview for <strong><%= safeStats.currentYear %></strong>
+            Real-time overview for <strong><%= safeStats.currentMonth %> <%= safeStats.currentYear %></strong>
+            <span class="data-freshness <%= safeDataFreshness === 'real-time' ? 'real-time' : 'cached' %>">
+              <i class="fas fa-circle"></i>
+              <%= safeDataFreshness %>
+            </span>
           </p>
           <div class="welcome-stats">
             <div class="stat-badge">
@@ -61,7 +69,11 @@
             </div>
             <div class="stat-badge">
               <i class="fas fa-trophy"></i>
-              <span><%= Math.round((safeStats.yearlyAttendance / 365) * 100) %>% Attendance</span>
+              <span><%= safeStats.attendancePercentage %>% Attendance Rate</span>
+            </div>
+            <div class="stat-badge pending-badge" id="pendingActionsBadge">
+              <i class="fas fa-clock"></i>
+              <span><%= safeStats.pendingLeaves + safeStats.pendingFeedback %> Pending</span>
             </div>
           </div>
         </div>
@@ -76,15 +88,16 @@
     </div>
   </div>
 
-  <!-- 📊 MAIN STATS CARDS WITH GRADIENTS -->
-  <div class="row g-4 mb-5">
+  <!-- 📊 ENHANCED MAIN STATS CARDS WITH REAL-TIME UPDATES -->
+  <div class="row g-4 mb-5" id="statsCards">
+    <!-- Attendance Card -->
     <div class="col-xl-3 col-md-6">
       <div class="stat-card attendance-card">
         <div class="card-icon">
           <i class="fas fa-calendar-check"></i>
         </div>
         <div class="card-content">
-          <h3 class="stat-number"><%= safeStats.yearlyAttendance %></h3>
+          <h3 class="stat-number" id="yearlyAttendance"><%= safeStats.yearlyAttendance %></h3>
           <p class="stat-label">Present Days</p>
           <div class="progress-bar">
             <div class="progress-fill" style="width: <%= Math.min(safeStats.yearlyAttendance * 2, 100) %>%"></div>
@@ -95,51 +108,59 @@
       </div>
     </div>
 
+    <!-- Leaves Card -->
     <div class="col-xl-3 col-md-6">
       <div class="stat-card leaves-card">
         <div class="card-icon">
           <i class="fas fa-plane-departure"></i>
         </div>
         <div class="card-content">
-          <h3 class="stat-number"><%= safeStats.yearlyLeaves %></h3>
+          <h3 class="stat-number" id="yearlyLeaves"><%= safeStats.yearlyLeaves %></h3>
           <p class="stat-label">Leaves Applied</p>
           <div class="progress-bar">
             <div class="progress-fill" style="width: <%= Math.min(safeStats.yearlyLeaves * 10, 100) %>%"></div>
           </div>
-          <span class="stat-subtext"><%= safeStats.approvedLeaves %> Approved</span>
+          <span class="stat-subtext">
+            <span id="approvedLeaves"><%= safeStats.approvedLeaves %></span> Approved
+          </span>
         </div>
         <div class="card-wave"></div>
       </div>
     </div>
 
+    <!-- Feedback Card -->
     <div class="col-xl-3 col-md-6">
       <div class="stat-card feedback-card">
         <div class="card-icon">
           <i class="fas fa-comments"></i>
         </div>
         <div class="card-content">
-          <h3 class="stat-number"><%= safeStats.yearlyFeedback %></h3>
+          <h3 class="stat-number" id="yearlyFeedback"><%= safeStats.yearlyFeedback %></h3>
           <p class="stat-label">Feedback Submitted</p>
           <div class="progress-bar">
             <div class="progress-fill" style="width: <%= Math.min(safeStats.yearlyFeedback * 10, 100) %>%"></div>
           </div>
-          <span class="stat-subtext"><%= safeStats.pendingFeedback %> Pending</span>
+          <span class="stat-subtext">
+            <span id="pendingFeedback"><%= safeStats.pendingFeedback %></span> Pending
+          </span>
         </div>
         <div class="card-wave"></div>
       </div>
     </div>
 
+    <!-- Today's Status Card -->
     <div class="col-xl-3 col-md-6">
       <div class="stat-card today-card">
         <div class="card-icon">
           <i class="fas fa-user-check"></i>
         </div>
         <div class="card-content">
-          <h3 class="stat-number today-status <%= safeStats.todayAttendance === 'present' ? 'present' : safeStats.todayAttendance === 'Not Marked' ? 'not-marked' : 'other' %>">
+          <h3 class="stat-number today-status <%= safeStats.todayAttendance === 'present' ? 'present' : safeStats.todayAttendance === 'Not Marked' ? 'not-marked' : 'other' %>"
+              id="todayAttendance">
             <%= safeStats.todayAttendance %>
           </h3>
           <p class="stat-label">Today's Status</p>
-          <div class="today-action">
+          <div class="today-action" id="todayAction">
             <% if (safeStats.todayAttendance === 'Not Marked') { %>
               <a href="/user/attendance" class="action-btn mark-btn">
                 <i class="fas fa-plus me-2"></i>Mark Attendance
@@ -228,20 +249,94 @@
       <div class="feature-card activity-card">
         <div class="card-header">
           <h3><i class="fas fa-history me-2"></i>Recent Activity</h3>
-          <p>Your latest actions</p>
+          <p>Your latest actions & updates</p>
         </div>
         <div class="card-body">
-          <!-- Include Recent Activity Partial -->
-          <%- include('../partials/user-recent-activity', { 
-            recentActivity: safeRecentActivity,
-            stats: safeStats 
-          }) %>
+          <div class="activity-timeline" id="recentActivity">
+            <% if (safeRecentActivity.attendance.length > 0 || safeRecentActivity.leaves.length > 0 || safeRecentActivity.feedback.length > 0) { %>
+              <!-- Attendance Activity -->
+              <% safeRecentActivity.attendance.slice(0, 3).forEach(attendance => { %>
+                <div class="activity-item attendance-activity">
+                  <div class="activity-icon">
+                    <i class="fas fa-calendar-check"></i>
+                  </div>
+                  <div class="activity-content">
+                    <h5>Attendance Recorded</h5>
+                    <p><%= new Date(attendance.date).toLocaleDateString() %> - <%= attendance.status %></p>
+                    <small class="text-muted">
+                      <% if (attendance.checkIn) { %>
+                        Check-in: <%= new Date(attendance.checkIn).toLocaleTimeString() %>
+                      <% } %>
+                      <% if (attendance.checkOut) { %>
+                        • Check-out: <%= new Date(attendance.checkOut).toLocaleTimeString() %>
+                      <% } %>
+                    </small>
+                  </div>
+                  <div class="activity-time">
+                    <%= new Date(attendance.date).toLocaleDateString() %>
+                  </div>
+                </div>
+              <% }) %>
+
+              <!-- Leaves Activity -->
+              <% safeRecentActivity.leaves.slice(0, 3).forEach(leave => { %>
+                <div class="activity-item leave-activity">
+                  <div class="activity-icon">
+                    <i class="fas fa-plane-departure"></i>
+                  </div>
+                  <div class="activity-content">
+                    <h5>Leave <%= leave.status %></h5>
+                    <p><%= leave.reason %></p>
+                    <small class="text-muted">
+                      <%= new Date(leave.startDate).toLocaleDateString() %>
+                      <% if (leave.endDate && leave.leaveType === 'full-day') { %>
+                        to <%= new Date(leave.endDate).toLocaleDateString() %>
+                      <% } %>
+                      • <%= leave.days %> day(s)
+                    </small>
+                  </div>
+                  <div class="activity-time">
+                    <%= new Date(leave.startDate).toLocaleDateString() %>
+                  </div>
+                </div>
+              <% }) %>
+
+              <!-- Feedback Activity -->
+              <% safeRecentActivity.feedback.slice(0, 3).forEach(feedback => { %>
+                <div class="activity-item feedback-activity">
+                  <div class="activity-icon">
+                    <i class="fas fa-comments"></i>
+                  </div>
+                  <div class="activity-content">
+                    <h5>Feedback Submitted</h5>
+                    <p><%= feedback.title %></p>
+                    <small class="text-muted">
+                      Category: <%= feedback.category %> • 
+                      Status: <%= feedback.status %>
+                      <% if (feedback.rating) { %>
+                        • Rating: <%= '★'.repeat(feedback.rating) %>
+                      <% } %>
+                    </small>
+                  </div>
+                  <div class="activity-time">
+                    <%= new Date(feedback.createdAt).toLocaleDateString() %>
+                  </div>
+                </div>
+              <% }) %>
+            <% } else { %>
+              <div class="no-activity">
+                <i class="fas fa-inbox fa-3x mb-3 text-muted"></i>
+                <h5>No Recent Activity</h5>
+                <p class="text-muted">Your recent activities will appear here</p>
+              </div>
+            <% } %>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- 📈 ADDITIONAL FEATURES GRID -->
+  <!-- 📈 ENHANCED QUICK STATS SECTION -->
   <div class="row g-4 mt-4">
     <!-- Pending Actions -->
     <div class="col-lg-6">
@@ -251,100 +346,207 @@
           <p>Requires your attention</p>
         </div>
         <div class="card-body">
-          <%- include('../partials/user-pending-actions', { stats: safeStats }) %>
+          <div class="pending-actions-list">
+            <% if (safeStats.pendingLeaves > 0) { %>
+              <div class="pending-item">
+                <div class="pending-icon warning">
+                  <i class="fas fa-plane-departure"></i>
+                </div>
+                <div class="pending-content">
+                  <h5><%= safeStats.pendingLeaves %> Pending Leave<%= safeStats.pendingLeaves !== 1 ? 's' : '' %></h5>
+                  <p>Awaiting approval from manager</p>
+                </div>
+                <a href="/user/leaves" class="pending-action-btn">
+                  View
+                  <i class="fas fa-chevron-right"></i>
+                </a>
+              </div>
+            <% } %>
+
+            <% if (safeStats.pendingFeedback > 0) { %>
+              <div class="pending-item">
+                <div class="pending-icon info">
+                  <i class="fas fa-comments"></i>
+                </div>
+                <div class="pending-content">
+                  <h5><%= safeStats.pendingFeedback %> Pending Feedback<%= safeStats.pendingFeedback !== 1 ? 's' : '' %></h5>
+                  <p>Under review by admin team</p>
+                </div>
+                <a href="/user/feedback" class="pending-action-btn">
+                  View
+                  <i class="fas fa-chevron-right"></i>
+                </a>
+              </div>
+            <% } %>
+
+            <% if (safeStats.pendingLeaves === 0 && safeStats.pendingFeedback === 0) { %>
+              <div class="no-pending">
+                <i class="fas fa-check-circle fa-2x text-success mb-3"></i>
+                <h5>All Clear!</h5>
+                <p class="text-muted">No pending actions at the moment</p>
+              </div>
+            <% } %>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Quick Stats Section - IMPROVED DESIGN -->
-<div class="col-lg-6">
-  <div class="card stats-card">
-    <div class="card-header bg-gradient-primary text-white">
-      <h5 class="card-title mb-0">
-        <i class="fas fa-chart-pie me-2"></i>Quick Stats
-      </h5>
-      <small class="opacity-75"><%= safeStats.currentYear %> Overview</small>
-    </div>
-    <div class="card-body">
-      <div class="row g-3">
-        <!-- Approved Leaves -->
-        <div class="col-6">
-          <div class="stat-item text-center p-3 border rounded">
-            <div class="stat-icon mb-2">
-              <i class="fas fa-check-circle fa-2x text-success"></i>
+    <!-- Quick Stats -->
+    <div class="col-lg-6">
+      <div class="card stats-card">
+        <div class="card-header bg-gradient-primary text-white">
+          <h5 class="card-title mb-0">
+            <i class="fas fa-chart-pie me-2"></i>Quick Stats
+          </h5>
+          <small class="opacity-75"><%= safeStats.currentYear %> Overview</small>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <!-- Approved Leaves -->
+            <div class="col-6">
+              <div class="stat-item text-center p-3 border rounded">
+                <div class="stat-icon mb-2">
+                  <i class="fas fa-check-circle fa-2x text-success"></i>
+                </div>
+                <h4 class="stat-value text-success mb-1" id="approvedLeavesStat"><%= safeStats.approvedLeaves %></h4>
+                <p class="stat-label text-muted mb-0">Approved Leaves</p>
+              </div>
             </div>
-            <h4 class="stat-value text-success mb-1"><%= safeStats.approvedLeaves %></h4>
-            <p class="stat-label text-muted mb-0">Approved Leaves</p>
-          </div>
-        </div>
 
-        <!-- Pending Leaves -->
-        <div class="col-6">
-          <div class="stat-item text-center p-3 border rounded">
-            <div class="stat-icon mb-2">
-              <i class="fas fa-clock fa-2x text-warning"></i>
+            <!-- Pending Leaves -->
+            <div class="col-6">
+              <div class="stat-item text-center p-3 border rounded">
+                <div class="stat-icon mb-2">
+                  <i class="fas fa-clock fa-2x text-warning"></i>
+                </div>
+                <h4 class="stat-value text-warning mb-1" id="pendingLeavesStat"><%= safeStats.pendingLeaves %></h4>
+                <p class="stat-label text-muted mb-0">Pending Leaves</p>
+              </div>
             </div>
-            <h4 class="stat-value text-warning mb-1"><%= safeStats.pendingLeaves %></h4>
-            <p class="stat-label text-muted mb-0">Pending Leaves</p>
-          </div>
-        </div>
 
-        <!-- Pending Feedback -->
-        <div class="col-6">
-          <div class="stat-item text-center p-3 border rounded">
-            <div class="stat-icon mb-2">
-              <i class="fas fa-hourglass-half fa-2x text-info"></i>
+            <!-- Pending Feedback -->
+            <div class="col-6">
+              <div class="stat-item text-center p-3 border rounded">
+                <div class="stat-icon mb-2">
+                  <i class="fas fa-hourglass-half fa-2x text-info"></i>
+                </div>
+                <h4 class="stat-value text-info mb-1" id="pendingFeedbackStat"><%= safeStats.pendingFeedback %></h4>
+                <p class="stat-label text-muted mb-0">Pending Feedback</p>
+              </div>
             </div>
-            <h4 class="stat-value text-info mb-1"><%= safeStats.pendingFeedback %></h4>
-            <p class="stat-label text-muted mb-0">Pending Feedback</p>
-          </div>
-        </div>
 
-        <!-- Monthly Attendance -->
-        <div class="col-6">
-          <div class="stat-item text-center p-3 border rounded">
-            <div class="stat-icon mb-2">
-              <i class="fas fa-calendar-alt fa-2x text-primary"></i>
+            <!-- Monthly Attendance -->
+            <div class="col-6">
+              <div class="stat-item text-center p-3 border rounded">
+                <div class="stat-icon mb-2">
+                  <i class="fas fa-calendar-alt fa-2x text-primary"></i>
+                </div>
+                <h4 class="stat-value text-primary mb-1" id="monthlyAttendanceStat"><%= safeStats.monthlyAttendance %></h4>
+                <p class="stat-label text-muted mb-0">This Month</p>
+              </div>
             </div>
-            <h4 class="stat-value text-primary mb-1"><%= safeStats.monthlyAttendance %></h4>
-            <p class="stat-label text-muted mb-0">This Month</p>
           </div>
-        </div>
-      </div>
 
-      <!-- Progress Section -->
-      <div class="mt-4">
-        <h6 class="text-muted mb-3">Monthly Progress</h6>
-        <div class="progress mb-2" style="height: 10px;">
-          <div class="progress-bar bg-success" role="progressbar" 
-               style="width: <%= Math.min((safeStats.monthlyAttendance || 0) * 10, 100) %>%"
-               aria-valuenow="<%= safeStats.monthlyAttendance || 0 %>" 
-               aria-valuemin="0" aria-valuemax="10">
+          <!-- Progress Section -->
+          <div class="mt-4">
+            <h6 class="text-muted mb-3">Monthly Progress</h6>
+            <div class="progress mb-2" style="height: 10px;">
+              <div class="progress-bar bg-success" role="progressbar" 
+                   style="width: <%= safeStats.monthlyProgress %>%"
+                   id="monthlyProgressBar"
+                   aria-valuenow="<%= safeStats.monthlyAttendance || 0 %>" 
+                   aria-valuemin="0" aria-valuemax="10">
+              </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <small class="text-muted" id="monthlyAttendanceText">
+                <%= safeStats.monthlyAttendance || 0 %> present days
+              </small>
+              <small class="text-muted"><%= safeStats.currentMonth %></small>
+            </div>
           </div>
-        </div>
-        <div class="d-flex justify-content-between align-items-center">
-          <small class="text-muted"><%= safeStats.monthlyAttendance || 0 %> present days</small>
-          <small class="text-muted"><%= new Date().toLocaleString('default', { month: 'long' }) %></small>
         </div>
       </div>
     </div>
   </div>
-</div>
   
   <!-- Sidebar Overlay -->
   <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 </div>
 
-<!-- 🎨 SUPER ATTRACTIVE CSS -->
+<!-- 🎨 ENHANCED CSS WITH REAL-TIME FEATURES -->
 <style>
 .dashboard-container {
   padding: 20px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
+  position: relative;
 }
 
-/* 🎯 HERO SECTION */
+/* 🔄 REAL-TIME INDICATOR */
+.real-time-indicator {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 25px;
+  padding: 10px 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  z-index: 1000;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.real-time-indicator:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.indicator-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: #2c3e50;
+}
+
+.indicator-content .spin {
+  animation: spin 2s linear infinite;
+}
+
+.last-updated {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.data-freshness {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-left: 10px;
+}
+
+.data-freshness.real-time {
+  background: rgba(67, 233, 123, 0.2);
+  color: #43e97b;
+}
+
+.data-freshness.cached {
+  background: rgba(255, 217, 61, 0.2);
+  color: #ffd93d;
+}
+
+.data-freshness i {
+  font-size: 0.6rem;
+}
+
+/* 🎯 ENHANCED HERO SECTION */
 .hero-welcome {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 20px;
@@ -355,10 +557,27 @@
   box-shadow: 0 20px 40px rgba(0,0,0,0.1);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-welcome::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  filter: blur(40px);
+  opacity: 0.1;
 }
 
 .welcome-content {
   flex: 1;
+  position: relative;
+  z-index: 2;
 }
 
 .welcome-title {
@@ -374,11 +593,16 @@
   font-size: 1.1rem;
   color: #6c757d;
   margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .welcome-stats {
   display: flex;
   gap: 15px;
+  flex-wrap: wrap;
 }
 
 .stat-badge {
@@ -390,6 +614,16 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.stat-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.pending-badge {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
 }
 
 .welcome-graphic {
@@ -413,80 +647,46 @@
 .floating-icons i:nth-child(2) { top: 40px; right: 0; animation-delay: 1s; }
 .floating-icons i:nth-child(3) { bottom: 0; left: 40px; animation-delay: 2s; }
 
-/* 📊 STAT CARDS */
-/* 🎯 QUICK STATS IMPROVED STYLING */
-.stats-card {
-  border: none;
-  border-radius: 15px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  transition: all 0.3s ease;
-}
-
-.stats-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-}
-
-.bg-gradient-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-}
-
-.stats-card .card-header {
-  border-radius: 15px 15px 0 0 !important;
-  border: none;
-  padding: 20px;
-}
-
-.stats-card .card-header h5 {
-  font-weight: 600;
-  margin-bottom: 5px;
-}
-
-.stats-card .card-body {
+/* 📊 ENHANCED STAT CARDS */
+.stat-card {
+  background: linear-gradient(135deg, var(--card-color-1) 0%, var(--card-color-2) 100%);
+  border-radius: 20px;
   padding: 25px;
-}
-
-.stat-item {
-  background: #f8f9fa;
-  border-radius: 12px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   transition: all 0.3s ease;
-  border: 1px solid #e9ecef !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
-.stat-item:hover {
-  background: white;
-  transform: translateY(-3px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+.stat-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
 }
 
-.stat-icon {
-  opacity: 0.9;
+.stat-card.attendance-card {
+  --card-color-1: #667eea;
+  --card-color-2: #764ba2;
 }
 
-.stat-value {
-  font-weight: 700;
-  font-size: 1.8rem;
+.stat-card.leaves-card {
+  --card-color-1: #f093fb;
+  --card-color-2: #f5576c;
 }
 
-.stat-label {
-  font-size: 0.9rem;
-  font-weight: 500;
+.stat-card.feedback-card {
+  --card-color-1: #4facfe;
+  --card-color-2: #00f2fe;
 }
 
-.progress {
-  border-radius: 10px;
-  background-color: #e9ecef;
+.stat-card.today-card {
+  --card-color-1: #43e97b;
+  --card-color-2: #38f9d7;
 }
-
-.progress-bar {
-  border-radius: 10px;
-  transition: width 0.6s ease;
-}
-
-.attendance-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-.leaves-card { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-.feedback-card { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-.today-card { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
 
 .card-icon {
   width: 60px;
@@ -497,6 +697,7 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 20px;
+  backdrop-filter: blur(10px);
 }
 
 .card-icon i {
@@ -509,6 +710,7 @@
   font-weight: 700;
   color: white;
   margin-bottom: 5px;
+  transition: all 0.3s ease;
 }
 
 .stat-label {
@@ -555,12 +757,14 @@
   text-decoration: none;
   font-size: 0.9rem;
   transition: all 0.3s ease;
+  display: inline-block;
 }
 
 .action-btn:hover {
   background: rgba(255, 255, 255, 0.3);
   color: white;
   transform: translateY(-2px);
+  text-decoration: none;
 }
 
 .status-badge {
@@ -568,6 +772,7 @@
   border-radius: 15px;
   font-size: 0.8rem;
   font-weight: 600;
+  display: inline-block;
 }
 
 .status-badge.present {
@@ -590,7 +795,7 @@
   background-size: cover;
 }
 
-/* 🎯 FEATURE CARDS */
+/* 🎯 ENHANCED FEATURE CARDS */
 .feature-card {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 20px;
@@ -599,6 +804,7 @@
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
+  height: 100%;
 }
 
 .feature-card:hover {
@@ -617,6 +823,8 @@
   font-weight: 600;
   color: #2c3e50;
   margin-bottom: 5px;
+  display: flex;
+  align-items: center;
 }
 
 .card-header p {
@@ -628,7 +836,7 @@
   padding: 25px;
 }
 
-/* 🚀 QUICK ACTIONS */
+/* 🚀 ENHANCED QUICK ACTIONS */
 .action-grid {
   display: flex;
   flex-direction: column;
@@ -643,37 +851,30 @@
   text-decoration: none;
   transition: all 0.3s ease;
   border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .action-item:hover {
   transform: translateX(10px);
   text-decoration: none;
+  background: white;
 }
 
 .action-item.primary {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-  border-color: rgba(102, 126, 234, 0.2);
+  border-left: 4px solid #667eea;
 }
 
 .action-item.warning {
-  background: linear-gradient(135deg, rgba(240, 147, 251, 0.1) 0%, rgba(245, 87, 108, 0.1) 100%);
-  border-color: rgba(245, 87, 108, 0.2);
+  border-left: 4px solid #f5576c;
 }
 
 .action-item.info {
-  background: linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(0, 242, 254, 0.1) 100%);
-  border-color: rgba(79, 172, 254, 0.2);
+  border-left: 4px solid #4facfe;
 }
 
 .action-item.success {
-  background: linear-gradient(135deg, rgba(67, 233, 123, 0.1) 0%, rgba(56, 249, 215, 0.1) 100%);
-  border-color: rgba(67, 233, 123, 0.2);
+  border-left: 4px solid #43e97b;
 }
-
-.action-item:hover.primary { background: rgba(102, 126, 234, 0.15); }
-.action-item:hover.warning { background: rgba(245, 87, 108, 0.15); }
-.action-item:hover.info { background: rgba(79, 172, 254, 0.15); }
-.action-item:hover.success { background: rgba(67, 233, 123, 0.15); }
 
 .action-icon {
   width: 50px;
@@ -684,26 +885,23 @@
   justify-content: center;
   margin-right: 15px;
   font-size: 1.2rem;
+  color: white;
 }
 
 .action-item.primary .action-icon {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
 }
 
 .action-item.warning .action-icon {
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  color: white;
 }
 
 .action-item.info .action-icon {
   background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  color: white;
 }
 
 .action-item.success .action-icon {
   background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-  color: white;
 }
 
 .action-content {
@@ -733,6 +931,258 @@
   transform: translateX(5px);
 }
 
+/* 📈 ACTIVITY TIMELINE */
+.activity-timeline {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  background: rgba(248, 249, 250, 0.8);
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
+}
+
+.activity-item:hover {
+  background: white;
+  transform: translateX(5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.activity-item.attendance-activity {
+  border-left-color: #667eea;
+}
+
+.activity-item.leave-activity {
+  border-left-color: #f5576c;
+}
+
+.activity-item.feedback-activity {
+  border-left-color: #4facfe;
+}
+
+.activity-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.attendance-activity .activity-icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.leave-activity .activity-icon {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.feedback-activity .activity-icon {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.activity-content {
+  flex: 1;
+}
+
+.activity-content h5 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 5px;
+}
+
+.activity-content p {
+  font-size: 0.9rem;
+  color: #495057;
+  margin-bottom: 5px;
+}
+
+.activity-content small {
+  font-size: 0.8rem;
+}
+
+.activity-time {
+  font-size: 0.8rem;
+  color: #6c757d;
+  flex-shrink: 0;
+  margin-left: 15px;
+}
+
+.no-activity {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+}
+
+/* ⏳ PENDING ACTIONS */
+.pending-actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.pending-item {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  border-radius: 15px;
+  background: rgba(248, 249, 250, 0.8);
+  transition: all 0.3s ease;
+  border: 1px solid #e9ecef;
+}
+
+.pending-item:hover {
+  background: white;
+  transform: translateX(5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.pending-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.pending-icon.warning {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.pending-icon.info {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.pending-content {
+  flex: 1;
+}
+
+.pending-content h5 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 5px;
+}
+
+.pending-content p {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin: 0;
+}
+
+.pending-action-btn {
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  padding: 8px 16px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pending-action-btn:hover {
+  background: #667eea;
+  color: white;
+  text-decoration: none;
+  transform: translateX(3px);
+}
+
+.no-pending {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+}
+
+/* 📊 QUICK STATS IMPROVED */
+.stats-card {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.stats-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.stats-card .card-header {
+  border-radius: 15px 15px 0 0 !important;
+  border: none;
+  padding: 20px;
+}
+
+.stats-card .card-header h5 {
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.stats-card .card-body {
+  padding: 25px;
+}
+
+.stat-item {
+  background: #f8f9fa;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  border: 1px solid #e9ecef !important;
+}
+
+.stat-item:hover {
+  background: white;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.stat-icon {
+  opacity: 0.9;
+}
+
+.stat-value {
+  font-weight: 700;
+  font-size: 1.8rem;
+  transition: all 0.3s ease;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.progress {
+  border-radius: 10px;
+  background-color: #e9ecef;
+}
+
+.progress-bar {
+  border-radius: 10px;
+  transition: width 0.6s ease;
+}
+
 /* ✨ ANIMATIONS */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
@@ -743,6 +1193,16 @@
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 .gradient-text {
@@ -773,6 +1233,7 @@
   
   .stat-card {
     padding: 20px;
+    min-height: 180px;
   }
   
   .stat-number {
@@ -780,6 +1241,17 @@
   }
   
   .action-item {
+    padding: 15px;
+  }
+  
+  .real-time-indicator {
+    position: relative;
+    top: 0;
+    right: 0;
+    margin-bottom: 20px;
+  }
+  
+  .dashboard-container {
     padding: 15px;
   }
 }
@@ -801,35 +1273,6 @@
 
 .activity-timeline::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-}
-
-/* 🌙 DARK MODE SUPPORT */
-@media (prefers-color-scheme: dark) {
-  .dashboard-container {
-    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-  }
-  
-  .hero-welcome,
-  .feature-card {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-  }
-  
-  .card-header h3 {
-    color: #ecf0f1;
-  }
-  
-  .card-header p {
-    color: #bdc3c7;
-  }
-  
-  .action-content h4 {
-    color: #ecf0f1;
-  }
-  
-  .action-content p {
-    color: #bdc3c7;
-  }
 }
 
 /* ⚡ LOADING ANIMATIONS */
@@ -876,34 +1319,240 @@
   transform: scale(1.1);
   box-shadow: 0 8px 25px rgba(0,0,0,0.15);
 }
+
+/* 🔄 UPDATE ANIMATIONS */
+.updating {
+  animation: pulse 1s infinite;
+}
+
+.value-change {
+  animation: highlight 1s ease;
+}
+
+@keyframes highlight {
+  0% { background-color: transparent; }
+  50% { background-color: rgba(67, 233, 123, 0.3); }
+  100% { background-color: transparent; }
+}
 </style>
 
-<!-- ✨ INTERACTIVE JAVASCRIPT -->
+<!-- ✨ ENHANCED REAL-TIME JAVASCRIPT -->
 <script>
-// Initialize animations and interactions
-document.addEventListener('DOMContentLoaded', function() {
-  // Add loading animation to progress bars
-  const progressBars = document.querySelectorAll('.progress-fill');
-  progressBars.forEach(bar => {
-    const width = bar.style.width;
-    bar.style.width = '0%';
-    setTimeout(() => {
-      bar.style.width = width;
-    }, 500);
-  });
+// Real-time dashboard functionality
+class RealTimeDashboard {
+  constructor() {
+    this.updateInterval = 30000; // 30 seconds
+    this.isUpdating = false;
+    this.lastUpdate = new Date();
+    this.init();
+  }
 
-  // Add hover effects to cards
-  const cards = document.querySelectorAll('.stat-card, .feature-card');
-  cards.forEach(card => {
-    card.addEventListener('mouseenter', function() {
-      this.style.transform = this.classList.contains('stat-card') ? 
-        'translateY(-10px)' : 'translateY(-5px)';
-    });
+  init() {
+    console.log('🚀 Initializing Real-time Dashboard...');
+    this.startAutoRefresh();
+    this.setupEventListeners();
+    this.animateProgressBars();
+  }
+
+  startAutoRefresh() {
+    setInterval(() => {
+      this.fetchRealTimeData();
+    }, this.updateInterval);
+
+    // Initial fetch after 5 seconds
+    setTimeout(() => {
+      this.fetchRealTimeData();
+    }, 5000);
+  }
+
+  async fetchRealTimeData() {
+    if (this.isUpdating) return;
     
-    card.addEventListener('mouseleave', function() {
-      this.style.transform = 'translateY(0)';
+    this.isUpdating = true;
+    this.showUpdatingIndicator();
+
+    try {
+      const response = await fetch('/user/dashboard/data');
+      const data = await response.json();
+
+      if (data.success) {
+        this.updateDashboard(data.data);
+        this.updateLastUpdatedTime();
+        this.showSuccessIndicator();
+      }
+    } catch (error) {
+      console.error('Failed to fetch real-time data:', error);
+      this.showErrorIndicator();
+    } finally {
+      this.isUpdating = false;
+      this.hideUpdatingIndicator();
+    }
+  }
+
+  updateDashboard(realTimeData) {
+    // Update today's attendance
+    this.updateElementWithAnimation(
+      'todayAttendance',
+      realTimeData.todayAttendance,
+      true
+    );
+
+    // Update pending counts
+    this.updateElementWithAnimation(
+      'pendingLeavesStat',
+      realTimeData.pendingLeaves
+    );
+    
+    this.updateElementWithAnimation(
+      'pendingFeedbackStat',
+      realTimeData.pendingFeedback
+    );
+
+    // Update pending actions badge
+    const totalPending = realTimeData.pendingLeaves + realTimeData.pendingFeedback;
+    this.updateElementWithAnimation(
+      'pendingActionsBadge',
+      totalPending + ' Pending'
+    );
+
+    // Update today action section if needed
+    this.updateTodayAction(realTimeData.todayAttendance);
+  }
+
+  updateElementWithAnimation(elementId, newValue, isStatus = false) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+
+    const oldValue = element.textContent.trim();
+    
+    if (oldValue !== newValue.toString()) {
+      element.classList.add('value-change');
+      
+      if (isStatus) {
+        this.updateStatusStyles(element, newValue);
+      }
+      
+      element.textContent = newValue;
+      
+      setTimeout(() => {
+        element.classList.remove('value-change');
+      }, 1000);
+    }
+  }
+
+  updateStatusStyles(element, status) {
+    // Remove existing status classes
+    element.classList.remove('present', 'not-marked', 'other');
+    
+    // Add new status class
+    if (status === 'present') {
+      element.classList.add('present');
+    } else if (status === 'Not Marked') {
+      element.classList.add('not-marked');
+    } else {
+      element.classList.add('other');
+    }
+  }
+
+  updateTodayAction(status) {
+    const todayAction = document.getElementById('todayAction');
+    if (!todayAction) return;
+
+    if (status === 'Not Marked') {
+      todayAction.innerHTML = `
+        <a href="/user/attendance" class="action-btn mark-btn">
+          <i class="fas fa-plus me-2"></i>Mark Attendance
+        </a>
+      `;
+    } else {
+      todayAction.innerHTML = `
+        <span class="status-badge ${status === 'present' ? 'present' : 'other'}">
+          <i class="fas fa-check me-2"></i>Completed
+        </span>
+      `;
+    }
+  }
+
+  updateLastUpdatedTime() {
+    const lastUpdatedElement = document.getElementById('lastUpdatedTime');
+    if (lastUpdatedElement) {
+      lastUpdatedElement.textContent = new Date().toLocaleTimeString();
+    }
+  }
+
+  showUpdatingIndicator() {
+    const indicator = document.getElementById('realTimeIndicator');
+    if (indicator) {
+      indicator.classList.add('updating');
+    }
+  }
+
+  hideUpdatingIndicator() {
+    const indicator = document.getElementById('realTimeIndicator');
+    if (indicator) {
+      indicator.classList.remove('updating');
+    }
+  }
+
+  showSuccessIndicator() {
+    const indicator = document.getElementById('realTimeIndicator');
+    if (indicator) {
+      indicator.style.background = 'rgba(67, 233, 123, 0.95)';
+      setTimeout(() => {
+        indicator.style.background = '';
+      }, 2000);
+    }
+  }
+
+  showErrorIndicator() {
+    const indicator = document.getElementById('realTimeIndicator');
+    if (indicator) {
+      indicator.style.background = 'rgba(245, 87, 108, 0.95)';
+      setTimeout(() => {
+        indicator.style.background = '';
+      }, 2000);
+    }
+  }
+
+  animateProgressBars() {
+    const progressBars = document.querySelectorAll('.progress-fill');
+    progressBars.forEach(bar => {
+      const width = bar.style.width;
+      bar.style.width = '0%';
+      setTimeout(() => {
+        bar.style.width = width;
+      }, 500);
     });
-  });
+  }
+
+  setupEventListeners() {
+    // Add click event to manually refresh
+    const indicator = document.getElementById('realTimeIndicator');
+    if (indicator) {
+      indicator.addEventListener('click', () => {
+        this.fetchRealTimeData();
+      });
+    }
+
+    // Add hover effects to cards
+    const cards = document.querySelectorAll('.stat-card, .feature-card');
+    cards.forEach(card => {
+      card.addEventListener('mouseenter', function() {
+        this.style.transform = this.classList.contains('stat-card') ? 
+          'translateY(-10px)' : 'translateY(-5px)';
+      });
+      
+      card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+      });
+    });
+  }
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize real-time dashboard
+  new RealTimeDashboard();
 
   // Real-time clock update
   function updateClock() {
@@ -914,25 +1563,40 @@ document.addEventListener('DOMContentLoaded', function() {
       second: '2-digit',
       hour12: true 
     });
-    const dateString = now.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
   }
   
   setInterval(updateClock, 1000);
   updateClock();
+
+  // Smooth scrolling for activity timeline
+  function smoothScrollTo(element) {
+    element.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'nearest'
+    });
+  }
+
+  // Add loading animation to stats
+  const stats = document.querySelectorAll('.stat-number');
+  stats.forEach(stat => {
+    stat.style.opacity = '0';
+    setTimeout(() => {
+      stat.style.opacity = '1';
+      stat.style.transition = 'opacity 0.5s ease';
+    }, 300);
+  });
 });
 
-// Smooth scrolling for activity timeline
-function smoothScrollTo(element) {
-  element.scrollIntoView({ 
-    behavior: 'smooth',
-    block: 'nearest'
-  });
+// Manual refresh function
+function refreshDashboard() {
+  if (typeof RealTimeDashboard !== 'undefined') {
+    const dashboard = new RealTimeDashboard();
+    dashboard.fetchRealTimeData();
+  }
 }
+
+// Export for global access
+window.refreshDashboard = refreshDashboard;
 </script>
 
 <script src="/js/sidebar.js"></script>

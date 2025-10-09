@@ -1,24 +1,34 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
   // === AUTHENTICATION & BASIC INFO ===
   name: {
     type: String,
-    required: true,
-    trim: true
+    required: [true, 'Name is required'],
+    trim: true,
+    minlength: [2, 'Name must be at least 2 characters long'],
+    maxlength: [50, 'Name cannot exceed 50 characters']
   },
   email: {
     type: String,
-    required: true,
+    required: [true, 'Email is required'],
     unique: true,
     trim: true,
-    lowercase: true
+    lowercase: true,
+    validate: {
+      validator: function(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      },
+      message: 'Please enter a valid email address'
+    }
   },
   password: {
     type: String,
     required: function() {
       return !this.googleId && !this.githubId;
-    }
+    },
+    minlength: [6, 'Password must be at least 6 characters long']
   },
   phone: {
     type: String,
@@ -139,7 +149,6 @@ const userSchema = new mongoose.Schema({
     phone: { type: String, default: '', trim: true },
     address: { type: String, default: '', trim: true }
   },
-  // ADDED MISSING FIELDS
   emergencyContactName: {
     type: String,
     default: '',
@@ -170,7 +179,6 @@ const userSchema = new mongoose.Schema({
     pincode: { type: String, default: '', trim: true },
     country: { type: String, default: 'India', trim: true }
   },
-  // ADDED SIMPLE CURRENT ADDRESS FIELD
   currentAddressSimple: {
     type: String,
     default: '',
@@ -183,7 +191,6 @@ const userSchema = new mongoose.Schema({
     pincode: { type: String, default: '', trim: true },
     country: { type: String, default: 'India', trim: true }
   },
-  // ADDED SIMPLE PERMANENT ADDRESS FIELD
   permanentAddressSimple: {
     type: String,
     default: '',
@@ -301,7 +308,6 @@ const userSchema = new mongoose.Schema({
     branchName: { type: String, default: '', trim: true },
     accountType: { type: String, enum: ['Savings', 'Current', ''], default: 'Savings' }
   },
-  // ADDED STANDALONE BANK FIELDS
   bankName: {
     type: String,
     default: '',
@@ -350,7 +356,6 @@ const userSchema = new mongoose.Schema({
     documents: [{ type: String }],
     isHighest: { type: Boolean, default: false }
   }],
-  // ADDED STANDALONE EDUCATION FIELDS
   qualification: {
     type: String,
     default: '',
@@ -383,7 +388,6 @@ const userSchema = new mongoose.Schema({
     location: { type: String, default: '', trim: true },
     documents: [{ type: String }]
   }],
-  // ADDED STANDALONE EXPERIENCE FIELDS
   previousCompany: {
     type: String,
     default: '',
@@ -410,7 +414,6 @@ const userSchema = new mongoose.Schema({
     yearsOfExperience: { type: Number, default: 0 },
     isPrimary: { type: Boolean, default: false }
   }],
-  // ADDED SIMPLE SKILLS ARRAY
   skillsSimple: [{
     type: String,
     trim: true
@@ -450,7 +453,6 @@ const userSchema = new mongoose.Schema({
     facebook: { type: String, default: '', trim: true },
     instagram: { type: String, default: '', trim: true }
   },
-  // ADDED STANDALONE SOCIAL FIELDS
   linkedinProfile: {
     type: String,
     default: '',
@@ -528,6 +530,30 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     default: null
+  },
+
+  // === EMAIL VERIFICATION ===
+  isEmailVerified: {
+    type: Boolean,
+    default: false
+  },
+  emailVerificationToken: {
+    type: String,
+    default: null
+  },
+  emailVerificationExpires: {
+    type: Date,
+    default: null
+  },
+
+  // === PASSWORD RESET ===
+  passwordResetToken: {
+    type: String,
+    default: null
+  },
+  passwordResetExpires: {
+    type: Date,
+    default: null
   }
 
 }, { 
@@ -575,7 +601,6 @@ userSchema.virtual('displayName').get(function() {
   return this.name.split(' ')[0];
 });
 
-// Virtual for simple skills array compatibility
 userSchema.virtual('skillsArray').get(function() {
   if (this.skillsSimple && this.skillsSimple.length > 0) {
     return this.skillsSimple;
@@ -586,7 +611,6 @@ userSchema.virtual('skillsArray').get(function() {
   return [];
 });
 
-// Virtual for simple address compatibility
 userSchema.virtual('currentAddressString').get(function() {
   if (this.currentAddressSimple && this.currentAddressSimple !== '') {
     return this.currentAddressSimple;
@@ -609,6 +633,48 @@ userSchema.virtual('permanentAddressString').get(function() {
   return '';
 });
 
+// === FIXED PASSWORD HASHING MIDDLEWARE ===
+userSchema.pre('save', async function(next) {
+  // Only hash the password if it has been modified (or is new)
+  if (!this.isModified('password')) {
+    return next();
+  }
+
+  try {
+    // Generate salt
+    const salt = await bcrypt.genSalt(12);
+    // Hash password
+    this.password = await bcrypt.hash(this.password, salt);
+    console.log(`🔐 Password hashed for user: ${this.email}`);
+    next();
+  } catch (error) {
+    console.error('❌ Password hashing error:', error);
+    next(error);
+  }
+});
+
+// === FIXED PASSWORD COMPARISON METHOD ===
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  try {
+    if (!this.password) {
+      console.log(`❌ No password found for user: ${this.email}`);
+      return false;
+    }
+    
+    console.log(`🔐 Comparing password for user: ${this.email}`);
+    console.log(`📝 Candidate password length: ${candidatePassword ? candidatePassword.length : 'null'}`);
+    console.log(`📝 Stored password hash: ${this.password ? 'Exists' : 'Missing'}`);
+    
+    const isMatch = await bcrypt.compare(candidatePassword, this.password);
+    console.log(`✅ Password match result for ${this.email}: ${isMatch}`);
+    
+    return isMatch;
+  } catch (error) {
+    console.error(`❌ Password comparison error for ${this.email}:`, error);
+    return false;
+  }
+};
+
 // === METHODS ===
 userSchema.methods.updateLastLogin = function() {
   this.lastLogin = new Date();
@@ -621,8 +687,11 @@ userSchema.methods.calculateNetSalary = function() {
   return this.salaryDetails.netSalary;
 };
 
+// ✅ FIXED PROFILE COMPLETION METHOD
 userSchema.methods.calculateProfileCompletion = function() {
   let completion = 0;
+  
+  // ✅ SAFE FIELD CHECKING - Fixed version
   const fields = [
     this.name, 
     this.email, 
@@ -632,16 +701,25 @@ userSchema.methods.calculateProfileCompletion = function() {
     this.gender, 
     this.personalEmail, 
     this.currentAddressString,
-    this.bankName || this.bankDetails.bankName,
-    this.profilePhoto || this.profilePicture.url
+    // Safe check for bankName
+    this.bankName || (this.bankDetails && this.bankDetails.bankName ? this.bankDetails.bankName : ''),
+    // Safe check for profile photo
+    this.profilePhoto || (this.profilePicture && this.profilePicture.url ? this.profilePicture.url : '')
   ];
   
   const completedFields = fields.filter(field => {
-    if (typeof field === 'object') return Object.values(field).some(val => val && val !== '');
-    return field && field !== '';
+    if (!field) return false;
+    
+    // ✅ SAFE OBJECT CHECK - Fixed this part
+    if (typeof field === 'object' && field !== null) {
+      const values = Object.values(field);
+      return values.some(val => val !== null && val !== undefined && val !== '');
+    }
+    
+    return field !== null && field !== undefined && field !== '';
   }).length;
   
-  this.profileCompletion = Math.round((completedFields / fields.length) * 100);
+  this.profileCompletion = fields.length > 0 ? Math.round((completedFields / fields.length) * 100) : 0;
   return this.profileCompletion;
 };
 
@@ -655,7 +733,6 @@ userSchema.methods.getEmergencyContact = function() {
   return this.emergencyContact.name ? this.emergencyContact : null;
 };
 
-// Method to get skills as array
 userSchema.methods.getSkillsArray = function() {
   if (this.skillsSimple && this.skillsSimple.length > 0) {
     return this.skillsSimple;
@@ -666,8 +743,13 @@ userSchema.methods.getSkillsArray = function() {
   return [];
 };
 
-// === PRE-SAVE MIDDLEWARE ===
+// === FIXED PRE-SAVE MIDDLEWARE FOR DATA SYNC ===
 userSchema.pre('save', function(next) {
+  // Auto-generate employeeId if not present
+  if (this.isNew && !this.employeeId) {
+    this.employeeId = `EMP${Date.now()}${Math.floor(Math.random() * 1000)}`;
+  }
+
   // Auto-calculate net salary before save
   if (this.isModified('salaryDetails')) {
     this.calculateNetSalary();
@@ -675,38 +757,6 @@ userSchema.pre('save', function(next) {
   
   // Auto-calculate profile completion
   this.calculateProfileCompletion();
-  
-  // Sync simple fields with complex objects
-  if (this.isModified('currentAddressSimple') && this.currentAddressSimple) {
-    this.currentAddress.street = this.currentAddressSimple;
-  }
-  
-  if (this.isModified('permanentAddressSimple') && this.permanentAddressSimple) {
-    this.permanentAddress.street = this.permanentAddressSimple;
-  }
-  
-  // Sync emergency contact fields
-  if (this.isModified('emergencyContactName') || this.isModified('emergencyContactNumber')) {
-    this.emergencyContact.name = this.emergencyContactName;
-    this.emergencyContact.phone = this.emergencyContactNumber;
-  }
-  
-  // Sync bank fields
-  if (this.isModified('bankName') || this.isModified('accountNumber')) {
-    this.bankDetails.bankName = this.bankName;
-    this.bankDetails.accountNumber = this.accountNumber;
-    this.bankDetails.ifscCode = this.ifscCode;
-    this.bankDetails.branchName = this.branchName;
-    this.bankDetails.accountType = this.accountType;
-  }
-  
-  // Sync social fields
-  if (this.isModified('linkedinProfile')) {
-    this.socialLinks.linkedin = this.linkedinProfile;
-  }
-  if (this.isModified('twitterProfile')) {
-    this.socialLinks.twitter = this.twitterProfile;
-  }
   
   // Update last profile update timestamp
   if (this.isModified()) {

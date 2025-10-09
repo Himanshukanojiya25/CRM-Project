@@ -7,12 +7,17 @@
   <title>CRM - Authentication</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="/css/auth.css">
+  
+  <!-- ✅ CACHE BUSTING META TAGS -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
 </head>
 <body>
   <div class="container" id="container">
     <!-- Sign Up Form -->
     <div class="form-container sign-up-container">
-      <form action="/auth/register" method="POST">
+      <form id="registerForm" onsubmit="return handleRegister(event)">
         <h1>Create Account</h1>
         <div class="social-container">
           <a href="/auth/google" class="social">
@@ -29,18 +34,18 @@
           (Google & GitHub login available)
         </span>
         <span>or use your email for registration</span>
-        <input type="text" name="name" placeholder="Full Name" required>
-        <input type="tel" name="phone" placeholder="Mobile No">
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <input type="password" name="confirmPassword" placeholder="Re-enter Password" required>
+        <input type="text" id="regName" name="name" placeholder="Full Name" required>
+        <input type="tel" id="regPhone" name="phone" placeholder="Mobile No">
+        <input type="email" id="regEmail" name="email" placeholder="Email" required>
+        <input type="password" id="regPassword" name="password" placeholder="Password" required autocomplete="new-password">
+        <input type="password" id="regConfirmPassword" name="confirmPassword" placeholder="Re-enter Password" required autocomplete="new-password">
         <button type="submit">Sign Up</button>
       </form>
     </div>
 
     <!-- Sign In Form -->
     <div class="form-container sign-in-container">
-      <form action="/auth/login" method="POST">
+      <form id="loginForm" onsubmit="return handleLogin(event)">
         <h1>Sign In</h1>
         <div class="social-container">
           <a href="/auth/google" class="social">
@@ -57,9 +62,9 @@
           (Google & GitHub login available)
         </span>
         <span>or use your account</span>
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <a href="#">Forgot your password?</a>
+        <input type="email" id="loginEmail" name="email" placeholder="Email" required>
+        <input type="password" id="loginPassword" name="password" placeholder="Password" required autocomplete="current-password">
+        <a href="#" onclick="clearCache()">Forgot your password?</a>
         <button type="submit">Sign In</button>
       </form>
     </div>
@@ -81,6 +86,228 @@
     </div>
   </div>
 
-  <script src="/js/auth.js"></script>
+  <!-- ✅ ENHANCED CACHE BUSTING JAVASCRIPT -->
+  <script>
+  console.log('🚨 ENHANCED AUTH SCRIPT LOADED - CACHE BUSTING ACTIVE');
+
+  // ✅ CLEAR ALL STORAGE AND CACHE ON PAGE LOAD
+  function clearAllStorage() {
+    console.log('🧹 Clearing browser storage and cache...');
+    
+    // Clear localStorage
+    localStorage.clear();
+    
+    // Clear sessionStorage
+    sessionStorage.clear();
+    
+    // Clear cookies
+    document.cookie.split(";").forEach(function(c) {
+      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+    });
+    
+    // Clear service worker cache
+    if ('caches' in window) {
+      caches.keys().then(function(names) {
+        for (let name of names) {
+          caches.delete(name);
+        }
+      });
+    }
+    
+    console.log('✅ All storage cleared successfully');
+  }
+
+  // ✅ FORCE CLEAR CACHE FUNCTION
+  function clearCache() {
+    console.log('🔄 Manual cache clear triggered');
+    clearAllStorage();
+    
+    // Force reload without cache
+    window.location.href = '/clear-cache?t=' + new Date().getTime();
+    return false;
+  }
+
+  // Global form prevention
+  document.addEventListener('DOMContentLoaded', function() {
+      console.log('✅ DOM Loaded - Enhanced Auth System Active');
+      
+      // Clear cache on every page load
+      clearAllStorage();
+      
+      // View switching
+      const showRegister = document.getElementById('signUp');
+      const showLogin = document.getElementById('signIn');
+      const container = document.getElementById('container');
+
+      if (showRegister && showLogin && container) {
+          showRegister.addEventListener('click', () => {
+              container.classList.add("right-panel-active");
+          });
+
+          showLogin.addEventListener('click', () => {
+              container.classList.remove("right-panel-active");
+          });
+      }
+
+      // ✅ ADD MANUAL CACHE CLEAR BUTTON
+      const clearCacheBtn = document.createElement('button');
+      clearCacheBtn.innerHTML = '🔄 Clear Cache';
+      clearCacheBtn.style.position = 'fixed';
+      clearCacheBtn.style.top = '10px';
+      clearCacheBtn.style.right = '10px';
+      clearCacheBtn.style.zIndex = '1000';
+      clearCacheBtn.style.padding = '5px 10px';
+      clearCacheBtn.style.background = '#ff4444';
+      clearCacheBtn.style.color = 'white';
+      clearCacheBtn.style.border = 'none';
+      clearCacheBtn.style.borderRadius = '5px';
+      clearCacheBtn.style.cursor = 'pointer';
+      clearCacheBtn.style.fontSize = '12px';
+      clearCacheBtn.onclick = clearCache;
+      
+      document.body.appendChild(clearCacheBtn);
+  });
+
+  // ✅ ENHANCED REGISTER HANDLER WITH CACHE BUSTING
+  async function handleRegister(e) {
+      console.log('🟢 REGISTER FORM SUBMITTED');
+      e.preventDefault();
+      
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      
+      try {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = 'Creating Account...';
+
+          // Clear cache before registration
+          clearAllStorage();
+
+          const formData = {
+              name: document.getElementById('regName').value.trim(),
+              email: document.getElementById('regEmail').value.trim().toLowerCase(),
+              password: document.getElementById('regPassword').value,
+              confirmPassword: document.getElementById('regConfirmPassword').value,
+              phone: document.getElementById('regPhone')?.value || '',
+              role: 'user'
+          };
+
+          console.log('📤 Sending Register Data:', { ...formData, password: '***' });
+
+          const response = await fetch('/auth/register', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'Cache-Control': 'no-cache'
+              },
+              body: JSON.stringify(formData)
+          });
+
+          const result = await response.json();
+          console.log('📥 Register Response:', result);
+
+          if (result.success) {
+              console.log('✅ SUCCESS - Redirecting to login');
+              alert('✅ Registration successful! Redirecting to login...');
+              
+              // Force redirect with cache busting
+              window.location.href = (result.redirectUrl || '/auth') + '?t=' + new Date().getTime();
+          } else {
+              alert('❌ ' + result.message);
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = originalText;
+          }
+
+      } catch (error) {
+          console.error('❌ Register Error:', error);
+          alert('❌ Registration failed! Please try again.');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalText;
+      }
+      
+      return false;
+  }
+
+  // ✅ ENHANCED LOGIN HANDLER WITH CACHE BUSTING
+  async function handleLogin(e) {
+      console.log('🟢 LOGIN FORM SUBMITTED');
+      e.preventDefault();
+      
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      
+      try {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = 'Signing In...';
+
+          // Clear cache before login
+          clearAllStorage();
+
+          const formData = {
+              email: document.getElementById('loginEmail').value.trim().toLowerCase(),
+              password: document.getElementById('loginPassword').value
+          };
+
+          console.log('📤 Sending Login Data:', { ...formData, password: '***' });
+
+          const response = await fetch('/auth/login', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'Cache-Control': 'no-cache'
+              },
+              credentials: 'include',
+              body: JSON.stringify(formData)
+          });
+
+          const result = await response.json();
+          console.log('📥 Login Response:', result);
+
+          if (result.success) {
+              console.log('✅ SUCCESS - Redirecting to dashboard');
+              alert('✅ Login successful! Redirecting...');
+              
+              // Force redirect with cache busting and user info
+              const redirectUrl = result.redirectUrl || '/dashboard';
+              console.log(`🎯 Redirecting to: ${redirectUrl} for user: ${result.user?.email || 'unknown'}`);
+              
+              window.location.href = redirectUrl + '?t=' + new Date().getTime() + '&user=' + encodeURIComponent(result.user?.email || '');
+          } else {
+              alert('❌ ' + result.message);
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = originalText;
+          }
+
+      } catch (error) {
+          console.error('❌ Login Error:', error);
+          alert('❌ Login failed! Please try again.');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalText;
+      }
+      
+      return false;
+  }
+
+  // Force prevent all form submissions
+  document.addEventListener('submit', function(e) {
+      console.log('🛑 Global form prevention');
+      e.preventDefault();
+      return false;
+  });
+
+  // ✅ DETECT BROWSER BACK/FORWARD BUTTON
+  window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+      console.log('🔄 Page loaded from cache - clearing storage');
+      clearAllStorage();
+    }
+  });
+
+  // ✅ PERIODIC CACHE CLEANUP
+  setInterval(() => {
+    console.log('⏰ Periodic cache cleanup');
+    clearAllStorage();
+  }, 30000); // Every 30 seconds
+  </script>
 </body>
 </html>

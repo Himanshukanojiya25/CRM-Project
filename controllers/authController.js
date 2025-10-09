@@ -1,10 +1,10 @@
 const User = require('../models/User');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
-const transporter = require('../config/email'); // ✅ EMAIL TRANSPORTER IMPORT
+const transporter = require('../config/email');
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET || 'your-fallback-secret-key';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1d';
 
 // ----------------------------
@@ -78,6 +78,10 @@ const sendWelcomeEmail = async (email, name) => {
 // @desc Render Combined Auth Page (Login + Register)
 // ----------------------------
 const getAuthPage = (req, res) => {
+  // ✅ CLEAR ANY EXISTING COOKIES/SESSION WHEN ACCESSING AUTH PAGE
+  res.clearCookie('token');
+  res.clearCookie('session');
+  
   res.render('auth/auth', { 
     pageTitle: 'CRM - Authentication',
     layout: false
@@ -85,109 +89,405 @@ const getAuthPage = (req, res) => {
 };
 
 // ----------------------------
-// @desc Handle Registration
+// @desc Handle Registration - FIXED REDIRECT VERSION
 // ----------------------------
 const register = async (req, res) => {
-  console.log('REGISTER BODY 🟢:', req.body);
+  console.log('🟢 REGISTER REQUEST BODY:', req.body);
 
   try {
-    const { name, email, password, confirmPassword, age, department, role } = req.body;
+    const { name, email, password, confirmPassword, phone, role } = req.body;
+
+    // ✅ VALIDATION CHECKS
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name, email and password are required'
+      });
+    }
 
     if (password !== confirmPassword) {
-      return res.send('❌ Passwords do not match');
+      return res.status(400).json({
+        success: false,
+        message: 'Passwords do not match'
+      });
     }
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) return res.send('❌ User already exists');
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters long'
+      });
+    }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // ✅ CHECK IF USER ALREADY EXISTS
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'User already exists with this email'
+      });
+    }
 
+    // ✅ CREATE NEW USER
     const user = new User({
-      name,
-      email,
-      password: hashedPassword,
-      age,
-      role: role || 'user'
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      password: password,
+      phone: phone || '',
+      role: role || 'user',
+      status: 'Active',
+      isEmailVerified: false,
+      profilePhoto: '/images/default-avatar.png',
+      profilePicture: {
+        url: '/images/default-avatar.png',
+        filename: '',
+        originalName: '',
+        uploadDate: new Date(),
+        size: 0,
+        mimeType: ''
+      }
     });
 
-    if (department && mongoose.Types.ObjectId.isValid(department)) {
-      user.department = department;
+    console.log('🟢 Creating user with data:', {
+      name: user.name,
+      email: user.email,
+      role: user.role
+    });
+
+    // ✅ SAVE USER
+    await user.save();
+    console.log('✅ User saved successfully:', user._id);
+
+    // ✅ SEND WELCOME EMAIL (OPTIONAL)
+    try {
+      await sendWelcomeEmail(email, name);
+    } catch (emailError) {
+      console.error('❌ Email sending failed but user created:', emailError);
     }
 
-    await user.save();
+    // ✅ FIXED: SIMPLE SUCCESS RESPONSE WITH REDIRECT
+    res.status(201).json({
+      success: true,
+      message: 'Registration successful! Please login to continue.',
+      redirectUrl: '/auth' // ✅ DIRECT REDIRECT URL
+    });
+
+  } catch (error) {
+    console.error('❌ REGISTER ERROR DETAILS:');
+    console.error('Error Name:', error.name);
+    console.error('Error Message:', error.message);
+    console.error('Error Code:', error.code);
+    console.error('Full Error:', error);
     
-    // ✅ SEND WELCOME EMAIL AFTER SUCCESSFUL REGISTRATION
-    await sendWelcomeEmail(email, name);
-    
-    res.redirect('/auth');
-  } catch (err) {
-    console.error('Register Error:', err);
-    res.status(500).send('❌ Server error during registration');
+    // ✅ IMPROVED ERROR HANDLING
+    if (error.name === 'ValidationError') {
+      let errors = [];
+      if (error.errors) {
+        errors = Object.values(error.errors).map(err => err.message);
+      } else {
+        errors = ['Validation failed - please check your input data'];
+      }
+      
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors
+      });
+    }
+
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email already exists in our system'
+      });
+    }
+
+    if (error.name === 'MongoServerError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Database error occurred'
+      });
+    }
+
+    // ✅ GENERAL ERROR RESPONSE
+    res.status(500).json({
+      success: false,
+      message: 'Registration failed due to server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
   }
 };
 
-
 // ----------------------------
-// @desc Handle Login (DEBUG VERSION)
+// @desc Handle Login (FIXED VERSION WITH SESSION/CACHE FIX)
 // ----------------------------
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     
-    // ✅ DEBUG LOGS
-    console.log('🔐 Login attempt for email:', email);
-    console.log('📝 Input password:', password);
+    console.log('🔐 LOGIN ATTEMPT:', { email, passwordLength: password ? password.length : 'null' });
 
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      console.log('❌ User not found in database');
-      return res.send('❌ User not found');
+    // ✅ VALIDATION
+    if (!email || !password) {
+      console.log('❌ Missing email or password');
+      return res.status(400).json({
+        success: false,
+        message: 'Email and password are required'
+      });
     }
 
-    // ✅ DEBUG LOGS
-    console.log('💾 Stored hash:', user.password);
-    console.log('👤 User role:', user.role);
-
-    const isMatch = await bcrypt.compare(password, user.password);
+    // ✅ FIND USER WITH ENHANCED DEBUGGING
+    console.log(`🔍 Searching for user with email: ${email.toLowerCase()}`);
+    const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
     
-    // ✅ DEBUG LOGS
-    console.log('🔑 Bcrypt compare result:', isMatch);
-
-    if (!isMatch) {
-      console.log('❌ Password does not match');
-      return res.send('❌ Invalid credentials');
+    if (!user) {
+      console.log(`❌ USER NOT FOUND: ${email}`);
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
     }
 
+    console.log('👤 USER FOUND:', {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      status: user.status,
+      hasPassword: !!user.password
+    });
+
+    // ✅ CHECK USER STATUS
+    if (user.status !== 'Active') {
+      console.log(`❌ USER NOT ACTIVE: ${user.status}`);
+      return res.status(400).json({
+        success: false,
+        message: 'Your account is not active. Please contact administrator.'
+      });
+    }
+
+    // ✅ COMPARE PASSWORD WITH ENHANCED DEBUGGING
+    console.log(`🔐 Starting password comparison for: ${user.email}`);
+    const isMatch = await user.comparePassword(password);
+    
+    if (!isMatch) {
+      console.log(`❌ PASSWORD MISMATCH for user: ${user.email}`);
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+
+    console.log('✅ PASSWORD MATCH - Generating token...');
+
+    // ✅ CLEAR ANY EXISTING COOKIES/SESSION BEFORE SETTING NEW ONE
+    res.clearCookie('token');
+    res.clearCookie('session');
+
+    // ✅ GENERATE JWT TOKEN WITH UNIQUE IDENTIFIER
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      { 
+        id: user._id, 
+        email: user.email,
+        role: user.role,
+        loginTime: Date.now() // ✅ ADD UNIQUE TIMESTAMP TO PREVENT CACHE
+      },
       JWT_SECRET,
       { expiresIn: JWT_EXPIRES_IN }
     );
 
-    res.cookie('token', token, { httpOnly: true });
-    
-    console.log('✅ Login successful, redirecting to:', user.role === 'admin' ? '/admin/dashboard' : '/user/dashboard');
-    
-    res.redirect(user.role === 'admin' ? '/admin/dashboard' : '/user/dashboard');
-  } catch (err) {
-    console.error('❌ Login Error:', err);
-    res.status(500).send('❌ Server error during login');
+    // ✅ UPDATE LAST LOGIN
+    await User.findByIdAndUpdate(user._id, { 
+      lastLogin: new Date() 
+    });
+
+    // ✅ SET COOKIE WITH UNIQUE NAME TO PREVENT OVERLAP
+    res.cookie('token', token, { 
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      sameSite: 'strict'
+    });
+
+    console.log('✅ LOGIN SUCCESSFUL - Redirecting to:', user.role === 'admin' ? '/admin/dashboard' : '/user/dashboard');
+    console.log(`✅ SET COOKIE FOR USER: ${user.email}`);
+
+    // ✅ FIXED: SIMPLE SUCCESS RESPONSE WITH REDIRECT
+    res.json({
+      success: true,
+      message: 'Login successful! Redirecting...',
+      redirectUrl: user.role === 'admin' ? '/admin/dashboard' : '/user/dashboard',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ LOGIN ERROR:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during login',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
   }
 };
 
 // ----------------------------
-// @desc Handle Logout
+// @desc Handle Logout (ENHANCED VERSION)
 // ----------------------------
 const logout = (req, res) => {
+  console.log('🚪 LOGOUT - Clearing all cookies and sessions');
+  
+  // ✅ CLEAR ALL POSSIBLE COOKIES
   res.clearCookie('token');
-  res.redirect('/auth');
+  res.clearCookie('session');
+  res.clearCookie('user');
+  res.clearCookie('auth');
+  
+  res.json({
+    success: true,
+    message: 'Logout successful',
+    redirectUrl: '/auth'
+  });
+};
+
+// ----------------------------
+// @desc Check Auth Status (ENHANCED VERSION)
+// ----------------------------
+const checkAuth = async (req, res) => {
+  try {
+    const token = req.cookies.token;
+    
+    if (!token) {
+      console.log('🔍 AUTH CHECK: No token found');
+      return res.json({
+        success: false,
+        isAuthenticated: false
+      });
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+    console.log(`🔍 AUTH CHECK: Token decoded for user: ${decoded.email}`);
+    
+    const user = await User.findById(decoded.id).select('-password');
+    
+    if (!user) {
+      console.log(`❌ AUTH CHECK: User not found for token`);
+      res.clearCookie('token');
+      return res.json({
+        success: false,
+        isAuthenticated: false
+      });
+    }
+
+    console.log(`✅ AUTH CHECK: User authenticated: ${user.email}`);
+
+    res.json({
+      success: true,
+      isAuthenticated: true,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        employeeId: user.employeeId
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ AUTH CHECK ERROR:', error);
+    res.clearCookie('token');
+    res.json({
+      success: false,
+      isAuthenticated: false
+    });
+  }
+};
+
+// ----------------------------
+// @desc Emergency Simple Register (Backup)
+// ----------------------------
+const simpleRegister = async (req, res) => {
+  try {
+    const { name, email, password, confirmPassword } = req.body;
+
+    console.log('🆘 SIMPLE REGISTER ATTEMPT:', { name, email });
+
+    // Basic validation
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name, email and password are required'
+      });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Passwords do not match'
+      });
+    }
+
+    // Check existing
+    const existing = await User.findOne({ email: email.toLowerCase() });
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: 'User already exists'
+      });
+    }
+
+    // Create minimal user
+    const user = new User({
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      password: password,
+      role: 'user',
+      status: 'Active',
+      profilePhoto: '/images/default-avatar.png'
+    });
+
+    await user.save();
+    console.log('🆘 SIMPLE USER CREATED:', user._id);
+
+    // Generate token
+    const token = jwt.sign(
+      { id: user._id, email: user.email, role: user.role },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRES_IN }
+    );
+
+    res.cookie('token', token, { 
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production'
+    });
+
+    // ✅ FIXED: SIMPLE REDIRECT RESPONSE
+    res.status(201).json({
+      success: true,
+      message: 'Registration successful! Please login.',
+      redirectUrl: '/auth'
+    });
+
+  } catch (error) {
+    console.error('🆘 SIMPLE REGISTER ERROR:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Simple registration failed',
+      error: error.message
+    });
+  }
 };
 
 module.exports = {
-  getAuthPage,  // ✅ Combined auth page
+  getAuthPage,
   register,
   login,
   logout,
-  sendWelcomeEmail
+  checkAuth,
+  sendWelcomeEmail,
+  simpleRegister
 };

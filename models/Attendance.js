@@ -8,8 +8,11 @@ const attendanceSchema = new mongoose.Schema({
   },
   date: {
     type: Date,
-    default: Date.now,
-    index: true
+    required: true
+  },
+  monthYear: {
+    type: String,
+    required: true
   },
   checkIn: {
     type: Date
@@ -23,30 +26,38 @@ const attendanceSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['present', 'absent', 'half-day', 'late'],
-    default: 'present'
+    enum: ['present', 'absent', 'late', 'half-day', 'holiday'],
+    default: 'absent'
   },
-  ipAddress: String,
-  deviceType: String,
-  // New fields for archiving
-  monthYear: {
-    type: String, // Format: "2024-12"
-    index: true
+  ipAddress: {
+    type: String
+  },
+  deviceType: {
+    type: String
   },
   isArchived: {
     type: Boolean,
     default: false
   },
-  archivedAt: Date
-}, { timestamps: true });
+  archivedAt: {
+    type: Date
+  }
+}, {
+  timestamps: true
+});
 
-// Auto-calculate monthYear before saving
-attendanceSchema.pre('save', function(next) {
-  if (this.date) {
+// ✅ FIXED: Pre-validate middleware (more reliable)
+attendanceSchema.pre('validate', function(next) {
+  if (this.date && !this.monthYear) {
     const date = new Date(this.date);
     this.monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
   }
   next();
 });
+
+// Index for better query performance
+attendanceSchema.index({ user: 1, date: 1 });
+attendanceSchema.index({ user: 1, monthYear: 1 });
+attendanceSchema.index({ date: 1 });
 
 module.exports = mongoose.model('Attendance', attendanceSchema);

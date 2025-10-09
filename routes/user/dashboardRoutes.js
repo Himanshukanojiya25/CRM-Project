@@ -2,14 +2,10 @@ const express = require('express');
 const router = express.Router();
 
 const { isAuthenticated } = require('../../middlewares/authMiddleware');
-const roleMiddleware = require('../../middlewares/roleMiddleware');
-const { getDashboard } = require('../../controllers/user/dashboardController'); // ✅ getDashboard hi import karo
+const { getDashboard, getDashboardData } = require('../../controllers/user/dashboardController');
 
-// GET /user/dashboard - User dashboard page
-router.get('/dashboard', 
-  isAuthenticated, 
-  roleMiddleware(['user']), 
-  getDashboard // ✅ getDashboard hi use karo
-);
+// ✅ SIMPLE ROUTES - No complex middleware
+router.get('/dashboard', isAuthenticated, getDashboard);
+router.get('/dashboard/data', isAuthenticated, getDashboardData);
 
 module.exports = router;
