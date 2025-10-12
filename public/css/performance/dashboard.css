@@ -1,0 +1,77 @@
+.dashboard-container {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+.dashboard-container h1 {
+    color: #2c3e50;
+    margin-bottom: 30px;
+    font-size: 2.5rem;
+    text-align: center;
+}
+
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.kpi-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    text-align: center;
+    color: white;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+}
+
+.kpi-card h3 {
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    opacity: 0.9;
+    font-weight: 500;
+}
+
+.kpi-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.kpi-trend {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+/* Different colors for each card */
+.revenue-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.deals-card { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+.conversion-card { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+.pipeline-card { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+.activity-card { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+.avgdeal-card { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #2c3e50; }
+
+.success-message {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    margin-top: 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.success-message h2 {
+    margin: 0 0 15px 0;
+    font-size: 1.8rem;
+}

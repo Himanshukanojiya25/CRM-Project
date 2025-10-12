@@ -1,6 +1,7 @@
 const Feedback = require('../../models/Feedback');
 const User = require('../../models/User');
-const sendEmail = require('../../utils/emailSender');
+// const sendEmail = require('../../utils/emailSender');
+const { sendEmail } = require('../../config/email'); // Changed from utils/emailSender
 const fs = require('fs');
 const path = require('path');
 

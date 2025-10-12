@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/performance/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1>🚀 <%= title %></h1>
+        
+        <!-- KPI Cards Section -->
+        <div class="kpi-grid">
+            <div class="kpi-card revenue-card">
+                <h3>Total Revenue</h3>
+                <div class="kpi-value" id="revenue">₹<%= kpiData.totalRevenue.toLocaleString() %></div>
+                <div class="kpi-trend">📈 This Month</div>
+            </div>
+            
+            <div class="kpi-card deals-card">
+                <h3>Deals Won</h3>
+                <div class="kpi-value" id="dealsWon"><%= kpiData.dealsWon %></div>
+                <div class="kpi-trend">🎯 Closed</div>
+            </div>
+            
+            <div class="kpi-card conversion-card">
+                <h3>Conversion Rate</h3>
+                <div class="kpi-value" id="conversionRate"><%= kpiData.conversionRate %>%</div>
+                <div class="kpi-trend">📊 Success Rate</div>
+            </div>
+
+            <div class="kpi-card pipeline-card">
+                <h3>Pipeline Value</h3>
+                <div class="kpi-value" id="pipelineValue">₹<%= kpiData.pipelineValue.toLocaleString() %></div>
+                <div class="kpi-trend">💰 In Progress</div>
+            </div>
+
+            <div class="kpi-card activity-card">
+                <h3>Activities</h3>
+                <div class="kpi-value" id="totalActivities"><%= kpiData.totalActivities %></div>
+                <div class="kpi-trend">📞 Completed</div>
+            </div>
+
+            <div class="kpi-card avgdeal-card">
+                <h3>Avg Deal Size</h3>
+                <div class="kpi-value" id="avgDealSize">₹<%= kpiData.avgDealSize.toLocaleString() %></div>
+                <div class="kpi-trend">💎 Average</div>
+            </div>
+        </div>
+
+        <!-- Success Message -->
+        <div class="success-message">
+            <h2>🎉 PERFORMANCE DASHBOARD SUCCESSFULLY LOADED!</h2>
+            <p>User: <%= user.name %></p>
+            <p>All systems are working perfectly! 🚀</p>
+        </div>
+    </div>
+
+    <script src="/js/performance/dashboard.js"></script>
+</body>
+</html>

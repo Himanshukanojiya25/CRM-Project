@@ -2,16 +2,17 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
-const transporter = require('../config/email');
+const passport = require('passport');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-fallback-secret-key';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1d';
 
 // ----------------------------
-// @desc Send Welcome Email (PROFESSIONAL VERSION)
+// @desc Send Welcome Email
 // ----------------------------
 const sendWelcomeEmail = async (email, name) => {
   try {
+    const transporter = require('../config/email');
     const mailOptions = {
       from: `"CRM Team" <${process.env.EMAIL_USER}>`,
       to: email,
@@ -75,10 +76,9 @@ const sendWelcomeEmail = async (email, name) => {
 };
 
 // ----------------------------
-// @desc Render Combined Auth Page (Login + Register)
+// @desc Render Combined Auth Page
 // ----------------------------
 const getAuthPage = (req, res) => {
-  // ✅ CLEAR ANY EXISTING COOKIES/SESSION WHEN ACCESSING AUTH PAGE
   res.clearCookie('token');
   res.clearCookie('session');
   
@@ -89,7 +89,7 @@ const getAuthPage = (req, res) => {
 };
 
 // ----------------------------
-// @desc Handle Registration - FIXED REDIRECT VERSION
+// @desc Handle Registration
 // ----------------------------
 const register = async (req, res) => {
   console.log('🟢 REGISTER REQUEST BODY:', req.body);
@@ -158,28 +158,23 @@ const register = async (req, res) => {
     await user.save();
     console.log('✅ User saved successfully:', user._id);
 
-    // ✅ SEND WELCOME EMAIL (OPTIONAL)
+    // ✅ SEND WELCOME EMAIL
     try {
       await sendWelcomeEmail(email, name);
     } catch (emailError) {
       console.error('❌ Email sending failed but user created:', emailError);
     }
 
-    // ✅ FIXED: SIMPLE SUCCESS RESPONSE WITH REDIRECT
+    // ✅ SUCCESS RESPONSE
     res.status(201).json({
       success: true,
       message: 'Registration successful! Please login to continue.',
-      redirectUrl: '/auth' // ✅ DIRECT REDIRECT URL
+      redirectUrl: '/auth'
     });
 
   } catch (error) {
-    console.error('❌ REGISTER ERROR DETAILS:');
-    console.error('Error Name:', error.name);
-    console.error('Error Message:', error.message);
-    console.error('Error Code:', error.code);
-    console.error('Full Error:', error);
+    console.error('❌ REGISTER ERROR:', error);
     
-    // ✅ IMPROVED ERROR HANDLING
     if (error.name === 'ValidationError') {
       let errors = [];
       if (error.errors) {
@@ -202,14 +197,6 @@ const register = async (req, res) => {
       });
     }
 
-    if (error.name === 'MongoServerError') {
-      return res.status(400).json({
-        success: false,
-        message: 'Database error occurred'
-      });
-    }
-
-    // ✅ GENERAL ERROR RESPONSE
     res.status(500).json({
       success: false,
       message: 'Registration failed due to server error',
@@ -219,143 +206,106 @@ const register = async (req, res) => {
 };
 
 // ----------------------------
-// @desc Handle Login (FIXED VERSION WITH SESSION/CACHE FIX)
+// @desc Handle Login (PASSPORT VERSION - FIXED)
 // ----------------------------
-const login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    
-    console.log('🔐 LOGIN ATTEMPT:', { email, passwordLength: password ? password.length : 'null' });
-
-    // ✅ VALIDATION
-    if (!email || !password) {
-      console.log('❌ Missing email or password');
-      return res.status(400).json({
+const login = (req, res, next) => {
+  passport.authenticate('local', (err, user, info) => {
+    if (err) {
+      console.error('❌ Passport auth error:', err);
+      return res.status(500).json({
         success: false,
-        message: 'Email and password are required'
+        message: 'Server error during authentication'
       });
     }
 
-    // ✅ FIND USER WITH ENHANCED DEBUGGING
-    console.log(`🔍 Searching for user with email: ${email.toLowerCase()}`);
-    const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
-    
     if (!user) {
-      console.log(`❌ USER NOT FOUND: ${email}`);
+      console.log('❌ Passport auth failed:', info?.message);
       return res.status(400).json({
         success: false,
-        message: 'Invalid email or password'
+        message: info?.message || 'Invalid email or password'
       });
     }
 
-    console.log('👤 USER FOUND:', {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      status: user.status,
-      hasPassword: !!user.password
-    });
-
-    // ✅ CHECK USER STATUS
-    if (user.status !== 'Active') {
-      console.log(`❌ USER NOT ACTIVE: ${user.status}`);
-      return res.status(400).json({
-        success: false,
-        message: 'Your account is not active. Please contact administrator.'
-      });
-    }
-
-    // ✅ COMPARE PASSWORD WITH ENHANCED DEBUGGING
-    console.log(`🔐 Starting password comparison for: ${user.email}`);
-    const isMatch = await user.comparePassword(password);
-    
-    if (!isMatch) {
-      console.log(`❌ PASSWORD MISMATCH for user: ${user.email}`);
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
-    }
-
-    console.log('✅ PASSWORD MATCH - Generating token...');
-
-    // ✅ CLEAR ANY EXISTING COOKIES/SESSION BEFORE SETTING NEW ONE
-    res.clearCookie('token');
-    res.clearCookie('session');
-
-    // ✅ GENERATE JWT TOKEN WITH UNIQUE IDENTIFIER
-    const token = jwt.sign(
-      { 
-        id: user._id, 
-        email: user.email,
-        role: user.role,
-        loginTime: Date.now() // ✅ ADD UNIQUE TIMESTAMP TO PREVENT CACHE
-      },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
-    );
-
-    // ✅ UPDATE LAST LOGIN
-    await User.findByIdAndUpdate(user._id, { 
-      lastLogin: new Date() 
-    });
-
-    // ✅ SET COOKIE WITH UNIQUE NAME TO PREVENT OVERLAP
-    res.cookie('token', token, { 
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      sameSite: 'strict'
-    });
-
-    console.log('✅ LOGIN SUCCESSFUL - Redirecting to:', user.role === 'admin' ? '/admin/dashboard' : '/user/dashboard');
-    console.log(`✅ SET COOKIE FOR USER: ${user.email}`);
-
-    // ✅ FIXED: SIMPLE SUCCESS RESPONSE WITH REDIRECT
-    res.json({
-      success: true,
-      message: 'Login successful! Redirecting...',
-      redirectUrl: user.role === 'admin' ? '/admin/dashboard' : '/user/dashboard',
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role
+    req.login(user, async (loginErr) => {
+      if (loginErr) {
+        console.error('❌ req.login error:', loginErr);
+        return res.status(500).json({
+          success: false,
+          message: 'Session error during login'
+        });
       }
-    });
 
-  } catch (error) {
-    console.error('❌ LOGIN ERROR:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error during login',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      console.log('✅ Passport login successful:', user.email);
+
+      // ✅ GENERATE JWT TOKEN
+      const token = jwt.sign(
+        { 
+          id: user._id, 
+          email: user.email,
+          role: user.role,
+          loginTime: Date.now()
+        },
+        JWT_SECRET,
+        { expiresIn: JWT_EXPIRES_IN }
+      );
+
+      // ✅ UPDATE LAST LOGIN
+      await User.findByIdAndUpdate(user._id, { 
+        lastLogin: new Date() 
+      });
+
+      // ✅ SET COOKIE
+      res.cookie('token', token, { 
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60 * 1000,
+        sameSite: 'strict'
+      });
+
+      console.log('✅ LOGIN SUCCESSFUL - Redirecting to:', user.role === 'admin' ? '/admin/dashboard' : '/user/dashboard');
+
+      // ✅ SUCCESS RESPONSE
+      res.json({
+        success: true,
+        message: 'Login successful! Redirecting...',
+        redirectUrl: user.role === 'admin' ? '/admin/dashboard' : '/user/dashboard',
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role
+        }
+      });
     });
-  }
+  })(req, res, next);
 };
 
 // ----------------------------
-// @desc Handle Logout (ENHANCED VERSION)
+// @desc Handle Logout
 // ----------------------------
 const logout = (req, res) => {
   console.log('🚪 LOGOUT - Clearing all cookies and sessions');
   
-  // ✅ CLEAR ALL POSSIBLE COOKIES
-  res.clearCookie('token');
-  res.clearCookie('session');
-  res.clearCookie('user');
-  res.clearCookie('auth');
-  
-  res.json({
-    success: true,
-    message: 'Logout successful',
-    redirectUrl: '/auth'
+  req.logout((err) => {
+    if (err) {
+      console.error('❌ Passport logout error:', err);
+    }
+    
+    res.clearCookie('token');
+    res.clearCookie('session');
+    res.clearCookie('user');
+    res.clearCookie('auth');
+    
+    res.json({
+      success: true,
+      message: 'Logout successful',
+      redirectUrl: '/auth'
+    });
   });
 };
 
 // ----------------------------
-// @desc Check Auth Status (ENHANCED VERSION)
+// @desc Check Auth Status
 // ----------------------------
 const checkAuth = async (req, res) => {
   try {
@@ -408,7 +358,7 @@ const checkAuth = async (req, res) => {
 };
 
 // ----------------------------
-// @desc Emergency Simple Register (Backup)
+// @desc Emergency Simple Register
 // ----------------------------
 const simpleRegister = async (req, res) => {
   try {
@@ -465,7 +415,6 @@ const simpleRegister = async (req, res) => {
       secure: process.env.NODE_ENV === 'production'
     });
 
-    // ✅ FIXED: SIMPLE REDIRECT RESPONSE
     res.status(201).json({
       success: true,
       message: 'Registration successful! Please login.',

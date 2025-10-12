@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Department Analytics | Enterprise CRM</title>
+    
+    <!-- Premium Analytics Assets -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ffa8a8 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #e2e8f0;
+        }
+
+        .analytics-glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .metric-card-3d {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .metric-card-3d::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+        }
+
+        .metric-card-3d:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .metric-value-large {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+
+        .health-indicator {
+            width: 120px;
+            height: 120px;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .health-score {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            font-weight: 800;
+            color: white;
+        }
+
+        .chart-container-premium {
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .trend-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .trend-up { background: linear-gradient(135deg, #10b981, #34d399); color: white; }
+        .trend-down { background: linear-gradient(135deg, #ef4444, #f87171); color: white; }
+        .trend-neutral { background: linear-gradient(135deg, #6b7280, #9ca3af); color: white; }
+
+        .analytics-tabs {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .analytics-tabs .nav-link {
+            color: #94a3b8;
+            border: none;
+            padding: 15px 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .analytics-tabs .nav-link.active {
+            background: transparent;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .analytics-tabs .nav-link:hover {
+            color: #cbd5e1;
+        }
+
+        .recommendation-card {
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .recommendation-card:hover {
+            background: rgba(30, 41, 59, 0.8);
+            transform: translateX(5px);
+        }
+
+        .comparison-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .data-point {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .data-point:last-child {
+            border-bottom: none;
+        }
+
+        .prediction-indicator {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .prediction-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1s ease-in-out;
+        }
+
+        .animated-gradient {
+            background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+            background-size: 200% 200%;
+            animation: gradientShift 3s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .sparkline-container {
+            width: 100px;
+            height: 30px;
+        }
+
+        .export-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border: none;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.4);
+        }
+
+        .time-filter {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            padding: 8px 20px;
+            color: #94a3b8;
+            transition: all 0.3s ease;
+        }
+
+        .time-filter:hover {
+            background: rgba(30, 41, 59, 1);
+            color: #cbd5e1;
+        }
+
+        .time-filter.active {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Analytics Dashboard -->
+    <div class="container-fluid py-4">
+        <!-- Header Section -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="analytics-glass p-5 text-center">
+                    <h1 class="display-4 fw-bold text-white mb-3">
+                        <i class="fas fa-chart-network me-3"></i>Department Analytics
+                    </h1>
+                    <p class="lead text-light mb-4" id="analyticsSubtitle">Real-time insights and performance metrics</p>
+                    
+                    <!-- Time Period Filters -->
+                    <div class="d-flex justify-content-center gap-3 mb-4">
+                        <button class="time-filter active" data-period="7d">7 Days</button>
+                        <button class="time-filter" data-period="30d">30 Days</button>
+                        <button class="time-filter" data-period="90d">90 Days</button>
+                        <button class="time-filter" data-period="1y">1 Year</button>
+                        <button class="time-filter" data-period="all">All Time</button>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="d-flex justify-content-center gap-3">
+                        <button class="export-btn" onclick="exportAnalytics('pdf')">
+                            <i class="fas fa-file-pdf me-2"></i>Export PDF
+                        </button>
+                        <button class="export-btn" onclick="exportAnalytics('excel')">
+                            <i class="fas fa-file-excel me-2"></i>Export Excel
+                        </button>
+                        <button class="export-btn" onclick="generateReport()">
+                            <i class="fas fa-chart-bar me-2"></i>Generate Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Metrics Overview -->
+        <div class="row mb-5">
+            <div class="col-xl-2 col-md-4 col-6 mb-4">
+                <div class="metric-card-3d">
+                    <div class="metric-value-large" id="performanceMetric">0%</div>
+                    <div class="metric-label">Performance Score</div>
+                    <div class="mt-3">
+                        <span class="trend-badge trend-up" id="performanceTrend">
+                            <i class="fas fa-arrow-up me-1"></i>+5.2%
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-6 mb-4">
+                <div class="metric-card-3d">
+                    <div class="metric-value-large" id="utilizationMetric">0%</div>
+                    <div class="metric-label">Budget Utilization</div>
+                    <div class="mt-3">
+                        <span class="trend-badge trend-neutral" id="utilizationTrend">
+                            <i class="fas fa-minus me-1"></i>0.0%
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-6 mb-4">
+                <div class="metric-card-3d">
+                    <div class="metric-value-large" id="attendanceMetric">0%</div>
+                    <div class="metric-label">Attendance Rate</div>
+                    <div class="mt-3">
+                        <span class="trend-badge trend-up" id="attendanceTrend">
+                            <i class="fas fa-arrow-up me-1"></i>+2.1%
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-6 mb-4">
+                <div class="metric-card-3d">
+                    <div class="metric-value-large" id="productivityMetric">0%</div>
+                    <div class="metric-label">Productivity</div>
+                    <div class="mt-3">
+                        <span class="trend-badge trend-down" id="productivityTrend">
+                            <i class="fas fa-arrow-down me-1"></i>-1.5%
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-6 mb-4">
+                <div class="metric-card-3d">
+                    <div class="metric-value-large" id="satisfactionMetric">0%</div>
+                    <div class="metric-label">Satisfaction</div>
+                    <div class="mt-3">
+                        <span class="trend-badge trend-up" id="satisfactionTrend">
+                            <i class="fas fa-arrow-up me-1"></i>+3.8%
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-6 mb-4">
+                <div class="metric-card-3d text-center">
+                    <div class="health-indicator">
+                        <canvas id="healthGauge" width="120" height="120"></canvas>
+                        <div class="health-score" id="healthScore">0</div>
+                    </div>
+                    <div class="metric-label mt-2">Health Score</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Tabs -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <ul class="nav analytics-tabs" id="analyticsTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button">
+                            <i class="fas fa-chart-pie me-2"></i>Overview
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="performance-tab" data-bs-toggle="tab" data-bs-target="#performance" type="button">
+                            <i class="fas fa-chart-line me-2"></i>Performance
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="budget-tab" data-bs-toggle="tab" data-bs-target="#budget" type="button">
+                            <i class="fas fa-money-bill-wave me-2"></i>Budget
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="workforce-tab" data-bs-toggle="tab" data-bs-target="#workforce" type="button">
+                            <i class="fas fa-users me-2"></i>Workforce
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="predictive-tab" data-bs-toggle="tab" data-bs-target="#predictive" type="button">
+                            <i class="fas fa-crystal-ball me-2"></i>Predictive
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="analyticsTabContent">
+            <!-- Overview Tab -->
+            <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                <div class="row">
+                    <div class="col-lg-8 mb-4">
+                        <div class="chart-container-premium">
+                            <h5 class="fw-bold text-white mb-4">
+                                <i class="fas fa-trend-up me-2"></i>Performance Trends
+                            </h5>
+                            <canvas id="trendChart" height="300"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 mb-4">
+                        <div class="chart-container-premium">
+                            <h5 class="fw-bold text-white mb-4">
+                                                                <i class="fas fa-bullseye me-2"></i>KPI Dashboard
+                            </h5>
+                            <div id="kpiMetrics">
+                                <!-- KPI metrics will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6 mb-4">
+                        <div class="chart-container-premium">
+                            <h5 class="fw-bold text-white mb-4">
+                                <i class="fas fa-chart-bar me-2"></i>Metric Distribution
+                            </h5>
+                            <canvas id="distributionChart" height="250"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 mb-4">
+                        <div class="chart-container-premium">
+                            <h5 class="fw-bold text-white mb-4">
+                                <i class="fas fa-lightbulb me-2"></i>Recommendations
+                            </h5>
+                            <div id="recommendationsList">
+                                <!-- Recommendations will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Tab -->
+            <div class="tab-pane fade" id="performance" role="tabpanel">
+                <div class="row">
+                    <div class="col-lg-8 mb-4">
+                        <div class="chart-container-premium">
+                            <h5 class="fw-bold text-white mb-4">
+                                <i class="fas fa-running me-2"></i>Performance Analytics
+                            </h5>
+                            <canvas id="performanceChart" height="350"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 mb-4">
+                        <div class="chart-container-premium">
+                            <h5 class="fw-bold text-white mb-4">
+                                <i class="fas fa-trophy me-2"></i>Performance Insights
+                            </h5>
+                            <div class="comparison-card mb-4">
+                                <h6 class="text-white mb-3">Compared to Average</h6>
+                                <div class="data-point">
+                                    <span>Department Performance</span>
+                                    <span class="text-success">+12%</span>
+                                </div>
+                                <div class="data-point">
+                                    <span>Team Productivity</span>
+                                    <span class="text-warning">-3%</span>
+                                </div>
+                                <div class="data-point">
+                                    <span>Goal Achievement</span>
+                                    <span class="text-success">+8%</span>
+                                </div>
+                            </div>
+                            <div class="comparison-card">
+                                <h6 class="text-white mb-3">Performance Drivers</h6>
+                                <div class="data-point">
+                                    <span>Training Effectiveness</span>
+                                    <span class="text-success">High</span>
+                                </div>
+                                <div class="data-point">
+                                    <span>Resource Allocation</span>
+                                    <span class="text-warning">Medium</span>
+                                </div>
+                                <div class="data-point">
+                                    <span>Process Efficiency</span>
+                                    <span class="text-success">High</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Budget Tab -->
+            <div class="tab-pane fade" id="budget" role="tabpanel">
+                <div class="row">
+                    <div class="col-lg-6 mb-4">
+                        <div class="chart-container-premium">
+                            <h5 class="fw-bold text-white mb-4">
+                                <i class="fas fa-money-bill-trend-up me-2"></i>Budget Utilization
+                            </h5>
+                            <canvas id="budgetChart" height="300"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 mb-4">
+                        <div class="chart-container-premium">
+                            <h5 class="fw-bold text-white mb-4">
+                                <i class="fas fa-chart-pie me-2"></i>Budget Distribution
+                            </h5>
+                            <canvas id="budgetPieChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="chart-container-premium">
+                            <h5 class="fw-bold text-white mb-4">
+                                <i class="fas fa-calendar-alt me-2"></i>Monthly Budget Trends
+                            </h5>
+                            <canvas id="monthlyBudgetChart" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workforce Tab -->
+            <div class="tab-pane fade" id="workforce" role="tabpanel">
+                <div class="row">
+                    <div class="col-lg-6 mb-4">
+                        <div class="chart-container-premium">
+                            <h5 class="fw-bold text-white mb-4">
+                                <i class="fas fa-user-friends me-2"></i>Team Composition
+                            </h5>
+                            <canvas id="workforceChart" height="300"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 mb-4">
+                        <div class="chart-container-premium">
+                            <h5 class="fw-bold text-white mb-4">
+                                <i class="fas fa-chart-network me-2"></i>Skill Distribution
+                            </h5>
+                            <canvas id="skillsChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Predictive Tab -->
+            <div class="tab-pane fade" id="predictive" role="tabpanel">
+                <div class="row">
+                    <div class="col-lg-8 mb-4">
+                        <div class="chart-container-premium">
+                            <h5 class="fw-bold text-white mb-4">
+                                <i class="fas fa-crystal-ball me-2"></i>Predictive Analytics
+                            </h5>
+                            <canvas id="predictiveChart" height="350"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 mb-4">
+                        <div class="chart-container-premium">
+                            <h5 class="fw-bold text-white mb-4">
+                                <i class="fas fa-chess-knight me-2"></i>Strategic Insights
+                            </h5>
+                            <div class="mb-4">
+                                <h6 class="text-white mb-3">Next Quarter Forecast</h6>
+                                <div class="prediction-indicator mb-2">
+                                    <div class="prediction-fill animated-gradient" style="width: 75%"></div>
+                                </div>
+                                <small class="text-muted">Performance: 75% likely to improve</small>
+                            </div>
+                            <div class="mb-4">
+                                <h6 class="text-white mb-3">Risk Assessment</h6>
+                                <div class="prediction-indicator mb-2">
+                                    <div class="prediction-fill bg-danger" style="width: 30%"></div>
+                                </div>
+                                <small class="text-muted">Low risk level detected</small>
+                            </div>
+                            <div>
+                                <h6 class="text-white mb-3">Opportunity Score</h6>
+                                <div class="prediction-indicator mb-2">
+                                    <div class="prediction-fill bg-success" style="width: 85%"></div>
+                                </div>
+                                <small class="text-muted">High growth potential</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Advanced Analytics JavaScript
+        class AdvancedDepartmentAnalytics {
+            constructor() {
+                this.departmentId = new URLSearchParams(window.location.search).get('id');
+                this.currentPeriod = '30d';
+                this.analyticsData = null;
+                this.charts = {};
+                this.init();
+            }
+
+            async init() {
+                await this.loadAnalyticsData();
+                this.initializeCharts();
+                this.setupEventListeners();
+                this.startRealTimeUpdates();
+            }
+
+            async loadAnalyticsData() {
+                try {
+                    // Show loading state
+                    this.showLoading();
+                    
+                    const response = await fetch(`/api/admin/department-analytics/${this.departmentId}?period=${this.currentPeriod}`);
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.analyticsData = result.data;
+                        this.renderAnalyticsData();
+                        this.updateAllCharts();
+                        this.hideLoading();
+                    } else {
+                        this.showError('Failed to load analytics data');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    this.showError('Error loading analytics data');
+                }
+            }
+
+            renderAnalyticsData() {
+                if (!this.analyticsData) return;
+
+                const { overview, performance, budget, attendance, health } = this.analyticsData;
+
+                // Update main metrics
+                document.getElementById('performanceMetric').textContent = performance.score + '%';
+                document.getElementById('utilizationMetric').textContent = budget.utilizationRate + '%';
+                document.getElementById('attendanceMetric').textContent = attendance.attendanceRate + '%';
+                document.getElementById('productivityMetric').textContent = '78%';
+                document.getElementById('satisfactionMetric').textContent = '92%';
+                document.getElementById('healthScore').textContent = health.score;
+
+                // Update trends
+                this.updateTrendIndicators();
+
+                // Update recommendations
+                this.renderRecommendations(health.recommendations);
+
+                // Update KPI metrics
+                this.renderKPIMetrics();
+            }
+
+            updateTrendIndicators() {
+                // Simulate trend calculations
+                const trends = {
+                    performance: Math.random() > 0.5 ? 'up' : 'down',
+                    utilization: 'neutral',
+                    attendance: 'up',
+                    productivity: Math.random() > 0.3 ? 'down' : 'up',
+                    satisfaction: 'up'
+                };
+
+                Object.keys(trends).forEach(metric => {
+                    const element = document.getElementById(metric + 'Trend');
+                    if (element) {
+                        const trend = trends[metric];
+                        element.className = `trend-badge trend-${trend}`;
+                        element.innerHTML = `<i class="fas fa-arrow-${trend === 'up' ? 'up' : trend === 'down' ? 'down' : 'minus'} me-1"></i>${this.getRandomChange()}`;
+                    }
+                });
+            }
+
+            getRandomChange() {
+                const changes = ['+2.1%', '+5.2%', '-1.5%', '+3.8%', '+0.7%', '-2.3%'];
+                return changes[Math.floor(Math.random() * changes.length)];
+            }
+
+            renderRecommendations(recommendations) {
+                const container = document.getElementById('recommendationsList');
+                if (!container) return;
+
+                container.innerHTML = recommendations.map(rec => `
+                    <div class="recommendation-card">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-lightbulb text-warning mt-1 me-3"></i>
+                            <div class="flex-grow-1">
+                                <p class="text-light mb-2">${rec}</p>
+                                <small class="text-muted">Priority: High</small>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            renderKPIMetrics() {
+                const container = document.getElementById('kpiMetrics');
+                if (!container) return;
+
+                const kpis = [
+                    { name: 'Employee Engagement', value: 85, target: 90, trend: 'up' },
+                    { name: 'Project Completion', value: 78, target: 85, trend: 'up' },
+                    { name: 'Quality Score', value: 92, target: 95, trend: 'neutral' },
+                    { name: 'Innovation Index', value: 67, target: 75, trend: 'down' }
+                ];
+
+                container.innerHTML = kpis.map(kpi => `
+                    <div class="data-point">
+                        <div>
+                            <div class="text-light fw-semibold">${kpi.name}</div>
+                            <small class="text-muted">Target: ${kpi.target}%</small>
+                        </div>
+                        <div class="text-end">
+                            <div class="text-light fw-bold">${kpi.value}%</div>
+                            <span class="trend-badge trend-${kpi.trend}">
+                                <i class="fas fa-arrow-${kpi.trend === 'up' ? 'up' : kpi.trend === 'down' ? 'down' : 'minus'} me-1"></i>
+                                ${kpi.trend === 'up' ? '+5%' : kpi.trend === 'down' ? '-3%' : '0%'}
+                            </span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            initializeCharts() {
+                this.initializeHealthGauge();
+                this.initializeTrendChart();
+                this.initializePerformanceChart();
+                this.initializeBudgetCharts();
+                this.initializeWorkforceCharts();
+                this.initializePredictiveChart();
+            }
+
+            initializeHealthGauge() {
+                const ctx = document.getElementById('healthGauge').getContext('2d');
+                this.charts.healthGauge = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        datasets: [{
+                            data: [75, 25],
+                            backgroundColor: ['#10b981', '#374151'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        cutout: '70%',
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { enabled: false }
+                        }
+                    }
+                });
+            }
+
+            initializeTrendChart() {
+                const ctx = document.getElementById('trendChart').getContext('2d');
+                this.charts.trendChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                        datasets: [
+                            {
+                                label: 'Performance',
+                                data: [65, 70, 68, 75, 80, 78, 82],
+                                borderColor: '#667eea',
+                                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'Budget Utilization',
+                                data: [45, 52, 58, 62, 68, 72, 75],
+                                borderColor: '#4facfe',
+                                backgroundColor: 'rgba(79, 172, 254, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: { color: '#e2e8f0' }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#94a3b8' }
+                            },
+                            x: {
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#94a3b8' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            initializePerformanceChart() {
+                const ctx = document.getElementById('performanceChart').getContext('2d');
+                this.charts.performanceChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+                        datasets: [
+                            {
+                                label: 'Current Year',
+                                data: [72, 78, 82, 85],
+                                backgroundColor: 'rgba(102, 126, 234, 0.8)'
+                            },
+                            {
+                                label: 'Previous Year',
+                                data: [68, 72, 75, 78],
+                                backgroundColor: 'rgba(79, 172, 254, 0.8)'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: { color: '#e2e8f0' }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#94a3b8' }
+                            },
+                            x: {
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#94a3b8' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            initializeBudgetCharts() {
+                // Budget Utilization Chart
+                const budgetCtx = document.getElementById('budgetChart').getContext('2d');
+                this.charts.budgetChart = new Chart(budgetCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        datasets: [{
+                            label: 'Budget Utilization',
+                            data: [45, 52, 58, 62, 68, 72],
+                            borderColor: '#4facfe',
+                            backgroundColor: 'rgba(79, 172, 254, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                labels: { color: '#e2e8f0' }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#94a3b8' }
+                            },
+                            x: {
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#94a3b8' }
+                            }
+                        }
+                    }
+                });
+
+                // Budget Pie Chart
+                const pieCtx = document.getElementById('budgetPieChart').getContext('2d');
+                this.charts.budgetPieChart = new Chart(pieCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Salaries', 'Equipment', 'Training', 'Software', 'Other'],
+                        datasets: [{
+                            data: [45, 20, 15, 12, 8],
+                            backgroundColor: [
+                                '#667eea', '#4facfe', '#fa709a', '#ff6b6b', '#00f2fe'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: '#e2e8f0' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            initializeWorkforceCharts() {
+                const workforceCtx = document.getElementById('workforceChart').getContext('2d');
+                this.charts.workforceChart = new Chart(workforceCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Developers', 'Designers', 'QA', 'Managers', 'Support'],
+                        datasets: [{
+                            label: 'Team Members',
+                            data: [25, 12, 8, 5, 10],
+                            backgroundColor: 'rgba(102, 126, 234, 0.8)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                labels: { color: '#e2e8f0' }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#94a3b8' }
+                            },
+                            x: {
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#94a3b8' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            initializePredictiveChart() {
+                const ctx = document.getElementById('predictiveChart').getContext('2d');
+                this.charts.predictiveChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Current', 'Q1', 'Q2', 'Q3', 'Q4'],
+                        datasets: [
+                            {
+                                label: 'Actual',
+                                data: [82, null, null, null, null],
+                                borderColor: '#667eea',
+                                borderWidth: 3,
+                                pointBackgroundColor: '#667eea',
+                                pointRadius: 6
+                            },
+                            {
+                                label: 'Forecast',
+                                data: [null, 85, 88, 90, 92],
+                                borderColor: '#4facfe',
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                pointBackgroundColor: '#4facfe',
+                                pointRadius: 4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: { color: '#e2e8f0' }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#94a3b8' }
+                            },
+                            x: {
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#94a3b8' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            updateAllCharts() {
+                // Update all charts with new data
+                Object.values(this.charts).forEach(chart => {
+                    if (chart && typeof chart.update === 'function') {
+                        chart.update();
+                    }
+                });
+            }
+
+            setupEventListeners() {
+                // Time period filters
+                document.querySelectorAll('.time-filter').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        document.querySelectorAll('.time-filter').forEach(btn => btn.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.currentPeriod = e.target.dataset.period;
+                        this.loadAnalyticsData();
+                    });
+                });
+
+                // Tab changes
+                document.getElementById('analyticsTabs').addEventListener('shown.bs.tab', (e) => {
+                    // Handle tab changes if needed
+                });
+            }
+
+            startRealTimeUpdates() {
+                // Simulate real-time data updates
+                setInterval(() => {
+                    this.updateRealTimeData();
+                }, 15000);
+            }
+
+            updateRealTimeData() {
+                // Update metrics with slight variations
+                const metrics = ['performanceMetric', 'utilizationMetric', 'attendanceMetric'];
+                metrics.forEach(metric => {
+                    const element = document.getElementById(metric);
+                    if (element) {
+                        const currentValue = parseInt(element.textContent);
+                        const variation = (Math.random() * 2 - 1); // -1 to +1
+                        const newValue = Math.max(0, Math.min(100, currentValue + variation));
+                        element.textContent = newValue.toFixed(0) + '%';
+                    }
+                });
+
+                // Update health score
+                const healthScore = document.getElementById('healthScore');
+                if (healthScore) {
+                    const currentHealth = parseInt(healthScore.textContent);
+                    const newHealth = Math.max(0, Math.min(100, currentHealth + (Math.random() * 2 - 1)));
+                    healthScore.textContent = Math.round(newHealth);
+                    
+                    // Update gauge
+                    if (this.charts.healthGauge) {
+                        this.charts.healthGauge.data.datasets[0].data = [newHealth, 100 - newHealth];
+                        this.charts.healthGauge.update();
+                    }
+                }
+            }
+
+            showLoading() {
+                // Implement loading state
+                console.log('Loading analytics data...');
+            }
+
+            hideLoading() {
+                // Hide loading state
+                console.log('Analytics data loaded');
+            }
+
+            showError(message) {
+                console.error('Analytics Error:', message);
+                // Show error notification
+                alert('Error: ' + message);
+            }
+        }
+
+        // Export functions
+        function exportAnalytics(format) {
+            const analytics = window.advancedAnalytics;
+            if (analytics) {
+                alert(`Exporting analytics in ${format.toUpperCase()} format...`);
+                // Implement export functionality
+            }
+        }
+
+        function generateReport() {
+            alert('Generating comprehensive analytics report...');
+            // Implement report generation
+        }
+
+        // Initialize advanced analytics
+        const advancedAnalytics = new AdvancedDepartmentAnalytics();
+    </script>
+</body>
+</html>
