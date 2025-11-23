@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
+const dashboardController = require('../../../controllers/admin/performance/dashboardController');
 
-console.log('✅ Performance routes loaded'); // Ye terminal mein dikhna chahiye
+console.log('✅ Performance routes loaded');
 
-// Main performance dashboard
-router.get('/', (req, res) => {
-  console.log('🎯 PERFORMANCE DASHBOARD ROUTE HIT!');
+// ✅ TEST ROUTE - HARDCODE ADMIN LAYOUT
+router.get('/test-layout', (req, res) => {
+  console.log('🔧 Testing admin layout...');
   
   const kpiData = {
     totalRevenue: 1250000,
@@ -16,11 +17,21 @@ router.get('/', (req, res) => {
     avgDealSize: 83000
   };
   
+  // ✅ EXPLICITLY SET ADMIN LAYOUT
   res.render('admin/performance/dashboard', {
     title: 'Performance Dashboard',
+    pageTitle: 'Performance Analytics - CRM Admin',
     kpiData: kpiData,
-    user: req.user || { name: 'Admin User' }
+    user: req.user || { name: 'Admin User', role: 'admin' },
+    currentUrl: '/admin/performance/test-layout',
+    layout: 'layouts/admin-base'  // ✅ HARDCODED
   });
 });
+
+// Main performance dashboard
+router.get('/', dashboardController.getDashboard);
+
+// API endpoint for KPI data
+router.get('/kpi-data', dashboardController.getKPIData);
 
 module.exports = router;

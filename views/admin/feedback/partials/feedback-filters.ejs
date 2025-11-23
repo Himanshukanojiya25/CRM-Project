@@ -1,0 +1,138 @@
+<!-- Advanced Feedback Filters Partial -->
+<div class="bg-gray-800/30 backdrop-blur-xl rounded-2xl p-6 border border-gray-700/50 mb-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+        <div class="flex flex-wrap gap-4">
+            <!-- Status Filter -->
+            <div class="relative">
+                <select class="bg-gray-700/50 border border-gray-600/50 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent appearance-none pr-10">
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="responded">Responded</option>
+                    <option value="resolved">Resolved</option>
+                    <option value="closed">Closed</option>
+                </select>
+                <i class="fas fa-chevron-down absolute right-3 top-3 text-gray-400"></i>
+            </div>
+            
+            <!-- Category Filter -->
+            <div class="relative">
+                <select class="bg-gray-700/50 border border-gray-600/50 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent appearance-none pr-10">
+                    <option value="">All Categories</option>
+                    <option value="bug">Bug Report</option>
+                    <option value="feature">Feature Request</option>
+                    <option value="general">General Feedback</option>
+                    <option value="support">Support</option>
+                    <option value="positive">Positive</option>
+                    <option value="complaint">Complaint</option>
+                </select>
+                <i class="fas fa-chevron-down absolute right-3 top-3 text-gray-400"></i>
+            </div>
+
+            <!-- Priority Filter -->
+            <div class="relative">
+                <select class="bg-gray-700/50 border border-gray-600/50 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent appearance-none pr-10">
+                    <option value="">All Priorities</option>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="urgent">Urgent</option>
+                </select>
+                <i class="fas fa-chevron-down absolute right-3 top-3 text-gray-400"></i>
+            </div>
+
+            <!-- Date Filter -->
+            <div class="relative">
+                <select class="bg-gray-700/50 border border-gray-600/50 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent appearance-none pr-10">
+                    <option value="">Any Time</option>
+                    <option value="today">Today</option>
+                    <option value="yesterday">Yesterday</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                    <option value="custom">Custom Range</option>
+                </select>
+                <i class="fas fa-calendar absolute right-3 top-3 text-gray-400"></i>
+            </div>
+
+            <!-- Search Input -->
+            <div class="relative">
+                <input type="text" placeholder="Search feedback..." class="bg-gray-700/50 border border-gray-600/50 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent pl-10 w-64">
+                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+            </div>
+        </div>
+
+        <div class="flex space-x-3">
+            <!-- Clear Filters -->
+            <button onclick="feedbackFilters.clearFilters()" class="bg-gray-700/50 hover:bg-gray-600/50 border border-gray-600/50 text-white px-4 py-2.5 rounded-xl font-medium transition-all duration-300">
+                <i class="fas fa-times mr-2"></i>Clear
+            </button>
+            
+            <!-- Export Button -->
+            <button onclick="feedbackFilters.exportFilteredData()" class="bg-gray-700/50 hover:bg-gray-600/50 border border-gray-600/50 text-white px-4 py-2.5 rounded-xl font-medium transition-all duration-300">
+                <i class="fas fa-download mr-2"></i>Export
+            </button>
+            
+            <!-- Save Filter Preset -->
+            <button class="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-4 py-2.5 rounded-xl font-medium transition-all duration-300 transform hover:scale-105">
+                <i class="fas fa-save mr-2"></i>Save Filter
+            </button>
+        </div>
+    </div>
+
+    <!-- Advanced Filters Toggle -->
+    <div class="mt-4 pt-4 border-t border-gray-700/30">
+        <button onclick="toggleAdvancedFilters()" class="flex items-center text-cyan-400 hover:text-cyan-300 transition-colors duration-300">
+            <i class="fas fa-sliders-h mr-2"></i>
+            <span>Advanced Filters</span>
+            <i class="fas fa-chevron-down ml-2 text-xs"></i>
+        </button>
+        
+        <!-- Advanced Filters Content -->
+        <div id="advancedFilters" class="hidden mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Rating Filter -->
+            <div>
+                <label class="block text-gray-400 text-sm font-medium mb-2">Rating</label>
+                <select class="w-full bg-gray-700/50 border border-gray-600/50 rounded-xl px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50">
+                    <option value="">Any Rating</option>
+                    <option value="5">5 Stars</option>
+                    <option value="4">4+ Stars</option>
+                    <option value="3">3+ Stars</option>
+                    <option value="2">2+ Stars</option>
+                    <option value="1">1+ Stars</option>
+                </select>
+            </div>
+            
+            <!-- Assignee Filter -->
+            <div>
+                <label class="block text-gray-400 text-sm font-medium mb-2">Assigned To</label>
+                <select class="w-full bg-gray-700/50 border border-gray-600/50 rounded-xl px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50">
+                    <option value="">Any Assignee</option>
+                    <option value="sarah">Sarah Johnson</option>
+                    <option value="mike">Mike Chen</option>
+                    <option value="emily">Emily Parker</option>
+                    <option value="david">David Rodriguez</option>
+                    <option value="unassigned">Unassigned</option>
+                </select>
+            </div>
+            
+            <!-- Response Time Filter -->
+            <div>
+                <label class="block text-gray-400 text-sm font-medium mb-2">Response Time</label>
+                <select class="w-full bg-gray-700/50 border border-gray-600/50 rounded-xl px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50">
+                    <option value="">Any Time</option>
+                    <option value="1h">Within 1 hour</option>
+                    <option value="4h">Within 4 hours</option>
+                    <option value="24h">Within 24 hours</option>
+                    <option value="overdue">Overdue</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleAdvancedFilters() {
+    const advancedFilters = document.getElementById('advancedFilters');
+    advancedFilters.classList.toggle('hidden');
+}
+</script>

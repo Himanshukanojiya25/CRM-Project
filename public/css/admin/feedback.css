@@ -1,0 +1,216 @@
+/* Ultra Premium Feedback Management Styles */
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(31, 41, 55, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #06b6d4, #3b82f6);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #0891b2, #2563eb);
+}
+
+/* Glass Morphism Effects */
+.glass-effect {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Gradient Text */
+.gradient-text {
+    background: linear-gradient(135deg, #06b6d4, #3b82f6, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Hover Glow Effects */
+.hover-glow:hover {
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Pulse Animation for Notifications */
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(6, 182, 212, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(6, 182, 212, 0.8);
+    }
+}
+
+.pulse-glow {
+    animation: pulse-glow 2s infinite;
+}
+
+/* Smooth Transitions */
+.smooth-transition {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom Button Styles */
+.btn-primary {
+    background: linear-gradient(135deg, #06b6d4, #3b82f6);
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0891b2, #2563eb);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(6, 182, 212, 0.3);
+}
+
+/* Status Badge Animations */
+.status-badge {
+    transition: all 0.3s ease;
+}
+
+.status-badge:hover {
+    transform: scale(1.05);
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid #06b6d4;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Chart Container Styles */
+.chart-container {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(139, 92, 246, 0.1));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Feedback Card Hover Effects */
+.feedback-card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.feedback-card:hover {
+    border-color: rgba(6, 182, 212, 0.5);
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Rating Stars Animation */
+.rating-stars {
+    transition: all 0.3s ease;
+}
+
+.rating-stars:hover {
+    transform: scale(1.1);
+}
+
+/* Filter Section Styles */
+.filter-section {
+    background: rgba(31, 41, 55, 0.5);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Table Row Animations */
+.table-row {
+    transition: all 0.3s ease;
+}
+
+.table-row:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Custom Input Styles */
+.custom-input {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.custom-input:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: #06b6d4;
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+}
+
+/* Action Button Styles */
+.action-btn {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.action-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Progress Bar Animations */
+.progress-bar {
+    transition: width 0.5s ease-in-out;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+}
+
+/* Success Animation */
+@keyframes success-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+    }
+}
+
+.success-pulse {
+    animation: success-pulse 2s infinite;
+}
+
+/* Responsive Design Helpers */
+@media (max-width: 768px) {
+    .mobile-stack {
+        flex-direction: column;
+    }
+    
+    .mobile-full {
+        width: 100%;
+    }
+}
+
+/* Dark Theme Enhancements */
+.dark-theme {
+    color-scheme: dark;
+}
+
+/* Focus States for Accessibility */
+.focus-visible:focus {
+    outline: 2px solid #06b6d4;
+    outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+}

@@ -3,7 +3,7 @@ const dashboardService = require('../../../services/admin/performance/dashboardS
 const dashboardController = {
   getDashboard: async (req, res) => {
     try {
-      console.log('🎯 Dashboard Controller Called');
+      console.log('🎯 Performance Dashboard Controller Called');
       
       const { startDate, endDate } = req.query;
       
@@ -12,17 +12,22 @@ const dashboardController = {
         endDate
       });
 
-      console.log('📊 KPI Data Ready:', kpiData);
-
+      // ✅ FORCE ADMIN LAYOUT FOR PERFORMANCE TAB
       res.render('admin/performance/dashboard', {
         title: 'Performance Dashboard',
+        pageTitle: 'Performance Analytics - CRM Admin', 
         kpiData,
-        user: req.user
+        user: req.user,
+        currentUrl: '/admin/performance',
+        layout: 'layouts/admin-base'  // ✅ YEH LINE CRITICAL HAI
       });
       
     } catch (error) {
       console.error('❌ Dashboard error:', error);
-      res.status(500).render('error', { error: 'Dashboard load failed' });
+      res.status(500).render('error', { 
+        error: 'Dashboard load failed',
+        layout: 'layouts/admin-base'
+      });
     }
   },
 

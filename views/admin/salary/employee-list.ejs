@@ -1,0 +1,501 @@
+<% layout = 'layouts/admin-base' %>
+<%
+pageTitle = 'Employees - Salary Management';
+%>
+
+<style>
+.employee-list-container {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.page-header {
+    background: rgba(255,255,255,0.95);
+    border-radius: 25px;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+}
+
+.employee-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.employee-card {
+    background: rgba(255,255,255,0.95);
+    border-radius: 25px;
+    padding: 2rem;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.employee-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+}
+
+.employee-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.employee-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.employee-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #fff;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    margin-right: 1.5rem;
+}
+
+.employee-info {
+    flex: 1;
+}
+
+.employee-name {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+}
+
+.employee-designation {
+    color: #667eea;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.employee-department {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.salary-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-box {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+    font-weight: 600;
+}
+
+.salary-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btn-action {
+    flex: 1;
+    border: none;
+    border-radius: 15px;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.btn-credit {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+}
+
+.btn-credit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+}
+
+.btn-history {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    border: 2px solid #667eea;
+}
+
+.btn-history:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.status-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.badge-paid {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+}
+
+.badge-pending {
+    background: linear-gradient(135deg, #fd746c 0%, #ff9068 100%);
+    color: white;
+}
+
+.search-filter-bar {
+    background: rgba(255,255,255,0.95);
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+}
+
+.search-box {
+    position: relative;
+}
+
+.search-box .form-control {
+    border-radius: 15px;
+    padding-left: 3rem;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.search-box .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.filter-btn {
+    border: 2px solid #e9ecef;
+    background: white;
+    color: #6c757d;
+    border-radius: 15px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.filter-btn.active {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: white;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.7;
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 3rem;
+}
+
+.page-link {
+    border: none;
+    color: #667eea;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    margin: 0 0.25rem;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+}
+
+.page-link:hover {
+    background: #667eea;
+    color: white;
+}
+
+.page-link.active {
+    background: #667eea;
+    color: white;
+}
+</style>
+
+<div class="employee-list-container">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="display-5 fw-bold text-dark mb-2">Employee Salary Management</h1>
+                    <p class="text-muted fs-5 mb-0">Manage and process salaries for all employees</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <a href="/admin/salary/credit" class="btn btn-premium btn-lg">
+                        <i class="fas fa-plus-circle me-2"></i>Credit Salary
+                    </a>
+                    <a href="/admin/salary/dashboard" class="btn btn-outline-primary btn-lg ms-2">
+                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search & Filter Bar -->
+        <div class="search-filter-bar">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-6">
+                    <div class="search-box">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="form-control form-control-lg" id="searchInput" 
+                               placeholder="Search employees by name, ID, or department...">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-filter="all">All Employees</button>
+                        <button class="filter-btn" data-filter="paid">Paid This Month</button>
+                        <button class="filter-btn" data-filter="pending">Pending</button>
+                        <button class="filter-btn" data-filter="new">New Employees</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employee Grid -->
+        <div class="employee-grid" id="employeeGrid">
+            <% if (employees && employees.length > 0) { %>
+                <% employees.forEach(employee => { %>
+                    <div class="employee-card" data-employee-id="<%= employee.id %>" 
+                         data-name="<%= employee.name.toLowerCase() %>"
+                         data-department="<%= employee.department?.name?.toLowerCase() || '' %>"
+                         data-status="<%= employee.salaryStatus || 'pending' %>">
+                        
+                        <!-- Status Badge -->
+                        <span class="status-badge <%= employee.salaryStatus === 'paid' ? 'badge-paid' : 'badge-pending' %>">
+                            <i class="fas <%= employee.salaryStatus === 'paid' ? 'fa-check-circle' : 'fa-clock' %> me-1"></i>
+                            <%= employee.salaryStatus === 'paid' ? 'Paid' : 'Pending' %>
+                        </span>
+
+                        <!-- Employee Header -->
+                        <div class="employee-header">
+                            <img src="<%= employee.profilePhoto || '/images/default-avatar.png' %>" 
+                                 alt="<%= employee.name %>" 
+                                 class="employee-avatar"
+                                 onerror="this.src='/images/default-avatar.png'">
+                            <div class="employee-info">
+                                <h3 class="employee-name"><%= employee.name %></h3>
+                                <p class="employee-designation"><%= employee.designation %></p>
+                                <p class="employee-department">
+                                    <i class="fas fa-building me-1"></i>
+                                    <%= employee.department?.name || 'No Department' %>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Salary Statistics -->
+                        <div class="salary-stats">
+                            <div class="stat-box">
+                                <div class="stat-value">₹<%= employee.currentSalary?.toLocaleString('en-IN') || '0' %></div>
+                                <div class="stat-label">Current Salary</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value"><%= employee.attendanceRate || 0 %>%</div>
+                                <div class="stat-label">Attendance</div>
+                            </div>
+                        </div>
+
+                        <!-- Last Salary Info -->
+                        <% if (employee.lastSalary) { %>
+                        <div class="mb-3 p-3" style="background: #f8f9fa; border-radius: 12px;">
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <small class="text-muted">Last Salary</small>
+                                    <div class="fw-bold text-success">₹<%= employee.lastSalary.amount?.toLocaleString('en-IN') %></div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Paid On</small>
+                                    <div class="fw-bold text-dark">
+                                        <%= new Date(employee.lastSalary.paymentDate).toLocaleDateString() %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <% } %>
+
+                        <!-- Action Buttons -->
+                        <div class="salary-actions">
+                            <a href="/admin/salary/credit?employeeId=<%= employee.id %>" 
+                               class="btn-action btn-credit">
+                                <i class="fas fa-credit-card me-1"></i>Credit Salary
+                            </a>
+                            <a href="/admin/salary/history/<%= employee.id %>" 
+                               class="btn-action btn-history">
+                                <i class="fas fa-history me-1"></i>History
+                            </a>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="text-white mb-3">No Employees Found</h3>
+                    <p class="text-white opacity-90 mb-4">There are no employees available for salary management.</p>
+                    <a href="/admin/employees" class="btn btn-premium btn-lg">
+                        <i class="fas fa-plus me-2"></i>Add Employees
+                    </a>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Pagination -->
+        <% if (employees && employees.length > 0) { %>
+        <div class="pagination-container">
+            <nav>
+                <ul class="pagination">
+                    <li class="page-item">
+                        <a class="page-link" href="#">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item"><a class="page-link active" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <% } %>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const employeeCards = document.querySelectorAll('.employee-card');
+
+    // Search functionality
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        
+        employeeCards.forEach(card => {
+            const name = card.getAttribute('data-name');
+            const department = card.getAttribute('data-department');
+            const employeeId = card.getAttribute('data-employee-id');
+            
+            const matchesSearch = name.includes(searchTerm) || 
+                                department.includes(searchTerm) || 
+                                employeeId.includes(searchTerm);
+            
+            card.style.display = matchesSearch ? 'block' : 'none';
+        });
+    });
+
+    // Filter functionality
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            const filter = this.getAttribute('data-filter');
+            
+            employeeCards.forEach(card => {
+                const status = card.getAttribute('data-status');
+                
+                switch(filter) {
+                    case 'all':
+                        card.style.display = 'block';
+                        break;
+                    case 'paid':
+                        card.style.display = status === 'paid' ? 'block' : 'none';
+                        break;
+                    case 'pending':
+                        card.style.display = status === 'pending' ? 'block' : 'none';
+                        break;
+                    case 'new':
+                        // Logic for new employees (you can customize this)
+                        card.style.display = 'block'; // Placeholder
+                        break;
+                }
+            });
+        });
+    });
+
+    // Add animation to cards
+    employeeCards.forEach((card, index) => {
+        card.style.animation = `fadeInUp 0.6s ease-out ${index * 0.1}s both`;
+    });
+
+    // Add CSS animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>

@@ -1,0 +1,650 @@
+<% layout = 'layouts/admin-base' %>
+<%
+pageTitle = 'Salary History - Admin';
+%>
+
+<style>
+.salary-history-container {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.page-header {
+    background: rgba(255,255,255,0.95);
+    border-radius: 25px;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+}
+
+.history-card {
+    background: rgba(255,255,255,0.95);
+    border-radius: 25px;
+    padding: 2.5rem;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.filter-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.filter-group {
+    margin-bottom: 0;
+}
+
+.filter-label {
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    border-left: 5px solid;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.stat-card.primary {
+    border-left-color: #667eea;
+}
+
+.stat-card.success {
+    border-left-color: #4facfe;
+}
+
+.stat-card.warning {
+    border-left-color: #fd746c;
+}
+
+.stat-card.info {
+    border-left-color: #764ba2;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+}
+
+.stat-card.primary .stat-value {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-card.success .stat-value {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-card.warning .stat-value {
+    background: linear-gradient(135deg, #fd746c 0%, #ff9068 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-card.info .stat-value {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-label {
+    color: #6c757d;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.salary-table {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+}
+
+.table-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem 2rem;
+}
+
+.table-header h3 {
+    margin: 0;
+    font-weight: 700;
+}
+
+.table-responsive {
+    border-radius: 0 0 20px 20px;
+}
+
+.table {
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table thead th {
+    background: #f8f9fa;
+    color: #2c3e50;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: none;
+    padding: 1.5rem 1rem;
+    vertical-align: middle;
+}
+
+.table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.table tbody tr:hover {
+    background: #f8f9fa;
+    transform: scale(1.01);
+}
+
+.table tbody td {
+    padding: 1.25rem 1rem;
+    vertical-align: middle;
+    border: none;
+    font-weight: 500;
+}
+
+.employee-cell {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.employee-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #e9ecef;
+}
+
+.employee-info {
+    flex: 1;
+}
+
+.employee-name {
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+}
+
+.employee-details {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.amount-cell {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.salary-breakdown {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.badge-status {
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+
+.badge-paid {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+}
+
+.badge-pending {
+    background: linear-gradient(135deg, #fd746c 0%, #ff9068 100%);
+    color: white;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-action {
+    border: none;
+    border-radius: 12px;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-pdf {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.btn-pdf:hover {
+    background: #dc3545;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-view {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+}
+
+.btn-view:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #6c757d;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.5;
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.page-link {
+    border: none;
+    color: #667eea;
+    font-weight: 600;
+    padding: 0.75rem 1.25rem;
+    margin: 0 0.25rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.page-link:hover {
+    background: #667eea;
+    color: white;
+}
+
+.page-link.active {
+    background: #667eea;
+    color: white;
+}
+
+.export-section {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-top: 2rem;
+    color: white;
+    text-align: center;
+}
+
+.btn-export {
+    background: rgba(255,255,255,0.2);
+    border: 2px solid white;
+    color: white;
+    border-radius: 50px;
+    padding: 1rem 2rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.btn-export:hover {
+    background: white;
+    color: #4facfe;
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(255,255,255,0.2);
+}
+</style>
+
+<div class="salary-history-container">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-5 fw-bold text-dark mb-2">Salary History & Reports</h1>
+                    <p class="text-muted fs-5 mb-0">Complete overview of all salary transactions and payments</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <a href="/admin/salary/dashboard" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                    </a>
+                    <a href="/admin/salary/employee-list" class="btn btn-premium btn-lg ms-2">
+                        <i class="fas fa-users me-2"></i>Employees
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="stats-cards">
+            <div class="stat-card primary">
+                <div class="stat-value">₹<%= totalPaid?.toLocaleString('en-IN') || '0' %></div>
+                <div class="stat-label">Total Paid</div>
+            </div>
+            <div class="stat-card success">
+                <div class="stat-value"><%= totalTransactions || 0 %></div>
+                <div class="stat-label">Total Transactions</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-value"><%= employeesCount || 0 %></div>
+                <div class="stat-label">Employees</div>
+            </div>
+            <div class="stat-card info">
+                <div class="stat-value"><%= averageSalary?.toLocaleString('en-IN') || '0' %></div>
+                <div class="stat-label">Avg. Salary</div>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="filter-group">
+                        <div class="filter-label">Employee</div>
+                        <select class="form-select" id="employeeFilter">
+                            <option value="">All Employees</option>
+                            <% employees.forEach(emp => { %>
+                                <option value="<%= emp.id %>"><%= emp.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="filter-group">
+                        <div class="filter-label">Month</div>
+                        <select class="form-select" id="monthFilter">
+                            <option value="">All Months</option>
+                            <% for(let i = 1; i <= 12; i++) { %>
+                                <option value="<%= i %>"><%= new Date(2000, i-1).toLocaleString('default', {month: 'long'}) %></option>
+                            <% } %>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="filter-group">
+                        <div class="filter-label">Year</div>
+                        <select class="form-select" id="yearFilter">
+                            <option value="">All Years</option>
+                            <% for(let i = 2023; i <= new Date().getFullYear(); i++) { %>
+                                <option value="<%= i %>"><%= i %></option>
+                            <% } %>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="filter-group">
+                        <div class="filter-label">Status</div>
+                        <select class="form-select" id="statusFilter">
+                            <option value="">All Status</option>
+                            <option value="paid">Paid</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="filter-group">
+                        <div class="filter-label">Department</div>
+                        <select class="form-select" id="departmentFilter">
+                            <option value="">All Departments</option>
+                            <% departments.forEach(dept => { %>
+                                <option value="<%= dept.id %>"><%= dept.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12 text-end">
+                    <button class="btn btn-outline-secondary me-2" id="resetFilters">
+                        <i class="fas fa-redo me-1"></i>Reset Filters
+                    </button>
+                    <button class="btn btn-premium" id="applyFilters">
+                        <i class="fas fa-filter me-1"></i>Apply Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Salary History Table -->
+        <div class="history-card">
+            <div class="table-header">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h3 class="text-white mb-0">
+                            <i class="fas fa-history me-2"></i>Salary Transactions
+                        </h3>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <span class="text-white opacity-90">
+                            Showing <%= salaryRecords?.length || 0 %> records
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <% if (salaryRecords && salaryRecords.length > 0) { %>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Period</th>
+                                <th>Basic Salary</th>
+                                <th>Allowances</th>
+                                <th>Deductions</th>
+                                <th>Net Salary</th>
+                                <th>Payment Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% salaryRecords.forEach(record => { %>
+                                <tr>
+                                    <td>
+                                        <div class="employee-cell">
+                                            <img src="<%= record.employee.profilePhoto || '/images/default-avatar.png' %>" 
+                                                 alt="<%= record.employee.name %>" 
+                                                 class="employee-avatar"
+                                                 onerror="this.src='/images/default-avatar.png'">
+                                            <div class="employee-info">
+                                                <div class="employee-name"><%= record.employee.name %></div>
+                                                <div class="employee-details">
+                                                    <%= record.employee.designation %> • <%= record.employee.department?.name %>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <strong><%= record.monthYear %></strong>
+                                    </td>
+                                    <td>
+                                        <div class="amount-cell text-primary">₹<%= record.basicSalary?.toLocaleString('en-IN') %></div>
+                                    </td>
+                                    <td>
+                                        <div class="amount-cell text-success">₹<%= record.allowances?.toLocaleString('en-IN') %></div>
+                                    </td>
+                                    <td>
+                                        <div class="amount-cell text-danger">₹<%= record.deductions?.toLocaleString('en-IN') %></div>
+                                    </td>
+                                    <td>
+                                        <div class="amount-cell text-dark">₹<%= record.netSalary?.toLocaleString('en-IN') %></div>
+                                    </td>
+                                    <td>
+                                        <%= new Date(record.paymentDate).toLocaleDateString() %>
+                                    </td>
+                                    <td>
+                                        <span class="badge-status badge-<%= record.status %>">
+                                            <i class="fas <%= record.status === 'paid' ? 'fa-check-circle' : 'fa-clock' %> me-1"></i>
+                                            <%= record.status %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a href="/admin/salary/slip/<%= record.id %>" 
+                                               class="btn-action btn-pdf" target="_blank">
+                                                <i class="fas fa-file-pdf me-1"></i>PDF
+                                            </a>
+                                            <a href="/admin/salary/details/<%= record.id %>" 
+                                               class="btn-action btn-view">
+                                                <i class="fas fa-eye me-1"></i>View
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                <% } else { %>
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <h3 class="text-muted mb-3">No Salary Records Found</h3>
+                        <p class="text-muted mb-4">There are no salary transactions matching your criteria.</p>
+                        <a href="/admin/salary/credit" class="btn btn-premium">
+                            <i class="fas fa-plus me-2"></i>Credit First Salary
+                        </a>
+                    </div>
+                <% } %>
+            </div>
+
+            <!-- Pagination -->
+            <% if (salaryRecords && salaryRecords.length > 0) { %>
+            <div class="pagination-container">
+                <nav>
+                    <ul class="pagination">
+                        <li class="page-item">
+                            <a class="page-link" href="#">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item"><a class="page-link active" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            <% } %>
+        </div>
+
+        <!-- Export Section -->
+        <div class="export-section">
+            <h4 class="text-white mb-3">Export Salary Reports</h4>
+            <p class="text-white opacity-90 mb-4">Download comprehensive salary reports in multiple formats</p>
+            <div class="d-flex justify-content-center gap-3">
+                <button class="btn-export">
+                    <i class="fas fa-file-pdf me-2"></i>Export as PDF
+                </button>
+                <button class="btn-export">
+                    <i class="fas fa-file-excel me-2"></i>Export as Excel
+                </button>
+                <button class="btn-export">
+                    <i class="fas fa-file-csv me-2"></i>Export as CSV
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Filter functionality
+    const applyFilters = document.getElementById('applyFilters');
+    const resetFilters = document.getElementById('resetFilters');
+    
+    applyFilters.addEventListener('click', function() {
+        // Implement filter logic here
+        console.log('Applying filters...');
+        // You can make an AJAX call or reload the page with query parameters
+    });
+    
+    resetFilters.addEventListener('click', function() {
+        document.getElementById('employeeFilter').value = '';
+        document.getElementById('monthFilter').value = '';
+        document.getElementById('yearFilter').value = '';
+        document.getElementById('statusFilter').value = '';
+        document.getElementById('departmentFilter').value = '';
+    });
+
+    // Add animation to table rows
+    const tableRows = document.querySelectorAll('tbody tr');
+    tableRows.forEach((row, index) => {
+        row.style.animation = `fadeInUp 0.5s ease-out ${index * 0.05}s both`;
+    });
+
+    // Add CSS animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>

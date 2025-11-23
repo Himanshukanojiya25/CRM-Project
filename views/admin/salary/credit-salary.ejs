@@ -1,0 +1,464 @@
+<% layout = 'layouts/admin-base' %>
+<%
+pageTitle = 'Credit Salary - Admin';
+%>
+
+<style>
+.credit-salary-container {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.salary-form-card {
+    background: rgba(255,255,255,0.95);
+    border-radius: 25px;
+    padding: 3rem;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.header-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2rem;
+    color: white;
+    font-size: 2.5rem;
+    box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+}
+
+.section-title {
+    color: #2c3e50;
+    font-weight: 700;
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 3px solid;
+    border-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%) 1;
+}
+
+.amount-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 20px;
+    padding: 2rem;
+    border: 2px dashed #dee2e6;
+    transition: all 0.3s ease;
+}
+
+.amount-card:hover {
+    border-color: #667eea;
+    transform: translateY(-5px);
+}
+
+.net-salary-display {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+    border-radius: 20px;
+    padding: 2.5rem;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(79, 172, 254, 0.3);
+}
+
+.net-amount {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+}
+
+.employee-select-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    border: 2px solid #f8f9fa;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.employee-select-card:hover {
+    border-color: #667eea;
+    transform: translateY(-3px);
+}
+
+.employee-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.employee-select-card:hover .employee-avatar {
+    border-color: #667eea;
+}
+
+.amount-input-group {
+    position: relative;
+}
+
+.amount-input-group .form-control {
+    padding-left: 2.5rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border-radius: 15px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.amount-input-group .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+}
+
+.amount-input-group::before {
+    content: '₹';
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #667eea;
+    z-index: 5;
+}
+
+.btn-premium {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 50px;
+    padding: 1.2rem 3rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: white;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-premium:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 40px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+
+.btn-premium::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s;
+}
+
+.btn-premium:hover::before {
+    left: 100%;
+}
+
+.calculation-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.calculation-row:last-child {
+    border-bottom: none;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #2c3e50;
+}
+
+.employee-info {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 20px;
+    padding: 2rem;
+}
+
+.info-item {
+    display: flex;
+    justify-content: between;
+    margin-bottom: 0.5rem;
+}
+
+.info-label {
+    font-weight: 600;
+    opacity: 0.9;
+    min-width: 120px;
+}
+
+.info-value {
+    font-weight: 500;
+}
+</style>
+
+<div class="credit-salary-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="salary-form-card">
+                    <!-- Header -->
+                    <div class="form-header">
+                        <div class="header-icon">
+                            <i class="fas fa-money-check-alt"></i>
+                        </div>
+                        <h1 class="display-5 fw-bold text-dark mb-3">Credit Salary</h1>
+                        <p class="text-muted fs-5">Process employee salary payment with detailed breakdown</p>
+                    </div>
+
+                    <form action="/admin/salary/credit" method="POST" id="salaryForm">
+                        <div class="row g-4">
+                            <!-- Left Column - Employee Selection & Basic Info -->
+                            <div class="col-lg-6">
+                                <!-- Employee Selection -->
+                                <div class="mb-4">
+                                    <h3 class="section-title">
+                                        <i class="fas fa-user-check me-2"></i>Select Employee
+                                    </h3>
+                                    <select class="form-select form-select-lg" id="employeeSelect" name="employeeId" required 
+                                            style="border-radius: 15px; padding: 1rem; border: 2px solid #e9ecef;">
+                                        <option value="">Choose Employee...</option>
+                                        <% employees.forEach(employee => { %>
+                                            <option value="<%= employee.id %>" 
+                                                    data-salary="<%= employee.currentSalary || 0 %>"
+                                                    data-designation="<%= employee.designation %>"
+                                                    data-department="<%= employee.department?.name || 'N/A' %>">
+                                                <%= employee.name %> - <%= employee.employeeId %> (<%= employee.designation %>)
+                                            </option>
+                                        <% }) %>
+                                    </select>
+                                </div>
+
+                                <!-- Selected Employee Info -->
+                                <div class="employee-info mb-4" id="employeeInfo" style="display: none;">
+                                    <h5 class="fw-bold mb-3">Employee Information</h5>
+                                    <div class="info-item">
+                                        <span class="info-label">Name:</span>
+                                        <span class="info-value" id="infoName">-</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Designation:</span>
+                                        <span class="info-value" id="infoDesignation">-</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Department:</span>
+                                        <span class="info-value" id="infoDepartment">-</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Current Salary:</span>
+                                        <span class="info-value" id="infoSalary">₹0</span>
+                                    </div>
+                                </div>
+
+                                <!-- Salary Period -->
+                                <div class="mb-4">
+                                    <h3 class="section-title">
+                                        <i class="fas fa-calendar-alt me-2"></i>Salary Period
+                                    </h3>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <select class="form-select" id="month" name="month" required>
+                                                    <option value="">Month</option>
+                                                    <% for(let i = 1; i <= 12; i++) { %>
+                                                        <option value="<%= i %>"><%= new Date(2000, i-1).toLocaleString('default', {month: 'long'}) %></option>
+                                                    <% } %>
+                                                </select>
+                                                <label for="month">Month</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="number" class="form-control" id="year" name="year" 
+                                                       value="<%= new Date().getFullYear() %>" min="2020" max="2030" required>
+                                                <label for="year">Year</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Payment Date -->
+                                <div class="mb-4">
+                                    <div class="form-floating">
+                                        <input type="date" class="form-control" id="paymentDate" name="paymentDate" 
+                                               value="<%= new Date().toISOString().split('T')[0] %>" required>
+                                        <label for="paymentDate"><i class="fas fa-calendar-day me-2"></i>Payment Date</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Column - Salary Breakdown -->
+                            <div class="col-lg-6">
+                                <!-- Basic Salary -->
+                                <div class="mb-4">
+                                    <h3 class="section-title">
+                                        <i class="fas fa-money-bill me-2"></i>Salary Breakdown
+                                    </h3>
+                                    <div class="amount-card">
+                                        <label class="form-label fw-bold text-primary">Basic Salary</label>
+                                        <div class="amount-input-group">
+                                            <input type="number" class="form-control" id="basicSalary" name="basicSalary" 
+                                                   placeholder="0.00" step="0.01" required>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Allowances -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold text-success">Allowances</label>
+                                    <div class="amount-card">
+                                        <div class="mb-3">
+                                            <label class="form-label">House Rent Allowance (HRA)</label>
+                                            <div class="amount-input-group">
+                                                <input type="number" class="form-control allowance" name="hra" 
+                                                       placeholder="0.00" step="0.01" value="0">
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Dearness Allowance (DA)</label>
+                                            <div class="amount-input-group">
+                                                <input type="number" class="form-control allowance" name="da" 
+                                                       placeholder="0.00" step="0.01" value="0">
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Other Allowances</label>
+                                            <div class="amount-input-group">
+                                                <input type="number" class="form-control allowance" name="otherAllowances" 
+                                                       placeholder="0.00" step="0.01" value="0">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Deductions -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold text-danger">Deductions</label>
+                                    <div class="amount-card">
+                                        <div class="mb-3">
+                                            <label class="form-label">Provident Fund (PF)</label>
+                                            <div class="amount-input-group">
+                                                <input type="number" class="form-control deduction" name="pf" 
+                                                       placeholder="0.00" step="0.01" value="0">
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Tax Deducted at Source (TDS)</label>
+                                            <div class="amount-input-group">
+                                                <input type="number" class="form-control deduction" name="tds" 
+                                                       placeholder="0.00" step="0.01" value="0">
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Other Deductions</label>
+                                            <div class="amount-input-group">
+                                                <input type="number" class="form-control deduction" name="otherDeductions" 
+                                                       placeholder="0.00" step="0.01" value="0">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Net Salary Display -->
+                                <div class="net-salary-display mb-4">
+                                    <div class="net-amount" id="netSalaryDisplay">₹0.00</div>
+                                    <p class="mb-0 opacity-90">Net Salary Payable</p>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-premium btn-lg" id="submitBtn">
+                                        <i class="fas fa-paper-plane me-2"></i>Credit Salary & Generate Slip
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const employeeSelect = document.getElementById('employeeSelect');
+    const employeeInfo = document.getElementById('employeeInfo');
+    const basicSalary = document.getElementById('basicSalary');
+    const netSalaryDisplay = document.getElementById('netSalaryDisplay');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Employee selection handler
+    employeeSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const salary = selectedOption.getAttribute('data-salary');
+        const name = selectedOption.text.split(' - ')[0];
+        const designation = selectedOption.getAttribute('data-designation');
+        const department = selectedOption.getAttribute('data-department');
+
+        if (this.value) {
+            employeeInfo.style.display = 'block';
+            document.getElementById('infoName').textContent = name;
+            document.getElementById('infoDesignation').textContent = designation;
+            document.getElementById('infoDepartment').textContent = department;
+            document.getElementById('infoSalary').textContent = '₹' + salary;
+            
+            // Auto-fill basic salary
+            basicSalary.value = salary;
+            calculateNetSalary();
+        } else {
+            employeeInfo.style.display = 'none';
+        }
+    });
+
+    // Calculate net salary
+    function calculateNetSalary() {
+        const basic = parseFloat(basicSalary.value) || 0;
+        const allowances = Array.from(document.querySelectorAll('.allowance'))
+            .reduce((sum, input) => sum + (parseFloat(input.value) || 0), 0);
+        const deductions = Array.from(document.querySelectorAll('.deduction'))
+            .reduce((sum, input) => sum + (parseFloat(input.value) || 0), 0);
+        
+        const netSalary = basic + allowances - deductions;
+        netSalaryDisplay.textContent = '₹' + netSalary.toLocaleString('en-IN', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    // Add event listeners for salary calculation
+    [basicSalary, ...document.querySelectorAll('.allowance'), ...document.querySelectorAll('.deduction')]
+        .forEach(input => {
+            input.addEventListener('input', calculateNetSalary);
+        });
+
+    // Form submission
+    document.getElementById('salaryForm').addEventListener('submit', function(e) {
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+        submitBtn.disabled = true;
+        
+        setTimeout(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }, 5000);
+    });
+
+    // Initial calculation
+    calculateNetSalary();
+});
+</script>

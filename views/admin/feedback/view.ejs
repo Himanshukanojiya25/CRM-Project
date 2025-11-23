@@ -1,0 +1,222 @@
+<%- include('../layouts/admin-base') %>
+
+<div class="p-6">
+    <!-- Header with Back Button -->
+    <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center space-x-4">
+            <a href="/admin/feedback" class="w-10 h-10 bg-gray-700/50 hover:bg-gray-600/50 border border-gray-600/50 rounded-xl flex items-center justify-center text-gray-300 transition-all duration-300">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="text-3xl font-bold text-white">Feedback Details</h1>
+                <p class="text-gray-400">View and manage individual feedback</p>
+            </div>
+        </div>
+        <div class="flex space-x-3">
+            <button class="bg-gray-700/50 hover:bg-gray-600/50 border border-gray-600/50 text-white px-6 py-2.5 rounded-xl font-medium transition-all duration-300">
+                <i class="fas fa-edit mr-2"></i>Edit
+            </button>
+            <button class="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 py-2.5 rounded-xl font-medium transition-all duration-300 transform hover:scale-105">
+                <i class="fas fa-reply mr-2"></i>Respond
+            </button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Feedback Card -->
+            <div class="bg-gray-800/30 backdrop-blur-xl rounded-2xl p-6 border border-gray-700/50">
+                <div class="flex items-start justify-between mb-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-14 h-14 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            JS
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-white">Login page loading too slow</h2>
+                            <p class="text-gray-400">Submitted by John Smith • 2 hours ago</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-500/20 text-red-400 border border-red-500/30">
+                            <i class="fas fa-bug mr-1"></i>Bug Report
+                        </span>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                            <i class="fas fa-clock mr-1"></i>Pending
+                        </span>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-white mb-3">Description</h3>
+                    <div class="bg-gray-700/30 rounded-xl p-4 border border-gray-600/30">
+                        <p class="text-gray-300 leading-relaxed">
+                            The login page is taking more than 10 seconds to load, which is causing frustration for users trying to access their accounts. 
+                            This issue started occurring after the last deployment. Users are reporting timeout errors and some are unable to login at all.
+                            
+                            Steps to reproduce:
+                            1. Go to login page
+                            2. Enter credentials
+                            3. Click login button
+                            4. Wait for 10+ seconds
+                            
+                            Expected behavior: Page should load within 2-3 seconds.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-gray-400 text-sm font-medium">Priority</label>
+                        <div class="flex items-center mt-1">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-500/20 text-red-400 border border-red-500/30">
+                                <i class="fas fa-exclamation-circle mr-1"></i>High
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-gray-400 text-sm font-medium">Rating</label>
+                        <div class="flex items-center mt-1">
+                            <div class="flex text-yellow-400 text-sm mr-2">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="text-white">4.2/5</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Response Section -->
+            <div class="bg-gray-800/30 backdrop-blur-xl rounded-2xl p-6 border border-gray-700/50">
+                <h3 class="text-xl font-semibold text-white mb-4">Response</h3>
+                
+                <!-- Previous Responses -->
+                <div class="space-y-4 mb-6">
+                    <div class="bg-gray-700/30 rounded-xl p-4 border border-gray-600/30">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                                    SA
+                                </div>
+                                <span class="text-white font-medium">Support Agent</span>
+                            </div>
+                            <span class="text-gray-400 text-sm">1 day ago</span>
+                        </div>
+                        <p class="text-gray-300">Thank you for reporting this issue. We're investigating the login performance problems and will deploy a fix soon.</p>
+                    </div>
+                </div>
+
+                <!-- Response Form -->
+                <form>
+                    <div class="mb-4">
+                        <label class="block text-gray-400 text-sm font-medium mb-2">Your Response</label>
+                        <textarea 
+                            rows="6" 
+                            class="w-full bg-gray-700/50 border border-gray-600/50 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent resize-none"
+                            placeholder="Type your response here..."
+                        ></textarea>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex space-x-3">
+                            <button type="button" class="flex items-center text-gray-400 hover:text-white transition-colors duration-300">
+                                <i class="fas fa-paperclip mr-2"></i>Attach File
+                            </button>
+                            <button type="button" class="flex items-center text-gray-400 hover:text-white transition-colors duration-300">
+                                <i class="fas fa-tag mr-2"></i>Add Template
+                            </button>
+                        </div>
+                        <div class="flex space-x-3">
+                            <button type="button" class="bg-gray-700/50 hover:bg-gray-600/50 border border-gray-600/50 text-white px-6 py-2.5 rounded-xl font-medium transition-all duration-300">
+                                Save Draft
+                            </button>
+                            <button type="submit" class="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 py-2.5 rounded-xl font-medium transition-all duration-300 transform hover:scale-105">
+                                <i class="fas fa-paper-plane mr-2"></i>Send Response
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Customer Info -->
+            <div class="bg-gray-800/30 backdrop-blur-xl rounded-2xl p-6 border border-gray-700/50">
+                <h3 class="text-lg font-semibold text-white mb-4">Customer Information</h3>
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-gray-400 text-sm">Name</label>
+                        <p class="text-white">John Smith</p>
+                    </div>
+                    <div>
+                        <label class="text-gray-400 text-sm">Email</label>
+                        <p class="text-white">john.smith@example.com</p>
+                    </div>
+                    <div>
+                        <label class="text-gray-400 text-sm">Company</label>
+                        <p class="text-white">Tech Solutions Inc.</p>
+                    </div>
+                    <div>
+                        <label class="text-gray-400 text-sm">Plan</label>
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                            Enterprise
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Timeline -->
+            <div class="bg-gray-800/30 backdrop-blur-xl rounded-2xl p-6 border border-gray-700/50">
+                <h3 class="text-lg font-semibold text-white mb-4">Activity Timeline</h3>
+                <div class="space-y-4">
+                    <div class="flex space-x-3">
+                        <div class="w-2 h-2 bg-cyan-500 rounded-full mt-2"></div>
+                        <div class="flex-1">
+                            <p class="text-white text-sm">Feedback submitted</p>
+                            <p class="text-gray-400 text-xs">2 hours ago</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-3">
+                        <div class="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                        <div class="flex-1">
+                            <p class="text-white text-sm">Assigned to support team</p>
+                            <p class="text-gray-400 text-xs">1 hour ago</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-3">
+                        <div class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                        <div class="flex-1">
+                            <p class="text-white text-sm">Initial response sent</p>
+                            <p class="text-gray-400 text-xs">1 day ago</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="bg-gray-800/30 backdrop-blur-xl rounded-2xl p-6 border border-gray-700/50">
+                <h3 class="text-lg font-semibold text-white mb-4">Quick Actions</h3>
+                <div class="space-y-3">
+                    <button class="w-full bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 text-green-400 px-4 py-2.5 rounded-xl text-left transition-all duration-300">
+                        <i class="fas fa-check-circle mr-2"></i>Mark as Resolved
+                    </button>
+                    <button class="w-full bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 px-4 py-2.5 rounded-xl text-left transition-all duration-300">
+                        <i class="fas fa-user mr-2"></i>Assign to Team
+                    </button>
+                    <button class="w-full bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-400 px-4 py-2.5 rounded-xl text-left transition-all duration-300">
+                        <i class="fas fa-tags mr-2"></i>Change Category
+                    </button>
+                    <button class="w-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 px-4 py-2.5 rounded-xl text-left transition-all duration-300">
+                        <i class="fas fa-archive mr-2"></i>Archive Feedback
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/admin/feedback/responses.js"></script>

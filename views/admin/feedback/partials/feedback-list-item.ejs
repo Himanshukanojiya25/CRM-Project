@@ -1,0 +1,180 @@
+<!-- Response Editor Component -->
+<div class="bg-gray-800/30 backdrop-blur-xl rounded-2xl p-6 border border-gray-700/50">
+    <h3 class="text-xl font-semibold text-white mb-4">Response Editor</h3>
+    
+    <!-- Template Selector -->
+    <div class="mb-6">
+        <label class="block text-gray-400 text-sm font-medium mb-2">Use Template</label>
+        <div class="flex space-x-3 overflow-x-auto pb-2">
+            <button class="bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 px-4 py-2 rounded-xl text-sm whitespace-nowrap transition-all duration-300">
+                Bug Acknowledgment
+            </button>
+            <button class="bg-gray-700/50 hover:bg-gray-600/50 border border-gray-600/50 text-gray-300 px-4 py-2 rounded-xl text-sm whitespace-nowrap transition-all duration-300">
+                Feature Request
+            </button>
+            <button class="bg-gray-700/50 hover:bg-gray-600/50 border border-gray-600/50 text-gray-300 px-4 py-2 rounded-xl text-sm whitespace-nowrap transition-all duration-300">
+                Positive Feedback
+            </button>
+            <button class="bg-gray-700/50 hover:bg-gray-600/50 border border-gray-600/50 text-gray-300 px-4 py-2 rounded-xl text-sm whitespace-nowrap transition-all duration-300">
+                Support Follow-up
+            </button>
+        </div>
+    </div>
+
+    <!-- Response Form -->
+    <form id="responseForm">
+        <div class="space-y-4">
+            <!-- Subject -->
+            <div>
+                <label class="block text-gray-400 text-sm font-medium mb-2">Subject</label>
+                <input 
+                    type="text" 
+                    class="w-full bg-gray-700/50 border border-gray-600/50 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent"
+                    placeholder="Response subject..."
+                    value="Re: <%= feedback.title %>"
+                >
+            </div>
+
+            <!-- Response Body -->
+            <div>
+                <label class="block text-gray-400 text-sm font-medium mb-2">Response</label>
+                <div class="border border-gray-600/50 rounded-xl overflow-hidden">
+                    <!-- Toolbar -->
+                    <div class="bg-gray-700/50 border-b border-gray-600/50 px-4 py-2 flex items-center space-x-4">
+                        <div class="flex space-x-2">
+                            <button type="button" class="w-8 h-8 hover:bg-gray-600/50 rounded flex items-center justify-center text-gray-300 transition-colors duration-300">
+                                <i class="fas fa-bold"></i>
+                            </button>
+                            <button type="button" class="w-8 h-8 hover:bg-gray-600/50 rounded flex items-center justify-center text-gray-300 transition-colors duration-300">
+                                <i class="fas fa-italic"></i>
+                            </button>
+                            <button type="button" class="w-8 h-8 hover:bg-gray-600/50 rounded flex items-center justify-center text-gray-300 transition-colors duration-300">
+                                <i class="fas fa-underline"></i>
+                            </button>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button type="button" class="w-8 h-8 hover:bg-gray-600/50 rounded flex items-center justify-center text-gray-300 transition-colors duration-300">
+                                <i class="fas fa-list-ul"></i>
+                            </button>
+                            <button type="button" class="w-8 h-8 hover:bg-gray-600/50 rounded flex items-center justify-center text-gray-300 transition-colors duration-300">
+                                <i class="fas fa-list-ol"></i>
+                            </button>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button type="button" class="w-8 h-8 hover:bg-gray-600/50 rounded flex items-center justify-center text-gray-300 transition-colors duration-300">
+                                <i class="fas fa-link"></i>
+                            </button>
+                            <button type="button" class="w-8 h-8 hover:bg-gray-600/50 rounded flex items-center justify-center text-gray-300 transition-colors duration-300">
+                                <i class="fas fa-image"></i>
+                            </button>
+                            <button type="button" class="w-8 h-8 hover:bg-gray-600/50 rounded flex items-center justify-center text-gray-300 transition-colors duration-300">
+                                <i class="fas fa-paperclip"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Textarea -->
+                    <textarea 
+                        rows="8"
+                        class="w-full bg-gray-700/50 border-0 px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-0 resize-none"
+                        placeholder="Type your response here... You can use templates or write a custom response."
+                    ></textarea>
+                </div>
+            </div>
+
+            <!-- Response Settings -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Status Update -->
+                <div>
+                    <label class="block text-gray-400 text-sm font-medium mb-2">Update Status</label>
+                    <select class="w-full bg-gray-700/50 border border-gray-600/50 rounded-xl px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50">
+                        <option value="in-progress">In Progress</option>
+                        <option value="responded">Responded</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="closed">Closed</option>
+                    </select>
+                </div>
+
+                <!-- Assign To -->
+                <div>
+                    <label class="block text-gray-400 text-sm font-medium mb-2">Assign To</label>
+                    <select class="w-full bg-gray-700/50 border border-gray-600/50 rounded-xl px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50">
+                        <option value="">Keep Current</option>
+                        <option value="sarah">Sarah Johnson</option>
+                        <option value="mike">Mike Chen</option>
+                        <option value="emily">Emily Parker</option>
+                        <option value="david">David Rodriguez</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Additional Options -->
+            <div class="bg-gray-700/30 rounded-xl p-4 border border-gray-600/30">
+                <h4 class="text-gray-300 text-sm font-medium mb-3">Additional Options</h4>
+                <div class="space-y-3">
+                    <label class="flex items-center">
+                        <input type="checkbox" class="rounded bg-gray-600 border-gray-500 text-cyan-500 focus:ring-cyan-500/50">
+                        <span class="ml-3 text-gray-300 text-sm">Send email notification to customer</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" class="rounded bg-gray-600 border-gray-500 text-cyan-500 focus:ring-cyan-500/50" checked>
+                        <span class="ml-3 text-gray-300 text-sm">Add to customer communication history</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" class="rounded bg-gray-600 border-gray-500 text-cyan-500 focus:ring-cyan-500/50">
+                        <span class="ml-3 text-gray-300 text-sm">Request customer feedback on response</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-between items-center mt-6 pt-6 border-t border-gray-700/50">
+            <div class="flex space-x-3">
+                <button type="button" class="flex items-center text-gray-400 hover:text-white transition-colors duration-300">
+                    <i class="fas fa-save mr-2"></i>Save Draft
+                </button>
+                <button type="button" class="flex items-center text-gray-400 hover:text-white transition-colors duration-300">
+                    <i class="fas fa-eye mr-2"></i>Preview
+                </button>
+            </div>
+            <div class="flex space-x-3">
+                <button type="button" class="bg-gray-700/50 hover:bg-gray-600/50 border border-gray-600/50 text-white px-6 py-2.5 rounded-xl font-medium transition-all duration-300">
+                    Cancel
+                </button>
+                <button type="submit" class="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 py-2.5 rounded-xl font-medium transition-all duration-300 transform hover:scale-105">
+                    <i class="fas fa-paper-plane mr-2"></i>Send Response
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+document.getElementById('responseForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Show loading state
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Sending...';
+    submitBtn.disabled = true;
+    
+    // Simulate API call
+    setTimeout(() => {
+        // Show success message
+        if (window.feedbackManager) {
+            window.feedbackManager.showNotification('Response sent successfully!', 'success');
+        }
+        
+        // Reset button
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        
+        // Close modal or redirect
+        setTimeout(() => {
+            window.location.reload();
+        }, 1500);
+    }, 2000);
+});
+</script>

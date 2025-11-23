@@ -1,0 +1,308 @@
+<% layout = 'layouts/admin-base' %>
+<%
+pageTitle = 'Salary Management Dashboard';
+%>
+
+<style>
+.salary-dashboard {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.stat-card {
+    background: rgba(255,255,255,0.95);
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.stat-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+}
+
+.stat-value {
+    font-size: 3rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: #6c757d;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.stat-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: white;
+    font-size: 2rem;
+}
+
+.quick-action-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    height: 100%;
+}
+
+.quick-action-card:hover {
+    border-color: #667eea;
+    transform: translateY(-5px);
+    box-shadow: 0 25px 50px rgba(102, 126, 234, 0.2);
+}
+
+.action-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: white;
+    font-size: 1.8rem;
+}
+
+.btn-premium {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 50px;
+    padding: 1rem 2rem;
+    font-weight: 600;
+    color: white;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-premium:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+
+.recent-transactions {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+.transaction-item {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+.transaction-item:hover {
+    background: #f8f9fa;
+    border-radius: 15px;
+}
+
+.transaction-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 1rem;
+}
+
+.badge-success {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.page-header {
+    background: rgba(255,255,255,0.95);
+    border-radius: 25px;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+}
+</style>
+
+<div class="salary-dashboard">
+    <div class="container">
+        <!-- Header -->
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-5 fw-bold text-dark mb-2">Salary Management Dashboard</h1>
+                    <p class="text-muted fs-5 mb-0">Manage employee salaries and payments efficiently</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <a href="/admin/salary/credit" class="btn btn-premium btn-lg">
+                        <i class="fas fa-plus-circle me-2"></i>Credit Salary
+                    </a>
+                    <a href="/admin/salary/history" class="btn btn-outline-primary btn-lg ms-2">
+                        <i class="fas fa-history me-2"></i>View History
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row g-4 mb-5">
+            <div class="col-xl-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div class="stat-value">₹<%= totalPaid || '0' %></div>
+                    <div class="stat-label">Total Paid This Month</div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-value"><%= employeesPaid || 0 %></div>
+                    <div class="stat-label">Employees Paid</div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-value"><%= pendingSalaries || 0 %></div>
+                    <div class="stat-label">Pending Salaries</div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="stat-value"><%= completionRate || 0 %>%</div>
+                    <div class="stat-label">Completion Rate</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions & Recent Transactions -->
+        <div class="row g-4">
+            <!-- Quick Actions -->
+            <div class="col-lg-4">
+                <div class="quick-action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Quick Salary</h4>
+                    <p class="text-muted mb-4">Credit salary to employees quickly</p>
+                    <a href="/admin/salary/credit" class="btn btn-premium w-100">
+                        <i class="fas fa-bolt me-2"></i>Credit Salary
+                    </a>
+                </div>
+
+                <div class="quick-action-card mt-4">
+                    <div class="action-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Generate Reports</h4>
+                    <p class="text-muted mb-4">Create salary reports and analytics</p>
+                    <a href="/admin/salary/reports" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-chart-bar me-2"></i>View Reports
+                    </a>
+                </div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="col-lg-8">
+                <div class="recent-transactions">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="fw-bold mb-0">Recent Salary Transactions</h3>
+                        <a href="/admin/salary/history" class="btn btn-sm btn-outline-primary">View All</a>
+                    </div>
+                    
+                    <% if (recentTransactions && recentTransactions.length > 0) { %>
+                        <% recentTransactions.forEach(transaction => { %>
+                            <div class="transaction-item">
+                                <img src="<%= transaction.employee?.profilePhoto || '/images/default-avatar.png' %>" 
+                                     alt="<%= transaction.employee?.name %>" 
+                                     class="transaction-avatar"
+                                     onerror="this.src='/images/default-avatar.png'">
+                                <div class="flex-grow-1">
+                                    <h6 class="fw-bold mb-1"><%= transaction.employee?.name || 'Unknown Employee' %></h6>
+                                    <p class="text-muted mb-0 small">
+                                        <%= transaction.monthYear %> • <%= transaction.employee?.designation || 'Employee' %>
+                                    </p>
+                                </div>
+                                <div class="text-end">
+                                    <h6 class="fw-bold text-success mb-1">₹<%= transaction.netSalary %></h6>
+                                    <span class="badge-success">
+                                        <i class="fas fa-check me-1"></i>Paid
+                                    </span>
+                                </div>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="text-center py-5">
+                            <i class="fas fa-money-bill-wave fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No recent transactions</h5>
+                            <p class="text-muted">Start by crediting salaries to employees</p>
+                            <a href="/admin/salary/credit" class="btn btn-premium">Credit First Salary</a>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.stat-card, .quick-action-card');
+    
+    cards.forEach((card, index) => {
+        card.style.animation = `fadeInUp 0.6s ease-out ${index * 0.1}s both`;
+    });
+
+    // Add CSS animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>

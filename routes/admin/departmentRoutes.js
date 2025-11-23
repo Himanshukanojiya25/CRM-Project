@@ -3,6 +3,18 @@ const router = express.Router();
 
 // Temporary simple controller
 const departmentController = {
+  // ✅ NEW: EJS PAGE RENDER
+  renderDepartmentPage: async (req, res) => {
+    try {
+      res.render('admin/department/list', { 
+        pageTitle: 'Department Management'
+      });
+    } catch (error) {
+      console.error('Render error:', error);
+      res.status(500).render('error', { message: 'Page load failed' });
+    }
+  },
+
   getAllDepartments: async (req, res) => {
     try {
       const Department = require('../../models/Department');
@@ -84,12 +96,15 @@ const departmentController = {
   }
 };
 
-// Routes
-router.get('/', departmentController.getAllDepartments);
-router.get('/:id', departmentController.getDepartmentById);
-router.get('/:id/analytics', departmentController.getDepartmentAnalytics);
-router.post('/', departmentController.createDepartment);
-router.put('/:id', departmentController.updateDepartment);
-router.delete('/:id', departmentController.deleteDepartment);
+// ✅ IMPORTANT: EJS RENDER ROUTE MUST COME FIRST
+router.get('/', departmentController.renderDepartmentPage);
+
+// API Routes
+router.get('/api', departmentController.getAllDepartments);
+router.get('/api/:id', departmentController.getDepartmentById);
+router.get('/api/:id/analytics', departmentController.getDepartmentAnalytics);
+router.post('/api', departmentController.createDepartment);
+router.put('/api/:id', departmentController.updateDepartment);
+router.delete('/api/:id', departmentController.deleteDepartment);
 
 module.exports = router;

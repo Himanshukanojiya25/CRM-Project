@@ -19,18 +19,96 @@ class PremiumDepartmentManager {
         this.viewMode = 'table';
         this.isLoading = false;
         
+        // Bind methods to ensure proper 'this' context
+        this.renderPagination = this.renderPagination.bind(this);
+        this.loadDepartments = this.loadDepartments.bind(this);
+        this.goToPage = this.goToPage.bind(this);
+        
         this.init();
+    }
+
+    // ===== PAGINATION =====
+    renderPagination() {
+        const pagination = document.getElementById('pagination');
+        const showingStart = document.getElementById('showingStart');
+        const showingEnd = document.getElementById('showingEnd');
+        const totalItems = document.getElementById('totalItems');
+
+        if (!pagination) {
+            console.warn('Pagination element not found');
+            return;
+        }
+
+        const start = (this.currentPage - 1) * this.limit + 1;
+        const end = Math.min(this.currentPage * this.limit, this.totalPages * this.limit);
+
+        if (showingStart) showingStart.textContent = start;
+        if (showingEnd) showingEnd.textContent = end;
+        if (totalItems) totalItems.textContent = this.totalPages * this.limit;
+
+        let html = '';
+
+        // Previous button
+        if (this.currentPage > 1) {
+            html += `
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="premiumManager.goToPage(${this.currentPage - 1}); return false;">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+            `;
+        }
+
+        // Page numbers
+        for (let i = 1; i <= this.totalPages; i++) {
+            if (i === 1 || i === this.totalPages || (i >= this.currentPage - 1 && i <= this.currentPage + 1)) {
+                html += `
+                    <li class="page-item ${i === this.currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="premiumManager.goToPage(${i}); return false;">${i}</a>
+                    </li>
+                `;
+            } else if (i === this.currentPage - 2 || i === this.currentPage + 2) {
+                html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+            }
+        }
+
+        // Next button
+        if (this.currentPage < this.totalPages) {
+            html += `
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="premiumManager.goToPage(${this.currentPage + 1}); return false;">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+            `;
+        }
+
+        pagination.innerHTML = html;
+    }
+
+    goToPage(page) {
+        if (page < 1 || page > this.totalPages || page === this.currentPage) return;
+        
+        this.currentPage = page;
+        this.loadDepartments();
+        
+        // Smooth scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     // ===== INITIALIZATION =====
     async init() {
-        await this.loadDepartments();
-        this.setupEventListeners();
-        this.setupRealTimeUpdates();
-        this.setupKeyboardShortcuts();
-        this.initializeAnimations();
-        
-        console.log('🚀 Premium Department Manager Initialized');
+        try {
+            await this.loadDepartments();
+            this.setupEventListeners();
+            this.setupRealTimeUpdates();
+            this.setupKeyboardShortcuts();
+            this.initializeAnimations();
+            
+            console.log('🚀 Premium Department Manager Initialized');
+        } catch (error) {
+            console.error('Initialization error:', error);
+        }
     }
 
     // ===== EVENT LISTENERS =====
@@ -210,7 +288,7 @@ class PremiumDepartmentManager {
                 this.totalPages = result.pagination.pages;
                 
                 this.renderDepartments();
-                this.renderPagination();
+                this.renderPagination(); // This should work now
                 this.updateStats(result.statistics);
                 this.updateFilters(result.filters);
                 
@@ -248,7 +326,7 @@ class PremiumDepartmentManager {
             return;
         }
 
-        emptyState.style.display = 'none';
+        if (emptyState) emptyState.style.display = 'none';
 
         if (this.viewMode === 'table') {
             this.renderTableView(tableView);
@@ -260,6 +338,8 @@ class PremiumDepartmentManager {
     }
 
     renderTableView(container) {
+        if (!container) return;
+        
         container.innerHTML = this.departments.map(dept => `
             <tr class="department-row animate-in" data-dept-id="${dept._id}">
                 <td>
@@ -341,6 +421,8 @@ class PremiumDepartmentManager {
     }
 
     renderGridView(container) {
+        if (!container) return;
+        
         container.innerHTML = this.departments.map(dept => `
             <div class="col-xl-4 col-lg-6 mb-4">
                 <div class="department-card" data-dept-id="${dept._id}">
@@ -501,84 +583,18 @@ class PremiumDepartmentManager {
         const gridBtn = document.querySelector('[data-view-mode="grid"]');
 
         if (mode === 'table') {
-            tableView.style.display = 'block';
-            gridView.style.display = 'none';
+            if (tableView) tableView.style.display = 'block';
+            if (gridView) gridView.style.display = 'none';
             tableBtn?.classList.add('active');
             gridBtn?.classList.remove('active');
         } else {
-            tableView.style.display = 'none';
-            gridView.style.display = 'block';
+            if (tableView) tableView.style.display = 'none';
+            if (gridView) gridView.style.display = 'block';
             tableBtn?.classList.remove('active');
             gridBtn?.classList.add('active');
         }
 
         this.renderDepartments();
-    }
-
-    // ===== PAGINATION =====
-    renderPagination() {
-        const pagination = document.getElementById('pagination');
-        const showingStart = document.getElementById('showingStart');
-        const showingEnd = document.getElementById('showingEnd');
-        const totalItems = document.getElementById('totalItems');
-
-        if (!pagination) return;
-
-        const start = (this.currentPage - 1) * this.limit + 1;
-        const end = Math.min(this.currentPage * this.limit, this.totalPages * this.limit);
-
-        if (showingStart) showingStart.textContent = start;
-        if (showingEnd) showingEnd.textContent = end;
-        if (totalItems) totalItems.textContent = this.totalPages * this.limit;
-
-        let html = '';
-
-        // Previous button
-        if (this.currentPage > 1) {
-            html += `
-                <li class="page-item">
-                    <a class="page-link" href="#" onclick="premiumManager.goToPage(${this.currentPage - 1}); return false;">
-                        <i class="fas fa-chevron-left"></i>
-                    </a>
-                </li>
-            `;
-        }
-
-        // Page numbers
-        for (let i = 1; i <= this.totalPages; i++) {
-            if (i === 1 || i === this.totalPages || (i >= this.currentPage - 1 && i <= this.currentPage + 1)) {
-                html += `
-                    <li class="page-item ${i === this.currentPage ? 'active' : ''}">
-                        <a class="page-link" href="#" onclick="premiumManager.goToPage(${i}); return false;">${i}</a>
-                    </li>
-                `;
-            } else if (i === this.currentPage - 2 || i === this.currentPage + 2) {
-                html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
-            }
-        }
-
-        // Next button
-        if (this.currentPage < this.totalPages) {
-            html += `
-                <li class="page-item">
-                    <a class="page-link" href="#" onclick="premiumManager.goToPage(${this.currentPage + 1}); return false;">
-                        <i class="fas fa-chevron-right"></i>
-                    </a>
-                </li>
-            `;
-        }
-
-        pagination.innerHTML = html;
-    }
-
-    goToPage(page) {
-        if (page < 1 || page > this.totalPages || page === this.currentPage) return;
-        
-        this.currentPage = page;
-        this.loadDepartments();
-        
-        // Smooth scroll to top
-        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     // ===== DEPARTMENT ACTIONS =====
@@ -908,16 +924,20 @@ class PremiumDepartmentManager {
 let premiumManager;
 
 document.addEventListener('DOMContentLoaded', function() {
-    premiumManager = new PremiumDepartmentManager();
-    window.premiumManager = premiumManager;
-    
-    // Additional global event listeners
-    document.addEventListener('visibilitychange', function() {
-        if (!document.hidden) {
-            // Reload data when tab becomes visible
-            premiumManager.loadDepartments();
-        }
-    });
+    try {
+        premiumManager = new PremiumDepartmentManager();
+        window.premiumManager = premiumManager;
+        
+        // Additional global event listeners
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                // Reload data when tab becomes visible
+                premiumManager.loadDepartments();
+            }
+        });
+    } catch (error) {
+        console.error('Failed to initialize Premium Department Manager:', error);
+    }
 });
 
 // Global utility functions
