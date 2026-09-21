@@ -1,0 +1,603 @@
+# File Tree: crm-project
+
+**Generated:** 3/12/2026, 7:32:02 PM
+**Root Path:** `c:\Users\ASUS\OneDrive\Desktop\crm-project`
+
+```
+├── 📁 config
+│   ├── 📄 db.js
+│   ├── 📄 dev.js
+│   ├── 📄 email.js
+│   ├── 📄 multer.js
+│   ├── 📄 passport.js
+│   ├── 📄 prod.js
+│   ├── 📄 roles.js
+│   └── 📄 swagger.js
+├── 📁 controllers
+│   ├── 📁 admin
+│   │   ├── 📁 feedback
+│   │   ├── 📁 performance
+│   │   │   ├── 📁 customer
+│   │   │   │   ├── 📄 customerAnalyticsController.js
+│   │   │   │   └── 📄 healthScoreController.js
+│   │   │   ├── 📁 forecasting
+│   │   │   │   ├── 📄 forecastingController.js
+│   │   │   │   └── 📄 predictiveAnalyticsController.js
+│   │   │   ├── 📁 marketing
+│   │   │   │   ├── 📄 campaignAnalyticsController.js
+│   │   │   │   └── 📄 marketingPerformanceController.js
+│   │   │   ├── 📁 pipeline
+│   │   │   │   ├── 📄 dealAgingController.js
+│   │   │   │   ├── 📄 pipelineController.js
+│   │   │   │   └── 📄 stageAnalysisController.js
+│   │   │   ├── 📁 revenue
+│   │   │   │   ├── 📄 retentionController.js
+│   │   │   │   ├── 📄 revenueController.js
+│   │   │   │   └── 📄 segmentationController.js
+│   │   │   ├── 📁 sales
+│   │   │   │   ├── 📄 individualPerformanceController.js
+│   │   │   │   ├── 📄 leaderboardController.js
+│   │   │   │   └── 📄 salesPerformanceController.js
+│   │   │   ├── 📁 support
+│   │   │   │   ├── 📄 supportPerformanceController.js
+│   │   │   │   └── 📄 ticketAnalyticsController.js
+│   │   │   ├── 📁 utils
+│   │   │   │   ├── 📄 dataProcessor.js
+│   │   │   │   └── 📄 performanceCalculator.js
+│   │   │   └── 📄 dashboardController.js
+│   │   ├── 📄 attendanceController.js
+│   │   ├── 📄 dashboardController.js
+│   │   ├── 📄 departmentAnalyticsController.js
+│   │   ├── 📄 departmentBudgetController.js
+│   │   ├── 📄 departmentController.js
+│   │   ├── 📄 departmentHierarchyController.js
+│   │   ├── 📄 departmentReportsController.js
+│   │   ├── 📄 employeeController.js
+│   │   ├── 📄 feedbackController.js
+│   │   ├── 📄 leavesController.js
+│   │   └── 📄 performanceController.js
+│   ├── 📁 test
+│   │   └── 📄 testController.js
+│   ├── 📁 user
+│   │   ├── 📄 attendanceController.js
+│   │   ├── 📄 dashboardController.js
+│   │   ├── 📄 draftController.js
+│   │   ├── 📄 feedbackController.js
+│   │   ├── 📄 leavesController.js
+│   │   ├── 📄 notificationController.js
+│   │   ├── 📄 profileController.js
+│   │   └── 📄 userController.js
+│   └── 📄 authController.js
+├── 📁 middlewares
+│   ├── 📁 feedback
+│   │   └── 📄 feedbackMiddleware.js
+│   ├── 📁 performance
+│   │   ├── 📄 accessControl.js
+│   │   ├── 📄 dataValidation.js
+│   │   └── 📄 performanceAuth.js
+│   ├── 📁 validation
+│   │   └── 📄 departmentValidation.js
+│   ├── 📄 authMiddleware.js
+│   ├── 📄 departmentMiddleware.js
+│   └── 📄 roleMiddleware.js
+├── 📁 models
+│   ├── 📁 feedback
+│   │   ├── 📄 Feedback.js
+│   │   ├── 📄 FeedbackAnalytics.js
+│   │   ├── 📄 FeedbackAssignment.js
+│   │   ├── 📄 FeedbackCategory.js
+│   │   ├── 📄 FeedbackResponse.js
+│   │   ├── 📄 FeedbackStatus.js
+│   │   └── 📄 FeedbackTemplate.js
+│   ├── 📁 migrations
+│   │   └── 📄 20241219120000-create-salary-slips-table.js
+│   ├── 📁 performance
+│   │   ├── 📄 Customer.js
+│   │   ├── 📄 Lead.js
+│   │   ├── 📄 PerformanceMetric.js
+│   │   ├── 📄 Revenue.js
+│   │   ├── 📄 SalesActivity.js
+│   │   ├── 📄 SalesDeal.js
+│   │   ├── 📄 SalesTarget.js
+│   │   ├── 📄 SupportTicket.js
+│   │   └── 📄 index.js
+│   ├── 📄 Announcement.js
+│   ├── 📄 Attendance.js
+│   ├── 📄 Department.js
+│   ├── 📄 DepartmentAssets.js
+│   ├── 📄 DepartmentBudget.js
+│   ├── 📄 DepartmentHierarchy.js
+│   ├── 📄 DepartmentPerformance.js
+│   ├── 📄 Draft.js
+│   ├── 📄 Employee.js
+│   ├── 📄 Feedback.js
+│   ├── 📄 Holiday.js
+│   ├── 📄 Leave.js
+│   ├── 📄 Notification.js
+│   ├── 📄 Performance.js
+│   ├── 📄 RegularizationRequest.js
+│   ├── 📄 SalarySlip.js
+│   ├── 📄 Shift.js
+│   └── 📄 User.js
+├── 📁 public
+│   ├── 📁 admin
+│   │   ├── 📁 css
+│   │   │   └── 🎨 employees.css
+│   │   ├── 📁 images
+│   │   └── 📁 js
+│   │       └── 📄 employees.js
+│   ├── 📁 css
+│   │   ├── 📁 admin
+│   │   │   ├── 🎨 attendance.css
+│   │   │   └── 🎨 feedback.css
+│   │   ├── 📁 department
+│   │   │   ├── 🎨 analytics.css
+│   │   │   └── 🎨 department-main.css
+│   │   ├── 📁 performance
+│   │   │   ├── 📁 components
+│   │   │   │   ├── 🎨 filters.css
+│   │   │   │   ├── 🎨 kpi-cards.css
+│   │   │   │   └── 🎨 tables.css
+│   │   │   ├── 🎨 charts.css
+│   │   │   ├── 🎨 dashboard.css
+│   │   │   └── 🎨 performance-main.css
+│   │   ├── 🎨 admin-attendance.css
+│   │   ├── 🎨 animations.css
+│   │   ├── 🎨 attendance-calendar.css
+│   │   ├── 🎨 attendance-reports.css
+│   │   ├── 🎨 attendance.css
+│   │   ├── 🎨 auth.css
+│   │   ├── 🎨 charts.css
+│   │   ├── 🎨 dashboard.css
+│   │   ├── 🎨 employees.css
+│   │   └── 🎨 style.css
+│   ├── 📁 images
+│   │   ├── 📁 attendance-icons
+│   │   │   ├── 🖼️ absent.png
+│   │   │   ├── 🖼️ half-day.png
+│   │   │   ├── 🖼️ leave.png
+│   │   │   └── 🖼️ present.png
+│   │   ├── 📁 performance
+│   │   │   ├── 📁 badges
+│   │   │   │   ├── 🖼️ deal-closer.png
+│   │   │   │   ├── 🖼️ revenue-achiever.png
+│   │   │   │   └── 🖼️ top-performer.png
+│   │   │   └── 📁 icons
+│   │   │       ├── 🖼️ conversion-icon.png
+│   │   │       ├── 🖼️ deals-icon.png
+│   │   │       ├── 🖼️ revenue-icon.png
+│   │   │       └── 🖼️ trophy-icon.png
+│   │   ├── 🖼️ default-avatar.png
+│   │   └── 🖼️ logo.jpg
+│   ├── 📁 js
+│   │   ├── 📁 admin
+│   │   │   ├── 📁 feedback
+│   │   │   │   ├── 📄 analytics.js
+│   │   │   │   ├── 📄 assignments.js
+│   │   │   │   ├── 📄 filters.js
+│   │   │   │   ├── 📄 main.js
+│   │   │   │   └── 📄 responses.js
+│   │   │   ├── 📄 attendance-analytics.js
+│   │   │   ├── 📄 attendance-dashboard.js
+│   │   │   ├── 📄 attendance-reports.js
+│   │   │   └── 📄 salary.js
+│   │   ├── 📁 animations
+│   │   │   └── 📄 gsapAnimations.js
+│   │   ├── 📁 charts
+│   │   │   └── 📄 performanceChart.js
+│   │   ├── 📁 department
+│   │   │   ├── 📄 analytics-charts.js
+│   │   │   ├── 📄 charts.js
+│   │   │   ├── 📄 department-main.js
+│   │   │   ├── 📄 export.js
+│   │   │   └── 📄 org-chart.js
+│   │   ├── 📁 performance
+│   │   │   ├── 📁 charts
+│   │   │   │   ├── 📄 chart-loader.js
+│   │   │   │   ├── 📄 funnel-chart.js
+│   │   │   │   ├── 📄 revenue-chart.js
+│   │   │   │   └── 📄 trend-chart.js
+│   │   │   ├── 📁 components
+│   │   │   │   ├── 📄 filters.js
+│   │   │   │   ├── 📄 gamification.js
+│   │   │   │   └── 📄 real-time-updates.js
+│   │   │   ├── 📁 utils
+│   │   │   │   ├── 📄 data-fetcher.js
+│   │   │   │   ├── 📄 date-handler.js
+│   │   │   │   └── 📄 export-utils.js
+│   │   │   ├── 📄 dashboard.js
+│   │   │   └── 📄 performance-main.js
+│   │   ├── 📄 admin-attendance.js
+│   │   ├── 📄 attendance-calendar.js
+│   │   ├── 📄 attendance-reports.js
+│   │   ├── 📄 attendance.js
+│   │   ├── 📄 auth.js
+│   │   ├── 📄 bulk-upload.js
+│   │   ├── 📄 dashboard.js
+│   │   ├── 📄 real-time-attendance.js
+│   │   └── 📄 sidebar.js
+│   ├── 📁 uploads
+│   │   ├── 📁 covers
+│   │   │   └── 🖼️ cover-68ab8541c8b011739ddb5efc-1759616171250-202466571.jpg
+│   │   ├── 📁 documents
+│   │   │   └── 🖼️ doc-68ab8541c8b011739ddb5efc-1759619112729-813201495.jpg
+│   │   ├── 📁 feedback
+│   │   │   ├── 📁 attachments
+│   │   │   └── 📁 screenshots
+│   │   │       ├── 🖼️ screenshots-1759687878020-251057508.jpg
+│   │   │       ├── 🖼️ screenshots-1759691690363-4672569.png
+│   │   │       ├── 🖼️ screenshots-1759696113909-644337003.jpg
+│   │   │       ├── 🖼️ screenshots-1759951688913-233094222.png
+│   │   │       └── 🖼️ screenshots-1767959563741-724921342.png
+│   │   ├── 📁 profiles
+│   │   │   ├── 🖼️ profile-68ab8541c8b011739ddb5efc-1759688795078-137046916.jpg
+│   │   │   ├── 🖼️ profile-68b2ddd03a1dd489d4beba53-1760127114184-858999466.jpg
+│   │   │   └── 🖼️ profile-68e16b7a2e9d237b65fae3f0-1760435769253-883245526.png
+│   │   └── 📁 salary-slips
+│   └── 📁 user
+│       ├── 📁 css
+│       │   ├── 🎨 dashboard.css
+│       │   ├── 🎨 feedback.css
+│       │   ├── 🎨 profile.css
+│       │   ├── 🎨 rich-text.css
+│       │   └── 🎨 style.css
+│       ├── 📁 images
+│       │   └── 🖼️ logo.jpg
+│       ├── 📁 js
+│       │   ├── 📄 attendance.js
+│       │   ├── 📄 auth.js
+│       │   ├── 📄 dashboard.js
+│       │   ├── 📄 feedback-drafts.js
+│       │   ├── 📄 feedback-history.js
+│       │   ├── 📄 feedback.js
+│       │   ├── 📄 profile.js
+│       │   └── 📄 utils.js
+│       ├── 🎨 salary.css
+│       └── 📄 salary.js
+├── 📁 routes
+│   ├── 📁 admin
+│   │   ├── 📁 feedback
+│   │   │   ├── 📄 analyticsRoutes.js
+│   │   │   ├── 📄 assignmentRoutes.js
+│   │   │   ├── 📄 feedbackRoutes.js
+│   │   │   └── 📄 templatesRoutes.js
+│   │   ├── 📁 performance
+│   │   │   ├── 📁 customer
+│   │   │   │   ├── 📄 customerAnalyticsRoutes.js
+│   │   │   │   └── 📄 healthScoreRoutes.js
+│   │   │   ├── 📁 forecasting
+│   │   │   │   ├── 📄 forecastingRoutes.js
+│   │   │   │   └── 📄 predictiveAnalyticsRoutes.js
+│   │   │   ├── 📁 marketing
+│   │   │   │   ├── 📄 campaignAnalyticsRoutes.js
+│   │   │   │   └── 📄 marketingPerformanceRoutes.js
+│   │   │   ├── 📁 pipeline
+│   │   │   │   ├── 📄 dealAgingRoutes.js
+│   │   │   │   ├── 📄 pipelineRoutes.js
+│   │   │   │   └── 📄 stageAnalysisRoutes.js
+│   │   │   ├── 📁 revenue
+│   │   │   │   ├── 📄 retentionRoutes.js
+│   │   │   │   ├── 📄 revenueRoutes.js
+│   │   │   │   └── 📄 segmentationRoutes.js
+│   │   │   ├── 📁 sales
+│   │   │   │   ├── 📄 individualPerformanceRoutes.js
+│   │   │   │   ├── 📄 leaderboardRoutes.js
+│   │   │   │   └── 📄 salesPerformanceRoutes.js
+│   │   │   ├── 📁 support
+│   │   │   │   ├── 📄 supportPerformanceRoutes.js
+│   │   │   │   └── 📄 ticketAnalyticsRoutes.js
+│   │   │   ├── 📄 dashboardRoutes.js
+│   │   │   └── 📄 index.js
+│   │   ├── 📄 attendanceRoutes.js
+│   │   ├── 📄 dashboardRoutes.js
+│   │   ├── 📄 departmentAnalyticsRoutes.js
+│   │   ├── 📄 departmentBudgetRoutes.js
+│   │   ├── 📄 departmentHierarchyRoutes.js
+│   │   ├── 📄 departmentOverviewRoutes.js
+│   │   ├── 📄 departmentReportsRoutes.js
+│   │   ├── 📄 departmentRoutes.js
+│   │   ├── 📄 employeeRoutes.js
+│   │   ├── 📄 feedbackRoutes.js
+│   │   ├── 📄 leavesRoutes.js
+│   │   └── 📄 salary.js
+│   ├── 📁 user
+│   │   ├── 📄 attendanceRoutes.js
+│   │   ├── 📄 dashboardRoutes.js
+│   │   ├── 📄 feedbackRoutes.js
+│   │   ├── 📄 leavesRoutes.js
+│   │   ├── 📄 profileRoutes.js
+│   │   └── 📄 salary.js
+│   ├── 📄 authRoutes.js
+│   ├── 📄 testEmail.js
+│   └── 📄 testRoutes.js
+├── 📁 seeders
+│   ├── 📄 seed.js
+│   ├── 📄 seedDepartments.js
+│   └── 📄 seedUsers.js
+├── 📁 services
+│   ├── 📁 admin
+│   │   ├── 📁 feedback
+│   │   │   ├── 📄 analyticsService.js
+│   │   │   ├── 📄 assignmentService.js
+│   │   │   ├── 📄 feedbackService.js
+│   │   │   ├── 📄 notificationService.js
+│   │   │   └── 📄 templateService.js
+│   │   ├── 📁 performance
+│   │   │   ├── 📁 customer
+│   │   │   │   ├── 📄 customerAnalyticsService.js
+│   │   │   │   ├── 📄 healthScoreService.js
+│   │   │   │   └── 📄 lifetimeValueService.js
+│   │   │   ├── 📁 export
+│   │   │   │   ├── 📄 dataExporter.js
+│   │   │   │   ├── 📄 pdfReportService.js
+│   │   │   │   └── 📄 reportGenerator.js
+│   │   │   ├── 📁 forecasting
+│   │   │   │   ├── 📄 dealWinProbabilityService.js
+│   │   │   │   ├── 📄 predictiveEngine.js
+│   │   │   │   ├── 📄 salesForecastService.js
+│   │   │   │   └── 📄 trendAnalyzer.js
+│   │   │   ├── 📁 integration
+│   │   │   │   ├── 📄 dataSyncService.js
+│   │   │   │   └── 📄 externalAPIService.js
+│   │   │   ├── 📁 marketing
+│   │   │   │   ├── 📄 campaignAnalyticsService.js
+│   │   │   │   ├── 📄 leadSourceService.js
+│   │   │   │   └── 📄 marketingROIService.js
+│   │   │   ├── 📁 pipeline
+│   │   │   │   ├── 📄 dealAgingService.js
+│   │   │   │   ├── 📄 funnelService.js
+│   │   │   │   └── 📄 pipelineAnalyzer.js
+│   │   │   ├── 📁 realtime
+│   │   │   │   ├── 📄 liveDataService.js
+│   │   │   │   └── 📄 notificationService.js
+│   │   │   ├── 📁 revenue
+│   │   │   │   ├── 📄 churnPredictor.js
+│   │   │   │   ├── 📄 retentionAnalyzer.js
+│   │   │   │   ├── 📄 revenueCalculator.js
+│   │   │   │   └── 📄 segmentationService.js
+│   │   │   ├── 📁 sales
+│   │   │   │   ├── 📄 leaderboardService.js
+│   │   │   │   ├── 📄 performanceTracker.js
+│   │   │   │   ├── 📄 salesCalculator.js
+│   │   │   │   └── 📄 targetService.js
+│   │   │   ├── 📁 support
+│   │   │   │   ├── 📄 customerSatisfactionService.js
+│   │   │   │   ├── 📄 supportMetricsService.js
+│   │   │   │   └── 📄 ticketAnalyticsService.js
+│   │   │   ├── 📄 analyticsService.js
+│   │   │   └── 📄 dashboardService.js
+│   │   ├── 📄 attendanceService.js
+│   │   ├── 📄 departmentService.js
+│   │   └── 📄 salaryService.js
+│   ├── 📁 common
+│   │   ├── 📄 emailService.js
+│   │   ├── 📄 notificationService.js
+│   │   ├── 📄 pdfService.js
+│   │   ├── 📄 reportService.js
+│   │   └── 📄 salaryCalculator.js
+│   ├── 📁 email
+│   │   ├── 📁 templates
+│   │   │   ├── 📁 admin
+│   │   │   │   ├── 📄 leave-application.ejs
+│   │   │   │   └── 📄 leave-reminder.ejs
+│   │   │   └── 📁 user
+│   │   │       ├── 📄 anniversary.ejs
+│   │   │       ├── 📄 birthday-wish.ejs
+│   │   │       ├── 📄 leave-approved.ejs
+│   │   │       └── 📄 leave-rejected.ejs
+│   │   ├── 📄 emailConfig.js
+│   │   └── 📄 emailService.js
+│   └── 📁 user
+│       ├── 📄 attendanceService.js
+│       ├── 📄 dashboardService.js
+│       ├── 📄 feedbackService.js
+│       ├── 📄 leavesService.js
+│       ├── 📄 profileService.js
+│       └── 📄 salaryService.js
+├── 📁 tests
+│   ├── 📄 auth.test.js
+│   ├── 📄 department.test.js
+│   └── 📄 user.test.js
+├── 📁 utils
+│   ├── 📁 department
+│   │   ├── 📄 budgetCalculator.js
+│   │   ├── 📄 departmentHelpers.js
+│   │   └── 📄 orgChartGenerator.js
+│   ├── 📁 feedback
+│   │   ├── 📄 feedbackAnalytics.js
+│   │   ├── 📄 feedbackExport.js
+│   │   ├── 📄 feedbackFilters.js
+│   │   └── 📄 feedbackNotifications.js
+│   ├── 📁 performance
+│   │   ├── 📁 analytics
+│   │   │   ├── 📄 correlationAnalyzer.js
+│   │   │   ├── 📄 outlierDetection.js
+│   │   │   ├── 📄 patternRecognition.js
+│   │   │   └── 📄 trendAnalysis.js
+│   │   ├── 📁 calculators
+│   │   │   ├── 📄 conversionCalculator.js
+│   │   │   ├── 📄 efficiencyCalculator.js
+│   │   │   ├── 📄 growthCalculator.js
+│   │   │   ├── 📄 metricsCalculator.js
+│   │   │   └── 📄 revenueCalculator.js
+│   │   ├── 📁 constants
+│   │   │   ├── 📄 errorMessages.js
+│   │   │   ├── 📄 kpiDefinitions.js
+│   │   │   ├── 📄 performanceConstants.js
+│   │   │   └── 📄 thresholds.js
+│   │   ├── 📁 formatters
+│   │   │   ├── 📄 chartDataFormatter.js
+│   │   │   ├── 📄 dataFormatters.js
+│   │   │   ├── 📄 exportFormatter.js
+│   │   │   └── 📄 reportFormatter.js
+│   │   ├── 📁 generators
+│   │   │   ├── 📄 chartConfigGenerator.js
+│   │   │   ├── 📄 dashboardWidgetGenerator.js
+│   │   │   ├── 📄 emailTemplateGenerator.js
+│   │   │   └── 📄 reportTemplateGenerator.js
+│   │   ├── 📁 helpers
+│   │   │   ├── 📄 cacheHelper.js
+│   │   │   ├── 📄 dateHelpers.js
+│   │   │   ├── 📄 filterHelpers.js
+│   │   │   ├── 📄 paginationHelper.js
+│   │   │   └── 📄 queryBuilder.js
+│   │   └── 📁 validators
+│   │       ├── 📄 dataValidator.js
+│   │       ├── 📄 forecastValidator.js
+│   │       └── 📄 kpiValidator.js
+│   ├── 📄 analyticsEngine.js
+│   ├── 📄 attendanceArchive.js
+│   ├── 📄 attendanceCalculator.js
+│   ├── 📄 emailSender.js
+│   ├── 📄 reportGenerator.js
+│   └── 📄 salaryCalculator.js
+├── 📁 views
+│   ├── 📁 admin
+│   │   ├── 📁 attendance
+│   │   │   ├── 📄 analytics.ejs
+│   │   │   ├── 📄 approvals.ejs
+│   │   │   ├── 📄 dashboard.ejs
+│   │   │   ├── 📄 employee-details.ejs
+│   │   │   ├── 📄 list.ejs
+│   │   │   └── 📄 reports.ejs
+│   │   ├── 📁 departments
+│   │   │   ├── 📁 partials
+│   │   │   ├── 📄 analytics.ejs
+│   │   │   ├── 📄 edit.ejs
+│   │   │   ├── 📄 list.ejs
+│   │   │   └── 📄 overview.ejs
+│   │   ├── 📁 email
+│   │   │   ├── 📄 leave-application.ejs
+│   │   │   ├── 📄 leave-reminder.ejs
+│   │   │   └── 📄 report-alert.ejs
+│   │   ├── 📁 employees
+│   │   │   ├── 📄 list.ejs
+│   │   │   ├── 📄 profile.ejs
+│   │   │   └── 📄 view.ejs
+│   │   ├── 📁 feedback
+│   │   │   ├── 📁 partials
+│   │   │   │   ├── 📄 feedback-filters.ejs
+│   │   │   │   ├── 📄 feedback-list-item.ejs
+│   │   │   │   ├── 📄 feedback-stats.ejs
+│   │   │   │   └── 📄 response-editor.ejs
+│   │   │   ├── 📄 analytics.ejs
+│   │   │   ├── 📄 assignments.ejs
+│   │   │   ├── 📄 list.ejs
+│   │   │   ├── 📄 templates.ejs
+│   │   │   └── 📄 view.ejs
+│   │   ├── 📁 leaves
+│   │   │   ├── 📄 approve.ejs
+│   │   │   └── 📄 list.ejs
+│   │   ├── 📁 performance
+│   │   │   ├── 📁 customer
+│   │   │   │   ├── 📄 analytics.ejs
+│   │   │   │   ├── 📄 health-scores.ejs
+│   │   │   │   └── 📄 segmentation.ejs
+│   │   │   ├── 📁 forecasting
+│   │   │   │   ├── 📄 predictions.ejs
+│   │   │   │   ├── 📄 trends.ejs
+│   │   │   │   └── 📄 win-probability.ejs
+│   │   │   ├── 📁 marketing
+│   │   │   │   ├── 📄 campaign-analytics.ejs
+│   │   │   │   ├── 📄 overview.ejs
+│   │   │   │   └── 📄 roi-calculator.ejs
+│   │   │   ├── 📁 partials
+│   │   │   │   ├── 📁 charts
+│   │   │   │   │   ├── 📄 comparison-chart.ejs
+│   │   │   │   │   ├── 📄 funnel-chart.ejs
+│   │   │   │   │   ├── 📄 revenue-chart.ejs
+│   │   │   │   │   └── 📄 trend-chart.ejs
+│   │   │   │   ├── 📁 filters
+│   │   │   │   │   ├── 📄 custom-filters.ejs
+│   │   │   │   │   ├── 📄 date-range.ejs
+│   │   │   │   │   └── 📄 team-filter.ejs
+│   │   │   │   ├── 📄 kpi-cards.ejs
+│   │   │   │   └── 📄 performance-header.ejs
+│   │   │   ├── 📁 pipeline
+│   │   │   │   ├── 📄 deal-aging.ejs
+│   │   │   │   ├── 📄 funnel.ejs
+│   │   │   │   ├── 📄 pipeline-health.ejs
+│   │   │   │   └── 📄 stage-analysis.ejs
+│   │   │   ├── 📁 revenue
+│   │   │   │   ├── 📄 overview.ejs
+│   │   │   │   ├── 📄 retention.ejs
+│   │   │   │   ├── 📄 segmentation.ejs
+│   │   │   │   └── 📄 trends.ejs
+│   │   │   ├── 📁 sales
+│   │   │   │   ├── 📄 individual.ejs
+│   │   │   │   ├── 📄 leaderboard.ejs
+│   │   │   │   ├── 📄 overview.ejs
+│   │   │   │   └── 📄 team-comparison.ejs
+│   │   │   ├── 📁 support
+│   │   │   │   ├── 📄 customer-satisfaction.ejs
+│   │   │   │   ├── 📄 performance.ejs
+│   │   │   │   └── 📄 ticket-analytics.ejs
+│   │   │   ├── 📄 add.ejs
+│   │   │   ├── 📄 dashboard.ejs
+│   │   │   └── 📄 list.ejs
+│   │   ├── 📁 salary
+│   │   │   ├── 📄 credit-salary.ejs
+│   │   │   ├── 📄 dashboard.ejs
+│   │   │   ├── 📄 employee-list.ejs
+│   │   │   └── 📄 history.ejs
+│   │   └── 📄 dashboard.ejs
+│   ├── 📁 auth
+│   │   └── 📄 auth.ejs
+│   ├── 📁 dashboard
+│   │   └── 📄 index.ejs
+│   ├── 📁 error
+│   │   ├── 📄 404.ejs
+│   │   └── 📄 500.ejs
+│   ├── 📁 layouts
+│   │   ├── 📄 admin-base.ejs
+│   │   ├── 📄 email-layout.ejs
+│   │   ├── 📄 main.ejs
+│   │   └── 📄 user-base.ejs
+│   ├── 📁 partials
+│   │   ├── 📄 footer.ejs
+│   │   ├── 📄 header.ejs
+│   │   ├── 📄 messages.ejs
+│   │   ├── 📄 nav-admin.ejs
+│   │   ├── 📄 nav-user.ejs
+│   │   ├── 📄 sidebar.ejs
+│   │   ├── 📄 user-pending-actions.ejs
+│   │   ├── 📄 user-quick-stats.ejs
+│   │   └── 📄 user-recent-activity.ejs
+│   ├── 📁 user
+│   │   ├── 📁 attendance
+│   │   │   └── 📄 list.ejs
+│   │   ├── 📁 email
+│   │   │   ├── 📄 anniversary.ejs
+│   │   │   ├── 📄 birthday-wish.ejs
+│   │   │   ├── 📄 leave-approved.ejs
+│   │   │   └── 📄 leave-rejected.ejs
+│   │   ├── 📁 feedback
+│   │   │   ├── 📄 confirmation.ejs
+│   │   │   ├── 📄 details.ejs
+│   │   │   ├── 📄 drafts.ejs
+│   │   │   ├── 📄 list.ejs
+│   │   │   └── 📄 submit.ejs
+│   │   ├── 📁 leaves
+│   │   │   ├── 📄 apply.ejs
+│   │   │   └── 📄 list.ejs
+│   │   ├── 📁 profile
+│   │   │   ├── 📄 edit.ejs
+│   │   │   └── 📄 view.ejs
+│   │   ├── 📁 salary
+│   │   │   ├── 📄 history.ejs
+│   │   │   └── 📄 slip.ejs
+│   │   └── 📄 dashboard.ejs
+│   ├── 📄 error.ejs
+│   └── 📄 layout.ejs
+├── ⚙️ .env.example
+├── ⚙️ .gitignore
+├── 📝 API_DOCS.md
+├── 📄 app.js
+├── 📄 createAdmin.js
+├── 📄 getHash.js
+├── ⚙️ package-lock.json
+└── ⚙️ package.json
+```
+
+---
+*Generated by FileTree Pro Extension*
